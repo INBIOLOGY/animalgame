@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import QuestCard from './QuestCard';
 import ScoreboardChips from './ScoreboardChips';
 import HandDock from './HandDock';
+import GameStartSplash from './GameStartSplash';
 import { UIIcon } from '../assets/natureIcons';
 
 export default function GameScreen({
@@ -18,6 +19,11 @@ export default function GameScreen({
   onSendEmote,
   onLeaveRoom,
 }) {
+  const [showStartSplash, setShowStartSplash] = useState(() => {
+    // Show splash if game started less than 3 seconds ago
+    return room && room.startTime && Date.now() - room.startTime < 4000;
+  });
+
   if (!room) return null;
 
   const me = room.players.find((p) => p.id === myId);
@@ -40,7 +46,15 @@ export default function GameScreen({
     : 'ข้ามตา / จั่วใหม่';
 
   return (
-    <section className="game-screen-wrap">
+    <section className="game-screen-wrap page-screen-anim">
+      {/* 🎲 Randomized Turn Order Intro Splash */}
+      {showStartSplash && (
+        <GameStartSplash
+          room={room}
+          myId={myId}
+          onDismiss={() => setShowStartSplash(false)}
+        />
+      )}
       {/* ─── Header Bar ─── */}
       <div className="game-header-bar">
         <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''}`}>

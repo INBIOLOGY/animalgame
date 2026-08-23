@@ -1901,22 +1901,246 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   🍪 COOKIE CONSENT BANNER (Clean, Cute & Non-Intrusive)
+   🎬 SCREEN TRANSITIONS & DYNAMIC ANIMATION SUITE
+   ═══════════════════════════════════════════════════════════════════ */
+.page-screen-anim {
+  animation: screenFadeIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+@keyframes screenFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 🎴 STAGGERED CARD DEAL CASCADE */
+.card-deal-anim {
+  animation: cardDealFly 0.48s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+
+@keyframes cardDealFly {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.65) rotate(-6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+/* 🎲 GAME START / INITIATIVE SPLASH OVERLAY */
+.game-start-splash-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 28, 8, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: splashFadeIn 0.3s ease-out both;
+  cursor: pointer;
+}
+
+@keyframes splashFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.game-start-splash-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbf0 100%);
+  border: 3px solid #facc15;
+  border-radius: 28px;
+  padding: 24px 28px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 4px rgba(250, 204, 21, 0.35),
+    inset 0 2px 0 rgba(255, 255, 255, 0.9);
+  animation: splashCardZoom 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+@keyframes splashCardZoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.splash-dice-icon {
+  font-size: 42px;
+  animation: diceWobble 1.6s infinite ease-in-out;
+  filter: drop-shadow(0 4px 12px rgba(234, 179, 8, 0.5));
+}
+
+@keyframes diceWobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-18deg) scale(1.15); }
+  75% { transform: rotate(18deg) scale(1.15); }
+}
+
+.splash-title {
+  font-family: var(--font-thai);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--forest-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.splash-subtitle {
+  font-size: 13px;
+  color: var(--ink-secondary);
+  margin: 0;
+  font-weight: 600;
+}
+
+.splash-first-player-spotlight {
+  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  border: 2px solid #eab308;
+  border-radius: 20px;
+  padding: 14px 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.25);
+  animation: spotlightPulse 1.8s infinite alternate ease-in-out;
+}
+
+@keyframes spotlightPulse {
+  0% { transform: scale(1); box-shadow: 0 8px 24px rgba(234, 179, 8, 0.25); }
+  100% { transform: scale(1.03); box-shadow: 0 12px 32px rgba(234, 179, 8, 0.45); }
+}
+
+.splash-crown-badge {
+  position: absolute;
+  top: -12px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 10px;
+  border-radius: var(--r-pill);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
+  border: 1.5px solid #ffffff;
+}
+
+.splash-first-player-name {
+  font-size: 16px;
+  font-weight: 900;
+  color: #713f12;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.splash-me-tag {
+  font-size: 10.5px;
+  background: var(--forest-primary);
+  color: #ffffff;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+}
+
+.splash-order-strip {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.splash-order-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.splash-order-players {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.splash-order-chip {
+  background: #ffffff;
+  border: 1.5px solid #d4e2c6;
+  border-radius: var(--r-pill);
+  padding: 3px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--forest-primary);
+}
+
+.splash-order-num {
+  font-family: var(--font-num);
+  font-size: 10px;
+  font-weight: 900;
+  background: var(--bg-matcha-soft);
+  border: 1px solid #c4d6ad;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--forest-primary);
+}
+
+.splash-order-name {
+  white-space: nowrap;
+}
+
+.splash-cta-hint {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--forest-accent);
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🍪 COOKIE CONSENT BANNER
    ═══════════════════════════════════════════════════════════════════ */
 .cookie-consent-bar {
   position: fixed;
-  bottom: 16px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 780px;
+  width: calc(100% - 24px);
+  max-width: 720px;
   background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid rgba(212, 228, 181, 0.9);
-  border-radius: var(--r-xl);
-  padding: 12px 18px;
-  box-shadow: 0 16px 40px rgba(35, 65, 20, 0.2), 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(191, 213, 117, 0.7);
+  border-radius: var(--r-lg);
+  padding: 10px 16px;
+  box-shadow: 0 8px 32px rgba(35, 65, 18, 0.16);
   z-index: 9999;
   animation: slideUpCookie 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

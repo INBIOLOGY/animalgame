@@ -538,6 +538,11 @@ io.on('connection', (socket) => {
       }
     }
 
+    // 🎲 สุ่มลำดับผู้เล่นเริ่มต้นอย่างยุติธรรม (Randomize Turn Order)
+    if (room.roomMode !== 'time_attack') {
+      room.players = shuffle(room.players);
+    }
+
     room.players.forEach((p) => {
       p.score = 0;
       p.wonCount = 0;
@@ -554,7 +559,9 @@ io.on('connection', (socket) => {
     // หากคนแรกที่ได้เล่นคือ บอท ให้สั่ง บอท เล่น
     const firstPlayer = room.players[0];
     if (firstPlayer && firstPlayer.isBot) {
-      setTimeout(() => runBotTurn(room, firstPlayer), 1500);
+      const diff = room.botDifficulty || 'medium';
+      const delay = diff === 'easy' ? 2000 : diff === 'hard' ? 1000 : 1500;
+      setTimeout(() => runBotTurn(room, firstPlayer), delay);
     }
 
     if (typeof ack === 'function') ack({ ok: true, room });

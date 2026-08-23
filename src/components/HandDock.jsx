@@ -85,7 +85,7 @@ export default function HandDock({
       <div className="hand-dock-content-row">
         <div id="playerHandScroll" className="hand-cards-list">
           {hand.length > 0 ? (
-            hand.map((animal) => {
+            hand.map((animal, idx) => {
               const isSelected = animal.id === selectedCardId;
               const animalInfo = ALL_ANIMALS_DATA.find((a) => a.id === animal.id);
               const rarity = animalInfo?.rarity || 'common';
@@ -95,7 +95,8 @@ export default function HandDock({
                 <div
                   key={animal.id}
                   id={`handCard-${animal.id}`}
-                  className={`animal-card ${isSelected ? 'selected' : ''}`}
+                  className={`animal-card card-deal-anim ${isSelected ? 'selected' : ''}`}
+                  style={{ animationDelay: `${idx * 0.08}s` }}
                   draggable={true}
                   onDragStart={(e) => {
                     e.dataTransfer.setData('text/plain', animal.id);
