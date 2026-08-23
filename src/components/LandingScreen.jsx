@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AnimalAvatar } from '../assets/animalIllustrations';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 import { ALL_ANIMALS_DATA, TRAIT_MAP, TRAIT_COLORS } from '../utils/traits';
-import { getAnimalArt, TCG_ARENA_BACKDROP } from '../assets/artAssets';
+import { CUTE_ARENA_BACKDROP } from '../assets/artAssets';
 import { playSfx } from '../utils/audio';
 import confetti from 'canvas-confetti';
 
@@ -31,26 +31,29 @@ const MODES = [
   {
     key: 'multiplayer',
     iconName: 'users',
-    title: 'เล่นกับเพื่อน (Online Arena)',
-    desc: 'สร้างห้องประลองการ์ดออนไลน์ 2-10 คน ชวนเพื่อนมาร่วมโต๊ะประลอง',
-    tag: 'ผู้เล่นหลายคน',
-    glow: 'rgba(56, 189, 248, 0.4)',
+    title: 'เล่นกับเพื่อน (2-10 คน)',
+    desc: 'สร้างห้องเล่นออนไลน์ ชวนเพื่อนๆ มาร่วมโต๊ะการ์ดสุดน่ารัก',
+    tag: 'หลายคน',
+    pillBg: '#EAF5E3',
+    pillColor: '#2D6A28',
   },
   {
     key: 'vs_bot',
     iconName: 'bot',
-    title: 'ฝึกซ้อมกับบอท AI',
-    desc: 'ประลองปัญญากับหุ่นจำลอง 3 ระดับความฉลาด (ง่าย / ปานกลาง / ยาก)',
-    tag: 'เล่นเดี่ยว / AI',
-    glow: 'rgba(234, 179, 8, 0.4)',
+    title: 'เล่นกับบอท AI',
+    desc: 'ฝึกซ้อมคนเดียวกับบอทสุดฉลาด 3 ระดับความยาก',
+    tag: 'เล่นเดี่ยว',
+    pillBg: '#FEF3C7',
+    pillColor: '#92400E',
   },
   {
     key: 'time_attack',
     iconName: 'timer',
-    title: 'สปีดรันจับเวลา (Chrono Run)',
-    desc: 'ท้าทายความเร็วในการจัดหมวดหมู่สัตว์ ทำคะแนนสูงสุดก่อนหมดเวลา',
+    title: 'สปีดรันจับเวลา',
+    desc: 'ท้าทายความเร็ว จัดหมวดหมู่สัตว์ให้เร็วที่สุดก่อนหมดเวลา',
     tag: 'จับเวลา',
-    glow: 'rgba(239, 68, 68, 0.4)',
+    pillBg: '#FFE4E6',
+    pillColor: '#BE123C',
   },
 ];
 
@@ -70,13 +73,8 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
 
   const curAnimalData = ALL_ANIMALS_DATA.find((a) => a.id === selectedAvatarId) || ALL_ANIMALS_DATA[0];
   const curAvatarMeta = ANIMAL_AVATARS.find((a) => a.id === selectedAvatarId) || ANIMAL_AVATARS[0];
-  const heroArt = getAnimalArt(curAnimalData.id);
 
-  // Extract Latin binomial name
-  const latinNameMatch = curAnimalData.englishName?.match(/\((.*?)\)/);
-  const latinName = latinNameMatch ? latinNameMatch[1] : curAnimalData.englishName;
-
-  // Deduplicate traits so none appear twice
+  // Deduplicate traits
   const distinctTraits = Array.from(
     new Set((curAnimalData.traits || []).map((t) => TRAIT_MAP[t] || t))
   ).slice(0, 3);
@@ -85,7 +83,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     const raw = playerName.trim();
     if (!raw) {
       playSfx('discard');
-      setNameError('กรุณากรอกชื่อผู้เล่นของคุณก่อน');
+      setNameError('กรุณาพิมพ์ชื่อของคุณก่อนนะ');
       return;
     }
     setNameError('');
@@ -93,10 +91,10 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     playSfx('fanfare');
     try {
       confetti({
-        particleCount: 50,
-        spread: 80,
+        particleCount: 45,
+        spread: 75,
         origin: { y: 0.65 },
-        colors: ['#285422', '#d49a26', '#38bdf8', '#f59e0b', '#ffffff'],
+        colors: ['#A8C686', '#FDE68A', '#FED7AA', '#93C5FD', '#FFFFFF'],
       });
     } catch (e) {}
     onCreateRoom(raw, selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty);
@@ -107,12 +105,12 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     const code = roomCode.trim();
     if (!raw) {
       playSfx('discard');
-      setNameError('กรุณากรอกชื่อผู้เล่นของคุณก่อน');
+      setNameError('กรุณาพิมพ์ชื่อของคุณก่อนนะ');
       return;
     }
     if (!code || code.length !== 6) {
       playSfx('discard');
-      setCodeError('กรุณากรอกรหัสห้อง 6 หลักให้ถูกต้อง');
+      setCodeError('กรุณากรอกรหัสห้อง 6 หลัก');
       return;
     }
     setNameError('');
@@ -129,63 +127,56 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   };
 
   return (
-    <section className="landing-container page-screen-anim">
-      {/* 🌲 Cinematic TCG Arena Tabletop Background Art */}
+    <section className="cute-landing-section page-screen-anim">
+      {/* 🌸 Cute Animal Crossing Meadow Backdrop */}
       <div
-        className="tcg-cinematic-backdrop"
-        style={{ backgroundImage: `url(${TCG_ARENA_BACKDROP})` }}
+        className="cute-meadow-backdrop"
+        style={{ backgroundImage: `url(${CUTE_ARENA_BACKDROP})` }}
         aria-hidden="true"
       />
-      <div className="tcg-cinematic-overlay" aria-hidden="true" />
+      <div className="cute-meadow-overlay" aria-hidden="true" />
 
-      {/* 🎴 Glassmorphic TCG Lobby Portal */}
-      <div className="naturalist-folio-portal">
-        {/* ─── LEFT: Signature Hero Card Showcase & Avatar Picker ─── */}
-        <div className="folio-specimen-column">
-          <div className="folio-section-header">
-            <span className="folio-section-title">การ์ดตัวละครหลักของคุณ</span>
-            <span className="folio-catalog-id">CARD #{curAvatarMeta.num}</span>
+      {/* 🍡 Cozy Minimalist Two-Column Container */}
+      <div className="cute-lobby-card">
+        {/* ─── LEFT: Cute Character Card & Avatar Picker ─── */}
+        <div className="cute-lobby-column left-column">
+          <div className="cute-column-header">
+            <span className="cute-column-title">🐾 สัตว์ประจำตัวของคุณ</span>
+            <span className="cute-badge-tag">NO. {curAvatarMeta.num}</span>
           </div>
 
-          {/* 🌟 AAA Hero Showcase Card with Digital Artwork */}
+          {/* 🌟 Cute Mascot Card */}
           <div
-            className={`hero-showcase-card ${mascotBounce ? 'card-bounce' : ''}`}
+            className={`cute-mascot-card ${mascotBounce ? 'card-bounce' : ''}`}
             onClick={() => handleSelectAvatar(selectedAvatarId)}
           >
-            {/* Card Visual Artwork Window */}
-            <div className="hero-card-art-frame">
-              <img src={heroArt} alt={curAnimalData.name} className="hero-card-img" />
-              <div className="hero-card-vignette" />
-              <div className="hero-card-shimmer" />
-              <span className="hero-card-rarity-badge">
-                {curAnimalData.rarity === 'legendary' ? '✨ LEGENDARY' : '⭐ TCG SPECIMEN'}
-              </span>
+            <div className="cute-mascot-avatar-wrap">
+              <AnimalAvatar id={curAnimalData.id} size={70} />
             </div>
 
-            {/* Hero Card Taxonomy & Stats */}
-            <div className="hero-card-meta-panel">
-              <div className="hero-card-title-row">
-                <h2 className="hero-card-thai-name">{curAnimalData.name}</h2>
-                <span className="hero-card-latin-name">{latinName}</span>
+            <div className="cute-mascot-info">
+              <div className="cute-mascot-name-line">
+                <h2 className="cute-mascot-name">{curAnimalData.name}</h2>
+                <span className="cute-mascot-eng">({curAnimalData.englishName})</span>
               </div>
-              <div className="hero-card-habitat">📍 {curAnimalData.habitat}</div>
+              <div className="cute-mascot-habitat">📍 {curAnimalData.habitat}</div>
 
               {/* Deduplicated Trait Badges */}
-              <div className="hero-card-traits-row">
+              <div className="cute-traits-list">
                 {distinctTraits.map((tLabel, idx) => {
                   const originalKey = curAnimalData.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
                   const colors = TRAIT_COLORS[originalKey] || { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', iconName: 'backbone' };
                   return (
                     <span
                       key={idx}
-                      className="hero-trait-pill"
+                      className="cute-trait-tag"
                       style={{
                         background: colors.bg,
                         color: colors.text,
                         borderColor: colors.border,
                       }}
                     >
-                      <TraitIcon name={colors.iconName} size={12} color={colors.text} />
+                      <TraitIcon name={colors.iconName} size={11} color={colors.text} />
                       <span>{tLabel}</span>
                     </span>
                   );
@@ -194,25 +185,25 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             </div>
           </div>
 
-          {/* 18-Avatar Grid Selection */}
-          <div className="specimen-selector-section">
-            <div className="section-label-line">
-              <span className="section-label-text">เลือกสัตว์ประจำตัว (18 ชนิด):</span>
+          {/* 18-Animal Cute Avatar Picker Grid */}
+          <div className="cute-avatar-picker-section">
+            <div className="cute-picker-header">
+              <span className="cute-picker-label">เลือกสัตว์ที่ชอบ (18 ชนิด):</span>
             </div>
 
-            <div className="collector-stamp-grid">
+            <div className="cute-avatar-grid">
               {ANIMAL_AVATARS.map((av) => {
                 const isSelected = selectedAvatarId === av.id;
                 return (
                   <button
                     key={av.id}
                     type="button"
-                    className={`collector-stamp-cell ${isSelected ? 'active-stamp' : ''}`}
+                    className={`cute-avatar-btn ${isSelected ? 'active-avatar' : ''}`}
                     onClick={() => handleSelectAvatar(av.id)}
                     title={av.name}
                   >
-                    <AnimalAvatar id={av.id} size={34} showArt={true} />
-                    {isSelected && <span className="active-seal-dot" />}
+                    <AnimalAvatar id={av.id} size={30} />
+                    {isSelected && <span className="cute-active-dot" />}
                   </button>
                 );
               })}
@@ -220,18 +211,16 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
           </div>
 
           {/* Player Name Input */}
-          <div className="researcher-signature-group">
-            <label className="signature-field-label">
-              <span>ชื่อผู้เล่นของคุณ:</span>
-            </label>
-            <div className="signature-input-wrap">
-              <div className="signature-avatar-seal">
-                <AnimalAvatar id={curAnimalData.id} size={24} showArt={true} />
+          <div className="cute-name-input-group">
+            <label className="cute-input-label">ชื่อผู้เล่น:</label>
+            <div className="cute-input-box">
+              <div className="cute-input-avatar">
+                <AnimalAvatar id={curAnimalData.id} size={22} />
               </div>
               <input
-                className={`signature-text-input${nameError ? ' input-error' : ''}`}
+                className={`cute-text-input${nameError ? ' input-error' : ''}`}
                 type="text"
-                placeholder="พิมพ์ชื่อของคุณ..."
+                placeholder="พิมพ์ชื่อของคุณตรงนี้..."
                 maxLength={16}
                 value={playerName}
                 onChange={(e) => {
@@ -241,62 +230,67 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                 onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               />
             </div>
-            {nameError && <div className="folio-error-alert">{nameError}</div>}
+            {nameError && <div className="cute-error-text">{nameError}</div>}
           </div>
         </div>
 
-        {/* ─── RIGHT: Game Modes & Room Controls ─── */}
-        <div className="folio-expedition-column">
-          <div className="folio-section-header">
-            <span className="folio-section-title">เลือกโหมดการเล่น</span>
-            <span className="folio-catalog-id">GAME MODE</span>
+        {/* ─── RIGHT: Minimal Game Modes & Controls ─── */}
+        <div className="cute-lobby-column right-column">
+          <div className="cute-column-header">
+            <span className="cute-column-title">🎮 เลือกโหมดการเล่น</span>
+            <span className="cute-badge-tag">MODE</span>
           </div>
 
-          {/* Mode Selector Cards */}
-          <div className="expedition-missions-stack">
+          {/* Mode Options List */}
+          <div className="cute-modes-list">
             {MODES.map((m) => {
               const isActive = mode === m.key;
               return (
                 <div
                   key={m.key}
-                  className={`expedition-mission-card ${isActive ? 'mission-active' : ''}`}
+                  className={`cute-mode-card ${isActive ? 'active-mode' : ''}`}
                   onClick={() => {
                     playSfx('select');
                     setMode(m.key);
                   }}
                 >
-                  <div className="mission-brass-compass">
-                    <UIIcon name={m.iconName} size={20} color={isActive ? '#1b4d18' : '#64748b'} />
+                  <div className="cute-mode-icon-box">
+                    <UIIcon name={m.iconName} size={18} color={isActive ? '#2D6A28' : '#64748B'} />
                   </div>
 
-                  <div className="mission-content-column">
-                    <div className="mission-title-row">
-                      <span className="mission-primary-name">{m.title}</span>
-                      <span className="mission-classification-badge">{m.tag}</span>
+                  <div className="cute-mode-info">
+                    <div className="cute-mode-top">
+                      <span className="cute-mode-title">{m.title}</span>
+                      <span
+                        className="cute-mode-tag"
+                        style={{ background: m.pillBg, color: m.pillColor }}
+                      >
+                        {m.tag}
+                      </span>
                     </div>
-                    <p className="mission-synopsis">{m.desc}</p>
+                    <p className="cute-mode-desc">{m.desc}</p>
                   </div>
 
-                  <div className="mission-stamp-marker">
-                    {isActive ? <span className="stamp-verified-check">✓</span> : <span className="stamp-open-ring" />}
+                  <div className="cute-mode-check">
+                    {isActive ? <span className="cute-check-mark">✓</span> : <span className="cute-check-circle" />}
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Dynamic Configuration Panel */}
-          <div className="expedition-parameters-panel">
+          {/* Mode Configuration Parameters */}
+          <div className="cute-params-panel">
             {mode === 'multiplayer' && (
-              <div className="param-config-row">
-                <div className="param-label-group">
-                  <span className="param-main-label">จำนวนผู้เล่นสูงสุด:</span>
-                  <span className="param-sub-desc">รองรับ 2 ถึง 10 คน</span>
+              <div className="cute-param-row">
+                <div className="cute-param-label-group">
+                  <span className="cute-param-title">จำนวนผู้เล่นสูงสุด:</span>
+                  <span className="cute-param-sub">รองรับ 2 - 10 คน</span>
                 </div>
-                <div className="researcher-stepper-box">
+                <div className="cute-stepper-box">
                   <button
                     type="button"
-                    className="stepper-btn"
+                    className="cute-step-btn"
                     onClick={() => {
                       playSfx('pop');
                       setMaxPlayers((prev) => Math.max(2, prev - 1));
@@ -305,12 +299,12 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                   >
                     -
                   </button>
-                  <span className="stepper-value-display">
+                  <span className="cute-step-val">
                     <strong>{maxPlayers}</strong> <small>คน</small>
                   </span>
                   <button
                     type="button"
-                    className="stepper-btn"
+                    className="cute-step-btn"
                     onClick={() => {
                       playSfx('pop');
                       setMaxPlayers((prev) => Math.min(10, prev + 1));
@@ -324,21 +318,21 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             )}
 
             {mode === 'vs_bot' && (
-              <div className="param-config-row">
-                <div className="param-label-group">
-                  <span className="param-main-label">ระดับความฉลาด AI:</span>
-                  <span className="param-sub-desc">ปรับระดับความท้าทาย</span>
+              <div className="cute-param-row">
+                <div className="cute-param-label-group">
+                  <span className="cute-param-title">ระดับความยาก AI:</span>
+                  <span className="cute-param-sub">ปรับความเก่งของบอท</span>
                 </div>
-                <div className="ai-difficulty-strip">
+                <div className="cute-diff-strip">
                   {[
                     { key: 'easy', label: 'ง่าย', icon: '🟢' },
                     { key: 'medium', label: 'ปานกลาง', icon: '🟡' },
-                    { key: 'hard', label: 'ยากมาก', icon: '🔴' },
+                    { key: 'hard', label: 'ยาก', icon: '🔴' },
                   ].map((d) => (
                     <button
                       key={d.key}
                       type="button"
-                      className={`difficulty-pill-btn ${botDifficulty === d.key ? 'active-diff' : ''}`}
+                      className={`cute-pill-btn ${botDifficulty === d.key ? 'active-pill' : ''}`}
                       onClick={() => {
                         playSfx('click');
                         setBotDifficulty(d.key);
@@ -353,17 +347,17 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             )}
 
             {mode === 'time_attack' && (
-              <div className="param-config-row">
-                <div className="param-label-group">
-                  <span className="param-main-label">เวลาที่กำหนด:</span>
-                  <span className="param-sub-desc">ทำแต้มให้ได้มากที่สุด</span>
+              <div className="cute-param-row">
+                <div className="cute-param-label-group">
+                  <span className="cute-param-title">เวลาที่กำหนด:</span>
+                  <span className="cute-param-sub">ทำคะแนนก่อนหมดเวลา</span>
                 </div>
-                <div className="time-options-strip">
+                <div className="cute-time-strip">
                   {TIME_OPTIONS.map((t) => (
                     <button
                       key={t}
                       type="button"
-                      className={`time-pill-btn ${timeLimit === t ? 'active-time' : ''}`}
+                      className={`cute-pill-btn ${timeLimit === t ? 'active-pill' : ''}`}
                       onClick={() => {
                         playSfx('click');
                         setTimeLimit(t);
@@ -377,27 +371,26 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             )}
           </div>
 
-          {/* Primary Action Dispatch Button */}
+          {/* Big Bouncy Create Room Button */}
           <button
             type="button"
-            className="expedition-dispatch-button"
+            className="cute-btn-create-room"
             onClick={handleCreate}
           >
-            <span className="dispatch-icon">⚔️</span>
-            <span className="dispatch-text">สร้างห้องประลองทันที</span>
+            <span>✨ สร้างห้องเล่นเกม</span>
           </button>
 
-          {/* Join Room Code Section */}
-          <div className="join-expedition-section">
-            <div className="join-divider-line">
-              <span>หรือเข้าร่วมด้วยรหัสห้อง</span>
+          {/* Join with Code */}
+          <div className="cute-join-section">
+            <div className="cute-join-divider">
+              <span>หรือใส่รหัสห้องเพื่อเข้าร่วม</span>
             </div>
 
-            <div className="join-input-group">
+            <div className="cute-join-inputs">
               <input
-                className={`join-code-input${codeError ? ' input-error' : ''}`}
+                className={`cute-code-input${codeError ? ' input-error' : ''}`}
                 type="text"
-                placeholder="ใส่รหัสห้อง 6 หลัก..."
+                placeholder="รหัสห้อง 6 หลัก..."
                 maxLength={6}
                 value={roomCode}
                 onChange={(e) => {
@@ -408,13 +401,13 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
               />
               <button
                 type="button"
-                className="join-action-btn"
+                className="cute-btn-join"
                 onClick={handleJoin}
               >
                 เข้าร่วม
               </button>
             </div>
-            {codeError && <div className="folio-error-alert">{codeError}</div>}
+            {codeError && <div className="cute-error-text">{codeError}</div>}
           </div>
         </div>
       </div>

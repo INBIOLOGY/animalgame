@@ -3,7 +3,7 @@ import { TRAIT_MAP, TRAIT_COLORS, ANIMAL_RARITIES, ALL_ANIMALS_DATA } from '../u
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 import { AnimalAvatar } from '../assets/animalIllustrations';
 
-const EMOTES = ['🎉', '🔥', '😎', '🐾', '💡', '👏'];
+const CUTE_EMOTES = ['🎉', '💖', '🐾', '🦁', '✨', '👏'];
 
 export default function HandDock({
   hand = [],
@@ -39,41 +39,32 @@ export default function HandDock({
   };
 
   return (
-    <div className={`bottom-hand-dock ${isMyTurn ? 'my-turn-active' : 'waiting-turn'}`}>
-      <div className="hand-top-header">
-        <div className="hand-guide-text">
+    <div className={`cute-hand-dock ${isMyTurn ? 'my-turn-active' : 'waiting-turn'}`}>
+      <div className="cute-hand-header">
+        <div className="cute-turn-guide">
           {isMyTurn ? (
             <>
-              <span className="turn-indicator-star">🌟</span>
-              <span style={{ color: '#ffffff', fontWeight: 800 }}>ถึงตาของคุณแล้ว!</span>
-              <span className="hand-guide-subtext">(แตะเลือกการ์ด หรือลากไปวางในช่องเควสต์)</span>
+              <span className="cute-turn-star">🌟</span>
+              <span className="cute-turn-bold">ถึงตาของคุณแล้ว!</span>
+              <span className="cute-turn-sub">(แตะเลือกการ์ด หรือลากไปวางในช่องเควสต์)</span>
             </>
           ) : (
             <>
-              <span className="turn-indicator-hourglass">⏳</span>
-              <span style={{ color: '#cbd5e1', fontWeight: 700 }}>รอเทิร์นของผู้เล่นอื่น...</span>
-              <span className="hand-guide-subtext">(การ์ดจะขยายเต็มจอเมื่อถึงตาคุณ)</span>
+              <span className="cute-turn-hourglass">⏳</span>
+              <span className="cute-turn-muted">รอตาของผู้เล่นอื่น...</span>
+              <span className="cute-turn-sub">(การ์ดจะขยายเมื่อถึงตาคุณ)</span>
             </>
           )}
         </div>
 
-        {/* Emotes */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          {EMOTES.map((emoji) => (
+        {/* Cute Emotes */}
+        <div className="cute-emotes-bar">
+          {CUTE_EMOTES.map((emoji) => (
             <button
               key={emoji}
+              type="button"
+              className="cute-emote-pill-btn"
               onClick={() => onSendEmote && onSendEmote(emoji)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                borderRadius: 'var(--r-pill)',
-                padding: '2px 7px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.2)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               title={`ส่งอีโมจิ ${emoji}`}
             >
               {emoji}
@@ -82,8 +73,8 @@ export default function HandDock({
         </div>
       </div>
 
-      <div className="hand-dock-content-row">
-        <div id="playerHandScroll" className="hand-cards-list">
+      <div className="cute-hand-cards-row">
+        <div id="playerHandScroll" className="cute-cards-scroll-list">
           {hand.length > 0 ? (
             hand.map((animal, idx) => {
               const isSelected = animal.id === selectedCardId;
@@ -98,7 +89,7 @@ export default function HandDock({
                 <div
                   key={animal.id}
                   id={`handCard-${animal.id}`}
-                  className={`animal-card card-deal-anim ${isSelected ? 'selected' : ''}`}
+                  className={`cute-hand-card card-deal-anim ${isSelected ? 'selected' : ''}`}
                   style={{ animationDelay: `${idx * 0.08}s` }}
                   draggable={true}
                   onDragStart={(e) => {
@@ -108,9 +99,9 @@ export default function HandDock({
                   onClick={() => onSelectCard(animal.id)}
                 >
                   {/* Card Top: Rarity Pill & Discard Action */}
-                  <div className="animal-card-header">
+                  <div className="cute-card-top-bar">
                     <div
-                      className="card-rarity-pill"
+                      className="cute-rarity-pill"
                       style={{
                         color: rData.color,
                         background: rData.bg,
@@ -122,44 +113,45 @@ export default function HandDock({
 
                     {isSelected && (
                       <button
-                        className="card-quick-discard-btn"
+                        type="button"
+                        className="cute-quick-discard"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDiscardSingle(animal.id);
                         }}
-                        title="ทิ้งการ์ดใบนี้เพื่อจั่วใบใหม่"
+                        title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
                       >
                         ทิ้งใบนี้
                       </button>
                     )}
                   </div>
 
-                  {/* Animal Name */}
-                  <div className="animal-card-name" title={animal.name}>
+                  {/* Animal Vernacular Name */}
+                  <div className="cute-card-name" title={animal.name}>
                     {animal.name}
                   </div>
 
-                  {/* Animal 3D High-Production Digital Artwork Frame */}
-                  <div className="animal-card-avatar-frame">
-                    <AnimalAvatar id={animal.id} size={50} showArt={true} />
+                  {/* Cute Animal Mascot Avatar */}
+                  <div className="cute-card-avatar-box">
+                    <AnimalAvatar id={animal.id} size={46} />
                   </div>
 
-                  {/* Trait Pills */}
-                  <div className="a-traits-wrap">
+                  {/* Deduplicated Trait Pills */}
+                  <div className="cute-card-traits-stack">
                     {distinctTraits.map((tLabel, tIdx) => {
                       const originalKey = animal.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
-                      const colors = TRAIT_COLORS[originalKey] || { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', iconName: 'backbone' };
+                      const colors = TRAIT_COLORS[originalKey] || { bg: '#E8F5E9', text: '#2E7D32', border: '#A5D6A7', iconName: 'backbone' };
                       return (
                         <span
                           key={tIdx}
-                          className="trait-pill"
+                          className="cute-trait-chip"
                           style={{
                             background: colors.bg,
                             color: colors.text,
                             border: `1px solid ${colors.border}`,
                           }}
                         >
-                          <TraitIcon name={colors.iconName} size={10} color={colors.text} />
+                          <TraitIcon name={colors.iconName} size={9} color={colors.text} />
                           <span>{tLabel}</span>
                         </span>
                       );
@@ -169,17 +161,17 @@ export default function HandDock({
               );
             })
           ) : (
-            <div className="hand-empty-loading">
-              <span className="loading-spinner" />
+            <div className="cute-hand-empty">
+              <span className="cute-loading-spin" />
               <span>กำลังแจกการ์ดเข้ามือ...</span>
             </div>
           )}
         </div>
 
-        {/* Discard Target Box */}
+        {/* Cute Discard Zone */}
         <div
           id="discardDropZone"
-          className="discard-drop-zone"
+          className="cute-discard-zone"
           onClick={onDiscardSelectedOrFirst}
           onDragOver={handleDiscardDragOver}
           onDragEnter={handleDiscardDragEnter}
@@ -187,11 +179,11 @@ export default function HandDock({
           onDrop={handleDrop}
           title="แตะหรือลากการ์ดมาที่นี่เพื่อทิ้งและจั่วใบใหม่"
         >
-          <div className="discard-icon-frame">
-            <UIIcon name="recycle" size={20} color="var(--terracotta)" />
+          <div className="cute-discard-icon-frame">
+            <UIIcon name="recycle" size={18} color="#EA580C" />
           </div>
-          <span className="discard-main-text">ทิ้งการ์ด</span>
-          <span className="discard-sub-text">(จั่วใบใหม่)</span>
+          <span className="cute-discard-main">ทิ้งการ์ด</span>
+          <span className="cute-discard-sub">(จั่วใหม่)</span>
         </div>
       </div>
     </div>

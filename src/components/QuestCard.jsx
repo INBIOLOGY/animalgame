@@ -13,9 +13,9 @@ export default function QuestCard({
 }) {
   if (!categoryItem || !categoryItem.category) {
     return (
-      <div className="tcg-quest-card empty-cat">
+      <div className="cute-quest-card empty-cat">
         <UIIcon name="trophy" size={24} color="var(--warm-gold-dark)" />
-        <span style={{ color: 'var(--ink-secondary)', fontWeight: 700, marginTop: '4px' }}>
+        <span style={{ color: 'var(--ink-secondary)', fontWeight: 800, marginTop: '4px' }}>
           ✨ พิชิตหมวดนี้แล้ว
         </span>
       </div>
@@ -27,16 +27,18 @@ export default function QuestCard({
   const layoutClass = `layout-${numSlots}`;
 
   return (
-    <div id={`catCard-${centerIdx}`} className="tcg-quest-card">
-      <div className="tcg-card-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
-          <span className="tcg-card-title">{cat.title}</span>
+    <div id={`catCard-${centerIdx}`} className="cute-quest-card">
+      <div className="cute-card-header">
+        <div className="cute-quest-title-wrap">
+          <span className="cute-quest-num">หมวด #{centerIdx + 1}</span>
+          <span className="cute-card-title">{cat.title}</span>
         </div>
-        <span className="tcg-card-pts">
-          +{cat.points} แต้ม
+        <span className="cute-card-pts">
+          ⭐ +{cat.points} แต้ม
         </span>
       </div>
-      <div className={`tcg-slots-layout ${layoutClass}`}>
+
+      <div className={`cute-slots-layout ${layoutClass}`}>
         {categoryItem.filledSlots.map((slotData, slotIdx) => {
           const requiredTrait = cat.slots[slotIdx];
           const isCompatible = activeAnimal && isTraitCompatible(activeAnimal.traits, requiredTrait);

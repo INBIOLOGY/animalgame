@@ -7,7 +7,7 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
   const showCrown = maxScore > 0;
 
   return (
-    <div className="scoreboard-chips-hud">
+    <div className="cute-scoreboard-chips">
       {players.map((p, idx) => {
         const isCur = idx === activeIndex && !isTimeAttack;
         const isMe = p.id === myId;
@@ -17,25 +17,25 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
           <div
             key={p.id}
             id={`scoreChip-${p.id}`}
-            className={`hud-player-chip ${isCur ? 'active-turn-hud' : ''} ${isMe ? 'is-me-hud' : ''}`}
+            className={`cute-player-chip ${isCur ? 'active-turn' : ''} ${isMe ? 'is-me' : ''}`}
             title={`คะแนนของ ${p.name}: ${p.score} แต้ม`}
           >
             {/* Avatar with Leader Crown */}
-            <div className="hud-avatar-wrapper">
-              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={28} showArt={true} />
-              {isLeader && <span className="hud-crown-badge">👑</span>}
+            <div className="cute-chip-avatar-box">
+              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={26} />
+              {isLeader && <span className="cute-crown-badge">👑</span>}
             </div>
 
             {/* Name & Status */}
-            <div className="hud-info-column">
-              <div className="hud-player-name">
+            <div className="cute-chip-info">
+              <div className="cute-chip-name">
                 {p.name}
-                {isMe && <span className="hud-me-tag">คุณ</span>}
+                {isMe && <span className="cute-me-pill">คุณ</span>}
               </div>
-              <div className="hud-score-badge">
-                <span className="hud-star-icon">⭐</span>
-                <span className="hud-score-num">{p.score}</span>
-                <span className="hud-score-unit">แต้ม</span>
+              <div className="cute-chip-score">
+                <span className="cute-star-icon">⭐</span>
+                <span className="cute-score-val">{p.score}</span>
+                <span className="cute-score-unit">แต้ม</span>
               </div>
             </div>
           </div>

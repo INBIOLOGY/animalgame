@@ -295,33 +295,28 @@ export function UIIcon({ name, size = 18, color = 'currentColor' }) {
   }
 }
 
-// 🌿 Authentic Vector Logo Emblem for Wildlife TCG
+// 🐾 Cute & Minimalist Game Logo Mark (Matcha & Paw Sprout Coin)
 export function GameLogoMark({ size = 32 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" style={{ flexShrink: 0 }}>
-      {/* Shield Base */}
-      <path
-        d="M24 4 L40 10 V24 C40 33 33 41 24 44 C15 41 8 33 8 24 V10 L24 4 Z"
-        fill="url(#shieldGrad)"
-        stroke="#143011"
-        strokeWidth="2"
-      />
-      {/* Golden Inner Ring */}
-      <circle cx="24" cy="22" r="12" stroke="#FDE68A" strokeWidth="1.5" strokeDasharray="2 2" />
-      {/* Animal Paw / Leaf Emblem */}
-      <ellipse cx="24" cy="25" rx="5" ry="4" fill="#FEF3C7" />
-      <circle cx="18" cy="18" r="2.2" fill="#FEF3C7" />
-      <circle cx="22" cy="15" r="2.2" fill="#FEF3C7" />
-      <circle cx="26" cy="15" r="2.2" fill="#FEF3C7" />
-      <circle cx="30" cy="18" r="2.2" fill="#FEF3C7" />
-      {/* Star Laurel */}
-      <path d="M24 38 L25.5 35 L28.5 35 L26 33 L27 30 L24 32 L21 30 L22 33 L19.5 35 L22.5 35 Z" fill="#F59E0B" />
-      <defs>
-        <linearGradient id="shieldGrad" x1="24" y1="4" x2="24" y2="44" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#3B7D2C" />
-          <stop offset="1" stopColor="#1B4214" />
-        </linearGradient>
-      </defs>
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" style={{ flexShrink: 0 }} xmlns="http://www.w3.org/2000/svg">
+      {/* Soft Pastel Matcha Round Coin Base */}
+      <rect x="2" y="2" width="44" height="44" rx="14" fill="#EAF5E3" stroke="#8CBF6D" strokeWidth="2.2" />
+      <circle cx="24" cy="24" r="17" fill="#FFFFFF" />
+      
+      {/* Cute Little Plant Sprout 🌱 */}
+      <path d="M24 16 C24 11 20 8 16 10 C16 15 20 16 24 16 Z" fill="#8CBF6D" />
+      <path d="M24 16 C24 10 29 8 32 11 C31 16 27 16 24 16 Z" fill="#6EA84E" />
+      <path d="M24 16 V22" stroke="#6EA84E" strokeWidth="2" strokeLinecap="round" />
+
+      {/* Adorable Chubby Paw Print 🐾 */}
+      <ellipse cx="24" cy="29" rx="6.5" ry="5" fill="#F59E0B" />
+      <circle cx="16.5" cy="23.5" r="2.6" fill="#F59E0B" />
+      <circle cx="21.5" cy="20.5" r="2.6" fill="#F59E0B" />
+      <circle cx="26.5" cy="20.5" r="2.6" fill="#F59E0B" />
+      <circle cx="31.5" cy="23.5" r="2.6" fill="#F59E0B" />
+
+      {/* Tiny Sparkle Star ✨ */}
+      <circle cx="38" cy="10" r="1.8" fill="#F59E0B" />
     </svg>
   );
 }
