@@ -51,7 +51,6 @@ const MODES = [
 ];
 
 const TIME_OPTIONS = [30, 60, 90, 120];
-const PLAYER_OPTIONS = [2, 4, 6, 8];
 
 export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   const [selectedAvatarId, setSelectedAvatarId] = useState('lion');
@@ -59,6 +58,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   const [mode, setMode] = useState('multiplayer');
   const [timeLimit, setTimeLimit] = useState(60);
   const [maxPlayers, setMaxPlayers] = useState(8);
+  const [botDifficulty, setBotDifficulty] = useState('medium');
   const [roomCode, setRoomCode] = useState('');
   const [mascotBounce, setMascotBounce] = useState(false);
   const [nameError, setNameError] = useState('');
@@ -95,7 +95,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
         colors: ['#285422', '#487a39', '#bfd575', '#d49a26', '#ffffff']
       });
     } catch (e) {}
-    onCreateRoom(getFullPlayerName(), selectedAvatarId, mode, timeLimit, maxPlayers);
+    onCreateRoom(getFullPlayerName(), selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty);
   };
 
   const handleJoin = () => {
@@ -362,6 +362,37 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                 >
                   +
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* AI Difficulty Selector for vs_bot Mode */}
+          {mode === 'vs_bot' && (
+            <div className="time-select-strip" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+              <span className="time-strip-label">
+                <UIIcon name="bot" size={14} color="var(--forest-primary)" />
+                <span>ระดับความยาก AI:</span>
+              </span>
+              <div className="time-pill-group" style={{ display: 'flex', gap: '4px' }}>
+                {[
+                  { key: 'easy', label: '🟢 ง่าย', desc: 'มือใหม่ เล่นสบายๆ' },
+                  { key: 'medium', label: '🟡 ปานกลาง', desc: 'มาตรฐาน รอบคอบ' },
+                  { key: 'hard', label: '🔴 ยาก', desc: 'เซียนชีวะ ฉลาดดักทาง' },
+                ].map((diff) => (
+                  <button
+                    key={diff.key}
+                    type="button"
+                    className={`time-select-pill ${botDifficulty === diff.key ? 'active' : ''}`}
+                    onClick={() => {
+                      playSfx('select');
+                      setBotDifficulty(diff.key);
+                    }}
+                    title={diff.desc}
+                    style={{ padding: '4px 10px', fontSize: '11.5px' }}
+                  >
+                    {diff.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}

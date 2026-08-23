@@ -110,12 +110,14 @@ function advanceTurn(room) {
   room.currentTurnIndex = (room.currentTurnIndex + 1) % room.players.length;
   broadcastRoomState(room.roomId);
 
-  // ถ้าถึงตาของ Bot ให้รัน Bot AI หลังจากผ่านไป 1.5 วินาที
+  // ถ้าถึงตาของ Bot ให้รัน Bot AI ตามระดับความยาก
   const activePlayer = room.players[room.currentTurnIndex];
   if (activePlayer && activePlayer.isBot && room.status === 'playing') {
+    const diff = room.botDifficulty || 'medium';
+    const delay = diff === 'easy' ? 1800 : diff === 'hard' ? 900 : 1300;
     setTimeout(() => {
       runBotTurn(room, activePlayer);
-    }, 1500);
+    }, delay);
   }
 }
 
@@ -125,6 +127,8 @@ function runBotTurn(room, botPlayer) {
   // ตรวจสอบว่าเป็นตาของบอทตัวนี้จริงๆ
   const currentActive = room.players[room.currentTurnIndex];
   if (!currentActive || currentActive.id !== botPlayer.id) return;
+
+  const difficulty = room.botDifficulty || 'medium';
 
   let possibleMoves = [];
 
@@ -136,11 +140,14 @@ function runBotTurn(room, botPlayer) {
           if (slot === null) {
             if (checkValidMove(animal, centerItem.category, slotIdx)) {
               const emptyCount = centerItem.filledSlots.filter((s) => s === null).length;
+              const points = centerItem.category.points || 15;
               possibleMoves.push({
                 animal,
                 centerIdx,
                 slotIdx,
-                isWinningMove: emptyCount === 1
+                isWinningMove: emptyCount === 1,
+                emptyCount,
+                points
               });
             }
           }
@@ -150,27 +157,84 @@ function runBotTurn(room, botPlayer) {
   }
 
   if (possibleMoves.length > 0) {
-    // เลือกท่าที่ลงแล้วได้แต้มทันที (isWinningMove) ก่อน
-    possibleMoves.sort((a, b) => (b.isWinningMove ? 1 : 0) - (a.isWinningMove ? 1 : 0));
-    const chosen = possibleMoves[0];
-    executeMove(room, botPlayer.id, chosen.centerIdx, chosen.slotIdx, chosen.animal.id);
-  } else {
-    // หากไม่มีท่าที่ลงได้ ให้บอททิ้งการ์ด 1 ใบ แล้วจั่วการ์ดใหม่ 1 ใบ (Discard 1 Card & Draw 1)
-    const discardedAnimal = botPlayer.hand.shift(); // ทิ้งใบแรก
-    if (room.animalDeck.length === 0) {
-      room.animalDeck = shuffle(ALL_ANIMALS);
-    }
-    const newAnimal = room.animalDeck.pop();
-    botPlayer.hand.push(newAnimal);
+    let chosen = null;
 
-    io.to(room.roomId).emit('card_discarded', {
-      playerId: botPlayer.id,
-      playerName: botPlayer.name,
-      discardedAnimal,
-      newAnimal
-    });
-    advanceTurn(room);
+    if (difficulty === 'easy') {
+      // 🟢 โหมดง่าย: เล่นสบายๆ 40% ปิดแต้ม, 60% วางตามใจชอบ
+      const winningMoves = possibleMoves.filter((m) => m.isWinningMove);
+      if (winningMoves.length > 0 && Math.random() < 0.4) {
+        chosen = winningMoves[Math.floor(Math.random() * winningMoves.length)];
+      } else {
+        chosen = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+      }
+    } else if (difficulty === 'hard') {
+      // 🔴 โหมดยาก: เล่นเชิงกลยุทธ์ แย่งแต้มสูงสุดและดักทางคู่แข่ง
+      possibleMoves.sort((a, b) => {
+        if (a.isWinningMove !== b.isWinningMove) {
+          return b.isWinningMove ? 1 : -1;
+        }
+        if (a.isWinningMove && b.isWinningMove) {
+          return b.points - a.points; // ปิดเควสต์ที่แต้มสูงกว่าก่อน
+        }
+        // เลี่ยงการวางแล้วเหลือ 1 ช่องเปิดทางให้คนอื่นแย่งแต้ม
+        const aRisk = a.emptyCount === 2 ? -10 : 0;
+        const bRisk = b.emptyCount === 2 ? -10 : 0;
+        return (b.points + bRisk) - (a.points + aRisk);
+      });
+      chosen = possibleMoves[0];
+    } else {
+      // 🟡 โหมดปานกลาง: เน้นปิดแต้มเควสต์ตามปกติ 85%
+      possibleMoves.sort((a, b) => (b.isWinningMove ? 1 : 0) - (a.isWinningMove ? 1 : 0) || b.points - a.points);
+      if (possibleMoves[0].isWinningMove || Math.random() < 0.85) {
+        chosen = possibleMoves[0];
+      } else {
+        chosen = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+      }
+    }
+
+    if (chosen) {
+      executeMove(room, botPlayer.id, chosen.centerIdx, chosen.slotIdx, chosen.animal.id);
+      return;
+    }
   }
+
+  // หากไม่มีท่าที่ลงได้ ให้บอททิ้งการ์ด 1 ใบ แล้วจั่วใหม่
+  let discardIdx = 0;
+  if (difficulty === 'hard' && botPlayer.hand.length > 1) {
+    let leastUsefulIdx = 0;
+    let minMatches = 999;
+    botPlayer.hand.forEach((card, idx) => {
+      let matches = 0;
+      room.centerCategories.forEach((centerItem) => {
+        if (!centerItem || !centerItem.category) return;
+        centerItem.filledSlots.forEach((slot, slotIdx) => {
+          if (slot === null && checkValidMove(card, centerItem.category, slotIdx)) {
+            matches++;
+          }
+        });
+      });
+      if (matches < minMatches) {
+        minMatches = matches;
+        leastUsefulIdx = idx;
+      }
+    });
+    discardIdx = leastUsefulIdx;
+  }
+
+  const discardedAnimal = botPlayer.hand.splice(discardIdx, 1)[0] || botPlayer.hand.shift();
+  if (room.animalDeck.length === 0) {
+    room.animalDeck = shuffle(ALL_ANIMALS);
+  }
+  const newAnimal = room.animalDeck.pop();
+  botPlayer.hand.push(newAnimal);
+
+  io.to(room.roomId).emit('card_discarded', {
+    playerId: botPlayer.id,
+    playerName: botPlayer.name,
+    discardedAnimal,
+    newAnimal
+  });
+  advanceTurn(room);
 }
 
 function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
@@ -294,7 +358,7 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   // 1. สร้างห้องใหม่
-  socket.on('create_room', ({ playerName, avatarId = 'lion', roomMode = 'multiplayer', timeLimitSec = 60, maxPlayers = 8 } = {}, ack) => {
+  socket.on('create_room', ({ playerName, avatarId = 'lion', roomMode = 'multiplayer', timeLimitSec = 60, maxPlayers = 8, botDifficulty = 'medium' } = {}, ack) => {
     const name = sanitizeName(playerName);
     if (!name) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นให้ถูกต้อง (1-16 ตัวอักษร)';
@@ -338,6 +402,7 @@ io.on('connection', (socket) => {
     const newRoom = {
       roomId,
       roomMode,
+      botDifficulty: ['easy', 'medium', 'hard'].includes(botDifficulty) ? botDifficulty : 'medium',
       timeLimitSec: Number(timeLimitSec) || 60,
       players,
       maxPlayers: finalMaxPlayers,
