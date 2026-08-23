@@ -73,8 +73,8 @@ export default function HandDock({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, alignItems: 'stretch', height: '126px' }}>
-        <div id="playerHandScroll" className="hand-cards-list" style={{ flex: 1, minWidth: 0 }}>
+      <div className="hand-dock-content-row">
+        <div id="playerHandScroll" className="hand-cards-list">
           {hand.length > 0 ? (
             hand.map((animal) => {
               const isSelected = animal.id === selectedCardId;
@@ -94,83 +94,41 @@ export default function HandDock({
                   }}
                   onClick={() => onSelectCard(animal.id)}
                 >
-                  {/* Quick Discard Button */}
-                  {isSelected && (
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDiscardSingle(animal.id);
-                      }}
+                  {/* Card Top: Rarity Pill & Discard Action */}
+                  <div className="animal-card-header">
+                    <div
+                      className="card-rarity-pill"
                       style={{
-                        position: 'absolute',
-                        top: 3,
-                        left: 3,
-                        fontSize: '9px',
-                        padding: '1px 5px',
-                        zIndex: 30,
-                        borderRadius: 'var(--r-xs)',
-                        whiteSpace: 'nowrap',
+                        color: rData.color,
+                        background: rData.bg,
+                        border: `1px solid ${rData.border}`,
                       }}
-                      title="ทิ้งการ์ดใบนี้เพื่อจั่วใบใหม่"
                     >
-                      ทิ้งใบนี้
-                    </button>
-                  )}
+                      {rData.label}
+                    </div>
 
-                  {/* Rarity Pill */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 3,
-                      right: 3,
-                      fontSize: '8px',
-                      fontWeight: 800,
-                      color: rData.color,
-                      background: rData.bg,
-                      borderRadius: 'var(--r-pill)',
-                      padding: '1px 5px',
-                      border: `1px solid ${rData.border}`,
-                      zIndex: 10,
-                      fontFamily: 'var(--font-game)',
-                    }}
-                  >
-                    {rData.label}
+                    {isSelected && (
+                      <button
+                        className="card-quick-discard-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDiscardSingle(animal.id);
+                        }}
+                        title="ทิ้งการ์ดใบนี้เพื่อจั่วใบใหม่"
+                      >
+                        ทิ้งใบนี้
+                      </button>
+                    )}
                   </div>
 
                   {/* Animal Name */}
-                  <div
-                    style={{
-                      width: '100%',
-                      textAlign: 'center',
-                      fontFamily: 'var(--font-thai)',
-                      fontSize: '12px',
-                      fontWeight: 800,
-                      color: 'var(--ink-primary)',
-                      marginBottom: '2px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
+                  <div className="animal-card-name" title={animal.name}>
                     {animal.name}
                   </div>
 
-                  {/* Animal Art Box */}
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '46px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                      marginBottom: '3px',
-                    }}
-                  >
-                    <AnimalAvatar id={animal.id} size={42} />
+                  {/* Animal 3D Avatar Artwork Frame */}
+                  <div className="animal-card-avatar-frame">
+                    <AnimalAvatar id={animal.id} size={48} />
                   </div>
 
                   {/* Trait Pills */}
@@ -185,9 +143,6 @@ export default function HandDock({
                             background: colors.bg,
                             color: colors.text,
                             border: `1px solid ${colors.border}`,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '3px',
                           }}
                         >
                           <TraitIcon name={colors.iconName} size={10} color={colors.text} />
@@ -200,17 +155,7 @@ export default function HandDock({
               );
             })
           ) : (
-            <div
-              style={{
-                padding: 12,
-                color: 'var(--ink-on-dark-sub)',
-                fontSize: 13,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
+            <div className="hand-empty-loading">
               <span>กำลังแจกการ์ดเข้ามือ...</span>
             </div>
           )}
@@ -227,9 +172,11 @@ export default function HandDock({
           onDrop={handleDiscardDrop}
           title="แตะหรือลากการ์ดมาวางที่นี่เพื่อทิ้งและจั่วใบใหม่"
         >
-          <UIIcon name="recycle" size={22} color="#fed7aa" />
-          <span style={{ fontSize: '11px', fontWeight: 800, whiteSpace: 'nowrap' }}>จั่วเปลี่ยนใบ</span>
-          <span style={{ fontSize: '9px', opacity: 0.8 }}>(ลากมาทิ้ง)</span>
+          <div className="discard-icon-frame">
+            <UIIcon name="recycle" size={24} color="#ea580c" />
+          </div>
+          <span className="discard-title">จั่วเปลี่ยนใบ</span>
+          <span className="discard-subtext">(แตะ/ลากมาทิ้ง)</span>
         </div>
       </div>
     </div>
