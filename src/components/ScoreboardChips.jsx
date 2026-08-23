@@ -1,12 +1,5 @@
 import React from 'react';
-
-const AVATAR_EMOJI = {
-  lion:'🦁', tiger:'🐯', cheetah:'🐆', elephant:'🐘', eagle:'🦅', owl:'🦉',
-  penguin:'🐧', shark:'🦈', dolphin:'🐬', frog:'🐸', turtle:'🐢', octopus:'🐙',
-  butterfly:'🦋', kangaroo:'🦘', koala:'🐨', wolf:'🐺', chimp:'🐵', polar_bear:'🐻‍❄️',
-  ostrich:'🦚', whale:'🐳', salmon:'🐟', snake:'🐍', chameleon:'🦎', crab:'🦀',
-  bee:'🐝', platypus:'🦆', beaver:'🦫', otter:'🦦', bat:'🦇',
-};
+import { AnimalAvatar } from '../assets/animalIllustrations';
 
 export default function ScoreboardChips({ players = [], activeIndex, isTimeAttack, myId }) {
   return (
@@ -20,10 +13,8 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
             id={`scoreChip-${p.id}`}
             className={`score-chip ${isCur ? 'active-turn' : ''}`}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '16px', lineHeight: 1, flexShrink: 0 }}>
-                {AVATAR_EMOJI[p.avatarId] || (p.isBot ? '🤖' : '🐾')}
-              </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={20} />
               <span style={{ fontWeight: isMe ? 800 : 700 }}>
                 {p.name}
                 {isMe && ' (คุณ)'}

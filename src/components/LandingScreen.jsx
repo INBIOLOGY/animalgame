@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
-import { AnimalSVG } from '../assets/animalIllustrations';
+import { AnimalAvatar } from '../assets/animalIllustrations';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 import { ALL_ANIMALS_DATA, TRAIT_MAP, TRAIT_COLORS } from '../utils/traits';
 import { playSfx } from '../utils/audio';
 import confetti from 'canvas-confetti';
 
 const ANIMAL_AVATARS = [
-  { id: 'lion',       num: '01', name: 'สิงโต',        emoji: '🦁' },
-  { id: 'tiger',      num: '02', name: 'เสือโคร่ง',    emoji: '🐯' },
-  { id: 'cheetah',   num: '03', name: 'ชีตาห์',        emoji: '🐆' },
-  { id: 'elephant',  num: '04', name: 'ช้าง',          emoji: '🐘' },
-  { id: 'eagle',     num: '05', name: 'นกอินทรี',      emoji: '🦅' },
-  { id: 'owl',       num: '06', name: 'นกฮูก',         emoji: '🦉' },
-  { id: 'penguin',   num: '07', name: 'เพนกวิน',       emoji: '🐧' },
-  { id: 'shark',     num: '08', name: 'ฉลาม',          emoji: '🦈' },
-  { id: 'dolphin',   num: '09', name: 'โลมา',          emoji: '🐬' },
-  { id: 'frog',      num: '10', name: 'กบ',            emoji: '🐸' },
-  { id: 'turtle',    num: '11', name: 'เต่าบก',        emoji: '🐢' },
-  { id: 'octopus',   num: '12', name: 'หมึกยักษ์',     emoji: '🐙' },
-  { id: 'butterfly', num: '13', name: 'ผีเสื้อ',       emoji: '🦋' },
-  { id: 'kangaroo',  num: '14', name: 'จิงโจ้',        emoji: '🦘' },
-  { id: 'koala',     num: '15', name: 'โคอาลา',        emoji: '🐨' },
-  { id: 'wolf',      num: '16', name: 'หมาป่า',        emoji: '🐺' },
-  { id: 'chimp',     num: '17', name: 'ชิมแปนซี',      emoji: '🐵' },
-  { id: 'polar_bear',num: '18', name: 'หมีขั้วโลก',   emoji: '🐻‍❄️' },
+  { id: 'lion',       num: '01', name: 'สิงโต' },
+  { id: 'tiger',      num: '02', name: 'เสือโคร่ง' },
+  { id: 'cheetah',   num: '03', name: 'ชีตาห์' },
+  { id: 'elephant',  num: '04', name: 'ช้าง' },
+  { id: 'eagle',     num: '05', name: 'นกอินทรี' },
+  { id: 'owl',       num: '06', name: 'นกฮูก' },
+  { id: 'penguin',   num: '07', name: 'เพนกวิน' },
+  { id: 'shark',     num: '08', name: 'ฉลาม' },
+  { id: 'dolphin',   num: '09', name: 'โลมา' },
+  { id: 'frog',      num: '10', name: 'กบ' },
+  { id: 'turtle',    num: '11', name: 'เต่าบก' },
+  { id: 'octopus',   num: '12', name: 'หมึกยักษ์' },
+  { id: 'butterfly', num: '13', name: 'ผีเสื้อ' },
+  { id: 'kangaroo',  num: '14', name: 'จิงโจ้' },
+  { id: 'koala',     num: '15', name: 'โคอาลา' },
+  { id: 'wolf',      num: '16', name: 'หมาป่า' },
+  { id: 'chimp',     num: '17', name: 'ชิมแปนซี' },
+  { id: 'polar_bear',num: '18', name: 'หมีขั้วโลก' },
 ];
 
 const MODES = [
@@ -65,7 +65,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   const curAnimalData = ALL_ANIMALS_DATA.find((a) => a.id === selectedAvatarId) || ALL_ANIMALS_DATA[0];
   const curAvatarMeta = ANIMAL_AVATARS.find((a) => a.id === selectedAvatarId) || ANIMAL_AVATARS[0];
 
-  // Extract Latin binomial name from englishName (e.g. "Panthera leo" from "Lion (Panthera leo)")
+  // Extract Latin binomial name from englishName
   const latinNameMatch = curAnimalData.englishName?.match(/\((.*?)\)/);
   const latinName = latinNameMatch ? latinNameMatch[1] : curAnimalData.englishName;
 
@@ -144,18 +144,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
           >
             {/* Card Specimen Artwork Frame */}
             <div className="specimen-frame-box">
-              <div style={{
-                fontSize: curAvatarMeta.id === 'polar_bear' ? '52px' : '60px',
-                lineHeight: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                height: '84px',
-                userSelect: 'none',
-              }}>
-                {curAvatarMeta.emoji}
-              </div>
+              <AnimalAvatar id={curAnimalData.id} size={64} />
               <div className="specimen-rarity-seal">{curAnimalData.rarity?.toUpperCase()}</div>
             </div>
 
@@ -206,9 +195,9 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                   className={`specimen-stamp-btn ${isSelected ? 'active' : ''}`}
                   onClick={() => handleSelectAvatar(av.id)}
                   title={av.name}
-                  style={{ fontSize: '22px', lineHeight: 1 }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
                 >
-                  {av.emoji}
+                  <AnimalAvatar id={av.id} size={30} />
                 </button>
               );
             })}
@@ -216,8 +205,8 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
 
           {/* Explorer Nickname Input */}
           <div className="explorer-name-wrap">
-            <div className="explorer-avatar-badge" style={{ fontSize: '20px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {curAvatarMeta.emoji}
+            <div className="explorer-avatar-badge" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AnimalAvatar id={curAnimalData.id} size={28} />
             </div>
             <input
               className={`explorer-name-input${nameError ? ' input-error' : ''}`}

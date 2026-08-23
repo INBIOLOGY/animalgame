@@ -1,14 +1,7 @@
 import React from 'react';
 import { TRAIT_MAP, TRAIT_COLORS, ANIMAL_RARITIES, ALL_ANIMALS_DATA } from '../utils/traits';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
-
-const AVATAR_EMOJI = {
-  lion:'🦁', tiger:'🐯', cheetah:'🐆', elephant:'🐘', eagle:'🦅', owl:'🦉',
-  penguin:'🐧', shark:'🦈', dolphin:'🐬', frog:'🐸', turtle:'🐢', octopus:'🐙',
-  butterfly:'🦋', kangaroo:'🦘', koala:'🐨', wolf:'🐺', chimp:'🐵', polar_bear:'🐻‍❄️',
-  ostrich:'🦚', whale:'🐳', salmon:'🐟', snake:'🐍', chameleon:'🦎', crab:'🦀',
-  bee:'🐝', platypus:'🦆', beaver:'🦫', otter:'🦦', bat:'🦇',
-};
+import { AnimalAvatar } from '../assets/animalIllustrations';
 
 const EMOTES = ['🎉', '🔥', '😎', '🐾', '💡', '👏'];
 
@@ -167,10 +160,7 @@ export default function HandDock({
                   <div
                     style={{
                       width: '100%',
-                      height: '48px',
-                      background: 'linear-gradient(145deg, #f0f8e8, #e8f5d4)',
-                      borderRadius: 'var(--r-sm)',
-                      border: '1px solid #ded5c2',
+                      height: '46px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -178,12 +168,9 @@ export default function HandDock({
                       overflow: 'hidden',
                       flexShrink: 0,
                       marginBottom: '3px',
-                      fontSize: '30px',
-                      lineHeight: 1,
-                      userSelect: 'none',
                     }}
                   >
-                    {AVATAR_EMOJI[animal.id] || '🐾'}
+                    <AnimalAvatar id={animal.id} size={42} />
                   </div>
 
                   {/* Trait Pills */}

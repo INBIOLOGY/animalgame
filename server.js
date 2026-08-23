@@ -83,7 +83,26 @@ function checkValidMove(animalCard, categoryCard, slotIndex) {
     return false;
   }
   const requiredTrait = categoryCard.slots[slotIndex];
-  return animalCard.traits.includes(requiredTrait);
+  if (animalCard.traits.includes(requiredTrait)) return true;
+
+  const aliases = {
+    backbone: ['has_backbone', 'backbone'],
+    has_backbone: ['has_backbone', 'backbone'],
+    no_backbone: ['no_backbone', 'invertebrate'],
+    invertebrate: ['no_backbone', 'invertebrate'],
+    fly: ['can_fly', 'fly'],
+    can_fly: ['can_fly', 'fly'],
+    swim: ['water_living', 'swim'],
+    water_living: ['water_living', 'swim'],
+    terrestrial: ['land_living', 'terrestrial'],
+    land_living: ['land_living', 'terrestrial'],
+  };
+
+  const matches = aliases[requiredTrait];
+  if (matches) {
+    return matches.some((t) => animalCard.traits.includes(t));
+  }
+  return false;
 }
 
 function advanceTurn(room) {

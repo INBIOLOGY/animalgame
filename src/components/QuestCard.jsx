@@ -1,6 +1,7 @@
 import React from 'react';
 import SlotCell from './SlotCell';
 import { UIIcon } from '../assets/natureIcons';
+import { isTraitCompatible } from '../utils/traits';
 
 export default function QuestCard({
   centerIdx,
@@ -38,7 +39,7 @@ export default function QuestCard({
       <div className={`tcg-slots-layout ${layoutClass}`}>
         {categoryItem.filledSlots.map((slotData, slotIdx) => {
           const requiredTrait = cat.slots[slotIdx];
-          const isCompatible = activeAnimal && activeAnimal.traits.includes(requiredTrait);
+          const isCompatible = activeAnimal && isTraitCompatible(activeAnimal.traits, requiredTrait);
 
           return (
             <SlotCell
