@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toggleBgm, playSfx } from '../utils/audio';
 import { UIIcon, GameLogoMark } from '../assets/natureIcons';
 
 export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalDeck = 12, onOpenDex }) {
   const [bgmActive, setBgmActive] = useState(false);
+  const [sfxActive, setSfxActive] = useState(() => {
+    return localStorage.getItem('animalgame_sfx_muted') !== 'true';
+  });
 
   const handleBgmToggle = () => {
     const newState = toggleBgm(!bgmActive);
     setBgmActive(newState);
-    playSfx('select');
+    if (sfxActive) playSfx('select');
+  };
+
+  const handleSfxToggle = () => {
+    const nextState = !sfxActive;
+    setSfxActive(nextState);
+    localStorage.setItem('animalgame_sfx_muted', nextState ? 'false' : 'true');
+    if (nextState) playSfx('pop');
   };
 
   return (
@@ -27,9 +37,10 @@ export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalD
       <div className="cute-topbar-right">
         {/* Dex Encyclopedia Button */}
         <button
+          type="button"
           className="cute-nav-btn"
           onClick={() => {
-            playSfx('pop');
+            if (sfxActive) playSfx('pop');
             onOpenDex();
           }}
           title="เปิดสมุดภาพสารานุกรมสัตว์ (Field Guide)"
@@ -40,16 +51,27 @@ export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalD
 
         {/* BGM Toggle */}
         <button
+          type="button"
           className={`cute-nav-btn ${bgmActive ? 'active-bgm' : ''}`}
           onClick={handleBgmToggle}
           title="เปิด/ปิด เสียงเพลงประกอบ"
         >
           <UIIcon
             name={bgmActive ? 'music_on' : 'music_off'}
-            size={15}
+            size={14}
             color={bgmActive ? '#ffffff' : 'var(--forest-primary)'}
           />
           <span>{bgmActive ? 'เพลง: เปิด' : 'เพลง: ปิด'}</span>
+        </button>
+
+        {/* SFX Toggle */}
+        <button
+          type="button"
+          className={`cute-nav-btn ${!sfxActive ? 'muted-sfx' : ''}`}
+          onClick={handleSfxToggle}
+          title="เปิด/ปิด เสียงเอฟเฟกต์ (SFX)"
+        >
+          <span>{sfxActive ? '🔊 เอฟเฟกต์' : '🔇 ปิดเสียง'}</span>
         </button>
 
         {showDeckCounter && (

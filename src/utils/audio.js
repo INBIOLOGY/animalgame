@@ -13,6 +13,9 @@ function getAudioContext() {
 
 export function playSfx(type) {
   try {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('animalgame_sfx_muted') === 'true') {
+      return;
+    }
     const ctx = getAudioContext();
     const now = ctx.currentTime;
 
