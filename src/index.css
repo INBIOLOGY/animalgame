@@ -1078,10 +1078,11 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--r-lg);
-  padding: 4px 14px;
-  gap: 8px;
+  padding: 5px 14px;
+  gap: 6px;
   flex-shrink: 0;
-  height: 46px;
+  min-height: 46px;
+  flex-wrap: wrap;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1652,4 +1653,144 @@ body {
     justify-content: flex-end;
     margin-top: 6px;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE — TABLET (≤900px)
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  /* Navbar */
+  .topbar { padding: 0 14px; }
+  .brand-logo span:last-child { display: none; }
+
+  /* Landing */
+  .naturalist-folio-portal {
+    grid-template-columns: 1fr;
+    max-height: none;
+    overflow-y: auto;
+    gap: 16px;
+    padding: 16px;
+  }
+  .folio-specimen-column { order: 1; }
+  .folio-expedition-column { order: 2; }
+  .specimen-stamp-grid { grid-template-columns: repeat(6, 1fr); }
+
+  /* Game header */
+  .turn-badge { font-size: 11px; padding: 3px 9px; }
+  .score-chip { font-size: 11px; padding: 2px 7px; }
+  .score-chip span:first-child span { max-width: 60px; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Category grid → 2 cols on tablet */
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+
+  /* Hand dock */
+  .animal-card { width: 80px; height: 110px; }
+  .bottom-hand-dock { padding: 5px 10px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE — MOBILE (≤600px)
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Root overflow allow scroll */
+  html, body, #root { overflow: auto; }
+  .app-screen { overflow-y: auto; height: auto; padding: 4px 8px; }
+
+  /* Navbar compact */
+  .topbar { padding: 0 10px; height: 46px; }
+  .topbar-right { gap: 5px; }
+  .btn.btn-sm span { display: none; } /* Hide button text, show only icons */
+  .btn.btn-sm { min-width: 32px; justify-content: center; padding: 5px 8px; }
+  /* Keep conn-pill text */
+  .conn-pill span:last-child { display: inline; }
+
+  /* Landing full column */
+  .landing-container { padding: 4px 8px; overflow-y: auto; max-height: none; }
+  .naturalist-folio-portal {
+    grid-template-columns: 1fr;
+    max-height: none;
+    padding: 12px;
+    gap: 12px;
+    border-radius: var(--r-lg);
+  }
+  .museum-specimen-card { gap: 8px; }
+  .specimen-frame-box { width: 70px; min-width: 60px; }
+  .specimen-stamp-grid { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .specimen-stamp-btn { width: 36px; height: 36px; }
+  .expedition-modes-list { gap: 6px; }
+  .expedition-mode-card { padding: 8px 10px; }
+  .btn-enter-arena { padding: 10px 14px; font-size: 13.5px; }
+
+  /* Game screen full mobile */
+  .game-screen-wrap { gap: 5px; }
+  .game-header-bar {
+    padding: 4px 8px;
+    gap: 4px;
+    border-radius: var(--r-md);
+    min-height: auto;
+  }
+  .turn-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    flex: 1;
+    min-width: 0;
+    white-space: normal;
+    line-height: 1.3;
+  }
+  .scoreboard-chips { gap: 4px; }
+  .score-chip {
+    font-size: 10px;
+    padding: 2px 6px;
+    gap: 3px;
+  }
+  .score-chip span:first-child > div { width: 16px; height: 16px; } /* Avatar */
+  .score-chip > span:first-child > span { max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Category grid → 2 cols on mobile */
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 5px;
+  }
+  .tcg-quest-card { padding: 5px 6px; border-radius: var(--r-sm); }
+  .tcg-card-title { font-size: 10px; }
+  .tcg-card-pts { font-size: 9px; padding: 1px 4px; }
+
+  /* Hand dock compact */
+  .bottom-hand-dock { padding: 5px 8px; gap: 4px; }
+  .hand-top-header { flex-wrap: wrap; gap: 4px; }
+  .hand-guide-text span:last-child { display: none; } /* Hide "(แตะเลือก...)" hint */
+  .hand-cards-list { gap: 5px; }
+  .animal-card { width: 72px; height: 100px; padding: 4px 5px; border-radius: var(--r-sm); }
+  .discard-drop-zone { width: 72px; }
+  .a-traits-wrap { gap: 1px; }
+  .trait-pill { font-size: 7px; padding: 1px 3px; }
+
+  /* Lobby */
+  .naturalist-folio-portal.lobby-wide-card { grid-template-columns: 1fr; }
+  .lobby-slots-grid { gap: 6px; }
+  .lobby-player-slot { padding: 8px 10px; }
+
+  /* Victory modal */
+  .victory-modal-card { padding: 20px 16px; margin: 12px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📱 RESPONSIVE — SMALL MOBILE (≤400px)
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 400px) {
+  .category-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, auto);
+    gap: 4px;
+  }
+  .animal-card { width: 64px; height: 92px; }
+  .discard-drop-zone { width: 64px; }
+  .score-chip { display: none; } /* Too small — hide scores from header */
+  .score-chip:first-child { display: flex; } /* Show only current player */
+  .specimen-stamp-grid { grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  .specimen-stamp-btn { width: 30px; height: 30px; }
 }

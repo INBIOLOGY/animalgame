@@ -48,7 +48,7 @@ export default function GameScreen({
         </div>
 
         {isTimeAttack && (
-          <div className="timer-pill" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div className="timer-pill" style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
             <UIIcon name="timer" size={14} color="#fff" />
             <span>{timeAttackSeconds}s</span>
           </div>
@@ -61,7 +61,7 @@ export default function GameScreen({
           myId={myId}
         />
 
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 5, flexShrink: 0, alignItems: 'center' }}>
           <button
             className="btn btn-dark btn-sm"
             onClick={onPassTurn}
