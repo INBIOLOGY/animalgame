@@ -1,0 +1,29 @@
+{
+  "name": "room-system",
+  "version": "2.0.0",
+  "description": "ระบบเกมการ์ดคุณสมบัติสัตว์ TCG ด้วย React, Vite, Socket.IO และ Express",
+  "main": "server.js",
+  "scripts": {
+    "dev:server": "node server.js",
+    "dev:client": "vite",
+    "dev": "node server.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.3",
+    "express": "^4.19.2",
+    "lucide-react": "^0.400.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.1"
+  }
+}
