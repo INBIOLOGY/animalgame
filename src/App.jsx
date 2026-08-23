@@ -10,7 +10,10 @@ import EncyclopediaModal from './components/EncyclopediaModal';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
 
-const socket = io();
+const SOCKET_SERVER = import.meta.env.VITE_SERVER_URL || '';
+const socket = io(SOCKET_SERVER, {
+  transports: ['websocket', 'polling'],
+});
 
 export default function App() {
   const [isOnline, setIsOnline] = useState(socket.connected);
