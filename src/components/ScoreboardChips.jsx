@@ -22,7 +22,7 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
           >
             {/* Avatar with Leader Crown */}
             <div className="hud-avatar-wrapper">
-              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={26} />
+              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={28} showArt={true} />
               {isLeader && <span className="hud-crown-badge">👑</span>}
             </div>
 

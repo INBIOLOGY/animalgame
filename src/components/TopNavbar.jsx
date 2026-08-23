@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toggleBgm, playSfx } from '../utils/audio';
-import { UIIcon, GameLogoMark } from '../assets/natureIcons';
+import { UIIcon } from '../assets/natureIcons';
+import { TCG_GAME_LOGO } from '../assets/artAssets';
 
 export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalDeck = 12, onOpenDex }) {
   const [bgmActive, setBgmActive] = useState(false);
@@ -14,10 +15,12 @@ export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalD
   return (
     <header className="topbar">
       <div className="brand-logo" onClick={() => window.location.reload()} title="รีเฟรชหน้าเว็บ">
-        <GameLogoMark size={30} />
-        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-          <span style={{ fontWeight: 800, fontSize: '15px', color: 'var(--forest-primary)' }}>สัตว์น่ารู้</span>
-          <span style={{ fontSize: '9px', fontWeight: 800, color: 'var(--forest-accent)', letterSpacing: '0.8px' }}>WILDLIFE TCG</span>
+        <div className="brand-logo-img-wrap">
+          <img src={TCG_GAME_LOGO} alt="Wildlife TCG Logo" className="brand-logo-img" />
+        </div>
+        <div className="brand-title-wrap">
+          <span className="brand-title-main">สัตว์น่ารู้</span>
+          <span className="brand-title-sub">WILDLIFE TCG</span>
         </div>
       </div>
 
@@ -31,7 +34,7 @@ export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalD
           }}
           title="เปิดสมุดภาพสารานุกรมสัตว์ (Field Guide)"
         >
-          <UIIcon name="book" size={15} color="var(--forest-primary)" />
+          <UIIcon name="book" size={15} color="var(--warm-gold)" />
           <span>สารานุกรมสัตว์</span>
         </button>
 
@@ -44,15 +47,15 @@ export default function TopNavbar({ isOnline, showDeckCounter, deckCount, totalD
           <UIIcon
             name={bgmActive ? 'music_on' : 'music_off'}
             size={15}
-            color={bgmActive ? '#ffffff' : 'var(--forest-primary)'}
+            color={bgmActive ? '#ffffff' : 'var(--warm-gold)'}
           />
           <span>{bgmActive ? 'เพลง: เปิด' : 'เพลง: ปิด'}</span>
         </button>
 
         {showDeckCounter && (
-          <span className="conn-pill" style={{ background: 'var(--bg-matcha-soft)', borderColor: 'var(--card-border-green)' }}>
-            <UIIcon name="trophy" size={14} color="var(--forest-primary)" />
-            <span>เหลือ <strong style={{ color: 'var(--forest-primary)', fontFamily: 'var(--font-num)' }}>{deckCount}/{totalDeck}</strong> หมวด</span>
+          <span className="conn-pill" style={{ background: 'rgba(254, 243, 199, 0.15)', borderColor: 'rgba(212, 154, 38, 0.4)' }}>
+            <UIIcon name="trophy" size={14} color="var(--warm-gold)" />
+            <span>เหลือ <strong style={{ color: 'var(--warm-gold)', fontFamily: 'var(--font-num)' }}>{deckCount}/{totalDeck}</strong> หมวด</span>
           </span>
         )}
 

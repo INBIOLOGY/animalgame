@@ -27,7 +27,7 @@ export default function HandDock({
     e.currentTarget.classList.remove('drag-over');
   };
 
-  const handleDiscardDrop = (e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over');
     const animalId = e.dataTransfer.getData('text/plain');
@@ -45,29 +45,29 @@ export default function HandDock({
           {isMyTurn ? (
             <>
               <span className="turn-indicator-star">🌟</span>
-              <span style={{ color: 'var(--forest-primary)', fontWeight: 800 }}>ถึงตาของคุณแล้ว!</span>
-              <span className="hand-guide-subtext">(แตะเลือกการ์ด หรือลากไปวางในช่อง)</span>
+              <span style={{ color: '#ffffff', fontWeight: 800 }}>ถึงตาของคุณแล้ว!</span>
+              <span className="hand-guide-subtext">(แตะเลือกการ์ด หรือลากไปวางในช่องเควสต์)</span>
             </>
           ) : (
             <>
               <span className="turn-indicator-hourglass">⏳</span>
-              <span style={{ color: 'var(--ink-muted)', fontWeight: 700 }}>รอเทิร์นของผู้เล่นอื่น...</span>
-              <span className="hand-guide-subtext">(การ์ดจะขยายเมื่อถึงตาคุณ)</span>
+              <span style={{ color: '#cbd5e1', fontWeight: 700 }}>รอเทิร์นของผู้เล่นอื่น...</span>
+              <span className="hand-guide-subtext">(การ์ดจะขยายเต็มจอเมื่อถึงตาคุณ)</span>
             </>
           )}
         </div>
 
         {/* Emotes */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           {EMOTES.map((emoji) => (
             <button
               key={emoji}
               onClick={() => onSendEmote && onSendEmote(emoji)}
               style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                background: 'rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
                 borderRadius: 'var(--r-pill)',
-                padding: '2px 6px',
+                padding: '2px 7px',
                 fontSize: '12px',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
@@ -90,6 +90,9 @@ export default function HandDock({
               const animalInfo = ALL_ANIMALS_DATA.find((a) => a.id === animal.id);
               const rarity = animalInfo?.rarity || 'common';
               const rData = ANIMAL_RARITIES[rarity] || ANIMAL_RARITIES.common;
+              const distinctTraits = Array.from(
+                new Set((animal.traits || []).map((t) => TRAIT_MAP[t] || t))
+              ).slice(0, 3);
 
               return (
                 <div
@@ -136,18 +139,19 @@ export default function HandDock({
                     {animal.name}
                   </div>
 
-                  {/* Animal 3D Avatar Artwork Frame */}
+                  {/* Animal 3D High-Production Digital Artwork Frame */}
                   <div className="animal-card-avatar-frame">
-                    <AnimalAvatar id={animal.id} size={48} />
+                    <AnimalAvatar id={animal.id} size={50} showArt={true} />
                   </div>
 
                   {/* Trait Pills */}
                   <div className="a-traits-wrap">
-                    {animal.traits.slice(0, 3).map((t) => {
-                      const colors = TRAIT_COLORS[t] || { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', iconName: 'backbone' };
+                    {distinctTraits.map((tLabel, tIdx) => {
+                      const originalKey = animal.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
+                      const colors = TRAIT_COLORS[originalKey] || { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', iconName: 'backbone' };
                       return (
                         <span
-                          key={t}
+                          key={tIdx}
                           className="trait-pill"
                           style={{
                             background: colors.bg,
@@ -156,7 +160,7 @@ export default function HandDock({
                           }}
                         >
                           <TraitIcon name={colors.iconName} size={10} color={colors.text} />
-                          <span>{TRAIT_MAP[t]?.replace(/^[^a-zA-Z0-9\u0E00-\u0E7F]+\s*/, '')}</span>
+                          <span>{tLabel}</span>
                         </span>
                       );
                     })}
@@ -166,12 +170,13 @@ export default function HandDock({
             })
           ) : (
             <div className="hand-empty-loading">
+              <span className="loading-spinner" />
               <span>กำลังแจกการ์ดเข้ามือ...</span>
             </div>
           )}
         </div>
 
-        {/* Discard & Draw Deck Box */}
+        {/* Discard Target Box */}
         <div
           id="discardDropZone"
           className="discard-drop-zone"
@@ -179,14 +184,14 @@ export default function HandDock({
           onDragOver={handleDiscardDragOver}
           onDragEnter={handleDiscardDragEnter}
           onDragLeave={handleDiscardDragLeave}
-          onDrop={handleDiscardDrop}
-          title="แตะหรือลากการ์ดมาวางที่นี่เพื่อทิ้งและจั่วใบใหม่"
+          onDrop={handleDrop}
+          title="แตะหรือลากการ์ดมาที่นี่เพื่อทิ้งและจั่วใบใหม่"
         >
           <div className="discard-icon-frame">
-            <UIIcon name="recycle" size={24} color="#ea580c" />
+            <UIIcon name="recycle" size={20} color="var(--terracotta)" />
           </div>
-          <span className="discard-title">จั่วเปลี่ยนใบ</span>
-          <span className="discard-subtext">(แตะ/ลากมาทิ้ง)</span>
+          <span className="discard-main-text">ทิ้งการ์ด</span>
+          <span className="discard-sub-text">(จั่วใบใหม่)</span>
         </div>
       </div>
     </div>

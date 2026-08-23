@@ -1,6 +1,7 @@
 import React from 'react';
 import { UIIcon } from '../assets/natureIcons';
-import { AnimalSVG } from '../assets/animalIllustrations';
+import { AnimalAvatar } from '../assets/animalIllustrations';
+import { TCG_ARENA_BACKDROP } from '../assets/artAssets';
 import { playSfx } from '../utils/audio';
 
 const QUICK_LOBBY_EMOTES = ['🎉', '🔥', '🐾', '🦁', '😎', '💡', '💖', '👑', '⚡', '🥳'];
@@ -14,7 +15,7 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
   const canStart = isHost && (room.roomMode !== 'time_attack' || room.players.length >= 1) && (room.roomMode !== 'multiplayer' || room.players.length >= 2);
 
   const modeLabels = {
-    multiplayer: '👥 เล่นกับเพื่อน (2-4 คน)',
+    multiplayer: '👥 เล่นกับเพื่อน (2-10 คน)',
     vs_bot: '🤖 เล่นกับบอท AI',
     time_attack: '⏱️ ท้าทายเวลา (Solo)',
   };
@@ -25,10 +26,14 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
   };
 
   return (
-    <section className="landing-container">
-      {/* Atmospheric Background */}
-      <div className="game-art-backdrop" aria-hidden="true" />
-      <div className="game-art-overlay" aria-hidden="true" />
+    <section className="landing-container page-screen-anim">
+      {/* 🌲 Cinematic Arena Tabletop Backdrop */}
+      <div
+        className="tcg-cinematic-backdrop"
+        style={{ backgroundImage: `url(${TCG_ARENA_BACKDROP})` }}
+        aria-hidden="true"
+      />
+      <div className="tcg-cinematic-overlay" aria-hidden="true" />
 
       <div className="naturalist-folio-portal lobby-wide-card">
         {/* Left Side: Room Code & Emotes */}
@@ -86,7 +91,7 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
                 return (
                   <div key={p.id} className={`lobby-player-slot ${isMe ? 'is-me' : ''}`} id={`scoreChip-${p.id}`}>
                     <div className="slot-avatar-circle">
-                      <AnimalSVG id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={30} />
+                      <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={34} showArt={true} />
                     </div>
                     <div className="slot-player-details">
                       <div className="slot-player-name">
@@ -139,9 +144,15 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
               </button>
             )}
 
-            <button className="action-btn-leave" onClick={onLeaveRoom}>
-              <UIIcon name="exit" size={15} color="#991b1b" />
-              <span>ออกจากห้อง</span>
+            {!isHost && (
+              <div className="guest-waiting-box">
+                <span className="loading-spinner" />
+                <span>กำลังรอเจ้าของห้องกดเริ่มเกม...</span>
+              </div>
+            )}
+
+            <button className="btn-leave-lobby" onClick={onLeaveRoom}>
+              ออกจากห้อง
             </button>
           </div>
         </div>

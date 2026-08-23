@@ -1,6 +1,6 @@
 import React from 'react';
 import { TRAIT_MAP, TRAIT_COLORS } from '../utils/traits';
-import { AnimalSVG } from '../assets/animalIllustrations';
+import { AnimalAvatar } from '../assets/animalIllustrations';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 
 export default function SlotCell({
@@ -81,9 +81,9 @@ export default function SlotCell({
           <span
             style={{
               fontSize: '9.5px',
-              background: 'var(--pine-green)',
+              background: 'linear-gradient(135deg, #275220, #386b2e)',
               color: '#ffffff',
-              padding: '1.5px 6px',
+              padding: '2px 7px',
               borderRadius: 'var(--r-pill)',
               fontWeight: 800,
               whiteSpace: 'nowrap',
@@ -91,7 +91,7 @@ export default function SlotCell({
               display: 'flex',
               alignItems: 'center',
               gap: '3px',
-              boxShadow: '0 1px 4px rgba(45, 106, 79, 0.3)',
+              boxShadow: '0 2px 6px rgba(45, 106, 79, 0.4)',
             }}
           >
             <UIIcon name="check" size={10} color="#ffffff" />
@@ -106,9 +106,7 @@ export default function SlotCell({
   return (
     <div className={`tcg-slot-cell filled-slot ${slotItemClass}`}>
       <div className="mini-card-left">
-        <div style={{ width: '22px', height: '22px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <AnimalSVG id={slotData.animalCard?.id} size={22} />
-        </div>
+        <AnimalAvatar id={slotData.animalCard?.id} size={24} showArt={true} />
         <span className="mini-card-name">{slotData.animalCard?.name}</span>
       </div>
       <div className="mini-card-right">
@@ -123,7 +121,7 @@ export default function SlotCell({
             gap: '3px',
           }}
         >
-          <TraitIcon name={traitColor.iconName} size={11} color={traitColor.text} />
+          <TraitIcon name={traitColor.iconName} size={10} color={traitColor.text} />
           <span>{traitLabel}</span>
         </span>
         <span className="mini-player-tag">

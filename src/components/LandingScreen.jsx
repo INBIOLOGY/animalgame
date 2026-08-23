@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AnimalAvatar } from '../assets/animalIllustrations';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 import { ALL_ANIMALS_DATA, TRAIT_MAP, TRAIT_COLORS } from '../utils/traits';
+import { getAnimalArt, TCG_ARENA_BACKDROP } from '../assets/artAssets';
 import { playSfx } from '../utils/audio';
 import confetti from 'canvas-confetti';
 
@@ -30,23 +31,26 @@ const MODES = [
   {
     key: 'multiplayer',
     iconName: 'users',
-    title: 'เล่นกับเพื่อน',
-    desc: 'สร้างห้องประลองออนไลน์ 2-8 คน ชวนเพื่อนมาร่วมโต๊ะ',
-    tag: 'ออนไลน์',
+    title: 'เล่นกับเพื่อน (Online Arena)',
+    desc: 'สร้างห้องประลองการ์ดออนไลน์ 2-10 คน ชวนเพื่อนมาร่วมโต๊ะประลอง',
+    tag: 'ผู้เล่นหลายคน',
+    glow: 'rgba(56, 189, 248, 0.4)',
   },
   {
     key: 'vs_bot',
     iconName: 'bot',
-    title: 'แข่งกับบอท AI',
-    desc: 'ฝึกซ้อมคนเดียว ประลองปัญญากับบอทจำลอง 3 ตัว',
-    tag: 'เล่นเดี่ยว',
+    title: 'ฝึกซ้อมกับบอท AI',
+    desc: 'ประลองปัญญากับหุ่นจำลอง 3 ระดับความฉลาด (ง่าย / ปานกลาง / ยาก)',
+    tag: 'เล่นเดี่ยว / AI',
+    glow: 'rgba(234, 179, 8, 0.4)',
   },
   {
     key: 'time_attack',
     iconName: 'timer',
-    title: 'สปีดรันจับเวลา',
-    desc: 'ท้าทายความเร็ว ทำคะแนนสูงสุดก่อนหมดเวลา',
+    title: 'สปีดรันจับเวลา (Chrono Run)',
+    desc: 'ท้าทายความเร็วในการจัดหมวดหมู่สัตว์ ทำคะแนนสูงสุดก่อนหมดเวลา',
     tag: 'จับเวลา',
+    glow: 'rgba(239, 68, 68, 0.4)',
   },
 ];
 
@@ -66,16 +70,16 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
 
   const curAnimalData = ALL_ANIMALS_DATA.find((a) => a.id === selectedAvatarId) || ALL_ANIMALS_DATA[0];
   const curAvatarMeta = ANIMAL_AVATARS.find((a) => a.id === selectedAvatarId) || ANIMAL_AVATARS[0];
+  const heroArt = getAnimalArt(curAnimalData.id);
 
-  // Extract Latin binomial name from englishName
+  // Extract Latin binomial name
   const latinNameMatch = curAnimalData.englishName?.match(/\((.*?)\)/);
   const latinName = latinNameMatch ? latinNameMatch[1] : curAnimalData.englishName;
 
-  const getFullPlayerName = () => {
-    const raw = playerName.trim();
-    if (!raw) return '';
-    return raw;
-  };
+  // Deduplicate traits so none appear twice
+  const distinctTraits = Array.from(
+    new Set((curAnimalData.traits || []).map((t) => TRAIT_MAP[t] || t))
+  ).slice(0, 3);
 
   const handleCreate = () => {
     const raw = playerName.trim();
@@ -89,13 +93,13 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     playSfx('fanfare');
     try {
       confetti({
-        particleCount: 40,
-        spread: 70,
+        particleCount: 50,
+        spread: 80,
         origin: { y: 0.65 },
-        colors: ['#285422', '#487a39', '#bfd575', '#d49a26', '#ffffff']
+        colors: ['#285422', '#d49a26', '#38bdf8', '#f59e0b', '#ffffff'],
       });
     } catch (e) {}
-    onCreateRoom(getFullPlayerName(), selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty);
+    onCreateRoom(raw, selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty);
   };
 
   const handleJoin = () => {
@@ -114,7 +118,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     setNameError('');
     setCodeError('');
     playSfx('select');
-    onJoinRoom(getFullPlayerName(), selectedAvatarId, code);
+    onJoinRoom(raw, selectedAvatarId, code);
   };
 
   const handleSelectAvatar = (id) => {
@@ -125,55 +129,64 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   };
 
   return (
-    <section className="landing-container">
-      {/* Tabletop Playmat Canvas */}
-      <div className="game-art-backdrop" aria-hidden="true" />
-      <div className="game-art-overlay" aria-hidden="true" />
+    <section className="landing-container page-screen-anim">
+      {/* 🌲 Cinematic TCG Arena Tabletop Background Art */}
+      <div
+        className="tcg-cinematic-backdrop"
+        style={{ backgroundImage: `url(${TCG_ARENA_BACKDROP})` }}
+        aria-hidden="true"
+      />
+      <div className="tcg-cinematic-overlay" aria-hidden="true" />
 
-      {/* Main Naturalist Folio Card */}
+      {/* 🎴 Glassmorphic TCG Lobby Portal */}
       <div className="naturalist-folio-portal">
-        {/* ─── LEFT: Signature Biological Specimen Card & Selector ─── */}
+        {/* ─── LEFT: Signature Hero Card Showcase & Avatar Picker ─── */}
         <div className="folio-specimen-column">
           <div className="folio-section-header">
-            <span className="folio-section-title">บัตรตัวอย่างสายพันธุ์ประจำตัว</span>
-            <span className="folio-catalog-id">CATALOG #{curAvatarMeta.num}</span>
+            <span className="folio-section-title">การ์ดตัวละครหลักของคุณ</span>
+            <span className="folio-catalog-id">CARD #{curAvatarMeta.num}</span>
           </div>
 
-          {/* 🌟 SIGNATURE ELEMENT: Naturalist Museum Specimen Card */}
+          {/* 🌟 AAA Hero Showcase Card with Digital Artwork */}
           <div
-            className={`museum-specimen-card ${mascotBounce ? 'card-bounce' : ''}`}
+            className={`hero-showcase-card ${mascotBounce ? 'card-bounce' : ''}`}
             onClick={() => handleSelectAvatar(selectedAvatarId)}
           >
-            {/* Card Specimen Artwork Frame */}
-            <div className="specimen-frame-box">
-              <AnimalAvatar id={curAnimalData.id} size={64} />
-              <div className="specimen-rarity-seal">{curAnimalData.rarity?.toUpperCase()}</div>
+            {/* Card Visual Artwork Window */}
+            <div className="hero-card-art-frame">
+              <img src={heroArt} alt={curAnimalData.name} className="hero-card-img" />
+              <div className="hero-card-vignette" />
+              <div className="hero-card-shimmer" />
+              <span className="hero-card-rarity-badge">
+                {curAnimalData.rarity === 'legendary' ? '✨ LEGENDARY' : '⭐ TCG SPECIMEN'}
+              </span>
             </div>
 
-            {/* Specimen Taxonomy Meta */}
-            <div className="specimen-meta-box">
-              <div className="specimen-title-row">
-                <span className="specimen-thai-name">{curAnimalData.name}</span>
-                <span className="specimen-latin-name">{latinName}</span>
+            {/* Hero Card Taxonomy & Stats */}
+            <div className="hero-card-meta-panel">
+              <div className="hero-card-title-row">
+                <h2 className="hero-card-thai-name">{curAnimalData.name}</h2>
+                <span className="hero-card-latin-name">{latinName}</span>
               </div>
-              <div className="specimen-habitat-text">{curAnimalData.habitat}</div>
+              <div className="hero-card-habitat">📍 {curAnimalData.habitat}</div>
 
-              {/* Systematic Trait Index Badges */}
-              <div className="specimen-trait-tags">
-                {curAnimalData.traits.slice(0, 3).map((t) => {
-                  const colors = TRAIT_COLORS[t] || { bg: '#252F28', text: '#EDE8DC', border: '#3D4B40', iconName: 'backbone' };
+              {/* Deduplicated Trait Badges */}
+              <div className="hero-card-traits-row">
+                {distinctTraits.map((tLabel, idx) => {
+                  const originalKey = curAnimalData.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
+                  const colors = TRAIT_COLORS[originalKey] || { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', iconName: 'backbone' };
                   return (
                     <span
-                      key={t}
-                      className="taxon-trait-badge"
+                      key={idx}
+                      className="hero-trait-pill"
                       style={{
                         background: colors.bg,
                         color: colors.text,
-                        border: `1px solid ${colors.border}`,
+                        borderColor: colors.border,
                       }}
                     >
-                      <TraitIcon name={colors.iconName} size={11} color={colors.text} />
-                      <span>{TRAIT_MAP[t]?.replace(/^[^a-zA-Z0-9\u0E00-\u0E7F]+\s*/, '')}</span>
+                      <TraitIcon name={colors.iconName} size={12} color={colors.text} />
+                      <span>{tLabel}</span>
                     </span>
                   );
                 })}
@@ -181,274 +194,228 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             </div>
           </div>
 
-          {/* 18 Specimen Selector Stamps */}
-          <div className="selector-label-row">
-            <span>เลือกสัตว์คู่หูของคุณ:</span>
-            <span className="selector-count-badge">18 สายพันธุ์</span>
-          </div>
-
-          <div className="specimen-stamp-grid">
-            {ANIMAL_AVATARS.map((av) => {
-              const isSelected = selectedAvatarId === av.id;
-              return (
-                <button
-                  key={av.id}
-                  type="button"
-                  className={`specimen-stamp-btn ${isSelected ? 'active' : ''}`}
-                  onClick={() => handleSelectAvatar(av.id)}
-                  title={av.name}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
-                >
-                  <AnimalAvatar id={av.id} size={30} />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Explorer Nickname Input */}
-          <div className="explorer-name-wrap">
-            <div className="explorer-avatar-badge" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <AnimalAvatar id={curAnimalData.id} size={28} />
+          {/* 18-Avatar Grid Selection */}
+          <div className="specimen-selector-section">
+            <div className="section-label-line">
+              <span className="section-label-text">เลือกสัตว์ประจำตัว (18 ชนิด):</span>
             </div>
-            <input
-              className={`explorer-name-input${nameError ? ' input-error' : ''}`}
-              type="text"
-              placeholder="พิมพ์ชื่อนักสำรวจของคุณ..."
-              maxLength={16}
-              value={playerName}
-              onChange={(e) => { setPlayerName(e.target.value); if (nameError) setNameError(''); }}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            />
-            {nameError && <div className="input-error-msg">{nameError}</div>}
+
+            <div className="collector-stamp-grid">
+              {ANIMAL_AVATARS.map((av) => {
+                const isSelected = selectedAvatarId === av.id;
+                return (
+                  <button
+                    key={av.id}
+                    type="button"
+                    className={`collector-stamp-cell ${isSelected ? 'active-stamp' : ''}`}
+                    onClick={() => handleSelectAvatar(av.id)}
+                    title={av.name}
+                  >
+                    <AnimalAvatar id={av.id} size={34} showArt={true} />
+                    {isSelected && <span className="active-seal-dot" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Player Name Input */}
+          <div className="researcher-signature-group">
+            <label className="signature-field-label">
+              <span>ชื่อผู้เล่นของคุณ:</span>
+            </label>
+            <div className="signature-input-wrap">
+              <div className="signature-avatar-seal">
+                <AnimalAvatar id={curAnimalData.id} size={24} showArt={true} />
+              </div>
+              <input
+                className={`signature-text-input${nameError ? ' input-error' : ''}`}
+                type="text"
+                placeholder="พิมพ์ชื่อของคุณ..."
+                maxLength={16}
+                value={playerName}
+                onChange={(e) => {
+                  setPlayerName(e.target.value);
+                  if (nameError) setNameError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              />
+            </div>
+            {nameError && <div className="folio-error-alert">{nameError}</div>}
           </div>
         </div>
 
-        {/* ─── RIGHT: Expedition Modes & Arena Entry ─── */}
+        {/* ─── RIGHT: Game Modes & Room Controls ─── */}
         <div className="folio-expedition-column">
           <div className="folio-section-header">
-            <span className="folio-section-title">เลือกรูปแบบการประลอง</span>
+            <span className="folio-section-title">เลือกโหมดการเล่น</span>
+            <span className="folio-catalog-id">GAME MODE</span>
           </div>
 
-          {/* 3 Expedition Mode Cards (No Emojis, Line-art Icons) */}
-          <div className="expedition-modes-list">
+          {/* Mode Selector Cards */}
+          <div className="expedition-missions-stack">
             {MODES.map((m) => {
               const isActive = mode === m.key;
               return (
                 <div
                   key={m.key}
-                  className={`expedition-mode-card ${isActive ? 'selected' : ''}`}
+                  className={`expedition-mission-card ${isActive ? 'mission-active' : ''}`}
                   onClick={() => {
                     playSfx('select');
                     setMode(m.key);
                   }}
                 >
-                  <div className="mode-icon-frame">
-                    <UIIcon name={m.iconName} size={20} color="var(--forest-primary)" />
+                  <div className="mission-brass-compass">
+                    <UIIcon name={m.iconName} size={20} color={isActive ? '#1b4d18' : '#64748b'} />
                   </div>
-                  <div className="mode-text-content">
-                    <div className="mode-header-line">
-                      <span className="mode-main-title">{m.title}</span>
-                      <span className="mode-tag-pill">{m.tag}</span>
+
+                  <div className="mission-content-column">
+                    <div className="mission-title-row">
+                      <span className="mission-primary-name">{m.title}</span>
+                      <span className="mission-classification-badge">{m.tag}</span>
                     </div>
-                    <div className="mode-desc-text">{m.desc}</div>
+                    <p className="mission-synopsis">{m.desc}</p>
                   </div>
-                  <div className="mode-select-indicator">
-                    {isActive && <div className="indicator-dot" />}
+
+                  <div className="mission-stamp-marker">
+                    {isActive ? <span className="stamp-verified-check">✓</span> : <span className="stamp-open-ring" />}
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Max Players Selector for Multiplayer (Clean Number Input & Stepper) */}
-          {mode === 'multiplayer' && (
-            <div className="time-select-strip" style={{ justifyContent: 'space-between' }}>
-              <span className="time-strip-label">
-                <UIIcon name="users" size={14} color="var(--forest-primary)" />
-                <span>จำนวนผู้เล่นสูงสุด (2-10 คน):</span>
-              </span>
-
-              {/* Clean Direct Number Input with +/- buttons */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#f4f9ed', border: '1.5px solid #dce8ce', borderRadius: '12px', padding: '3px 6px' }}>
-                <button
-                  type="button"
-                  disabled={Number(maxPlayers) <= 2}
-                  onClick={() => {
-                    playSfx('select');
-                    setMaxPlayers((prev) => Math.max(2, (Number(prev) || 2) - 1));
-                  }}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: Number(maxPlayers) <= 2 ? '#e2ebd0' : 'var(--forest-primary)',
-                    color: '#ffffff',
-                    fontWeight: 900,
-                    cursor: Number(maxPlayers) <= 2 ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '14px',
-                    lineHeight: 1,
-                  }}
-                  title="ลดจำนวนผู้เล่น"
-                >
-                  -
-                </button>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  <input
-                    type="number"
-                    min={2}
-                    max={10}
-                    value={maxPlayers}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value, 10);
-                      if (isNaN(val)) {
-                        setMaxPlayers('');
-                      } else {
-                        setMaxPlayers(Math.min(10, Math.max(1, val)));
-                      }
-                    }}
-                    onBlur={() => {
-                      const num = Number(maxPlayers);
-                      if (!num || num < 2) setMaxPlayers(2);
-                      else if (num > 10) setMaxPlayers(10);
-                    }}
-                    style={{
-                      width: '38px',
-                      height: '24px',
-                      textAlign: 'center',
-                      fontFamily: 'var(--font-num)',
-                      fontWeight: 900,
-                      fontSize: '14px',
-                      color: 'var(--forest-primary)',
-                      background: '#ffffff',
-                      border: '1.5px solid #dce8ce',
-                      borderRadius: '6px',
-                      outline: 'none',
-                      padding: 0,
-                    }}
-                  />
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--forest-primary)', paddingRight: '2px' }}>
-                    คน
-                  </span>
+          {/* Dynamic Configuration Panel */}
+          <div className="expedition-parameters-panel">
+            {mode === 'multiplayer' && (
+              <div className="param-config-row">
+                <div className="param-label-group">
+                  <span className="param-main-label">จำนวนผู้เล่นสูงสุด:</span>
+                  <span className="param-sub-desc">รองรับ 2 ถึง 10 คน</span>
                 </div>
-
-                <button
-                  type="button"
-                  disabled={Number(maxPlayers) >= 10}
-                  onClick={() => {
-                    playSfx('select');
-                    setMaxPlayers((prev) => Math.min(10, (Number(prev) || 2) + 1));
-                  }}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: Number(maxPlayers) >= 10 ? '#e2ebd0' : 'var(--forest-primary)',
-                    color: '#ffffff',
-                    fontWeight: 900,
-                    cursor: Number(maxPlayers) >= 10 ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '14px',
-                    lineHeight: 1,
-                  }}
-                  title="เพิ่มจำนวนผู้เล่น"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* AI Difficulty Selector for vs_bot Mode */}
-          {mode === 'vs_bot' && (
-            <div className="time-select-strip" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-              <span className="time-strip-label">
-                <UIIcon name="bot" size={14} color="var(--forest-primary)" />
-                <span>ระดับความยาก AI:</span>
-              </span>
-              <div className="time-pill-group" style={{ display: 'flex', gap: '4px' }}>
-                {[
-                  { key: 'easy', label: '🟢 ง่าย', desc: 'มือใหม่ เล่นสบายๆ' },
-                  { key: 'medium', label: '🟡 ปานกลาง', desc: 'มาตรฐาน รอบคอบ' },
-                  { key: 'hard', label: '🔴 ยาก', desc: 'เซียนชีวะ ฉลาดดักทาง' },
-                ].map((diff) => (
+                <div className="researcher-stepper-box">
                   <button
-                    key={diff.key}
                     type="button"
-                    className={`time-select-pill ${botDifficulty === diff.key ? 'active' : ''}`}
+                    className="stepper-btn"
                     onClick={() => {
-                      playSfx('select');
-                      setBotDifficulty(diff.key);
+                      playSfx('pop');
+                      setMaxPlayers((prev) => Math.max(2, prev - 1));
                     }}
-                    title={diff.desc}
-                    style={{ padding: '4px 10px', fontSize: '11.5px' }}
+                    disabled={maxPlayers <= 2}
                   >
-                    {diff.label}
+                    -
                   </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Speedrun Duration Selector */}
-          {mode === 'time_attack' && (
-            <div className="time-select-strip">
-              <span className="time-strip-label">
-                <UIIcon name="timer" size={14} color="var(--terracotta)" />
-                <span>จำกัดเวลา:</span>
-              </span>
-              <div className="time-pill-group">
-                {TIME_OPTIONS.map((sec) => (
+                  <span className="stepper-value-display">
+                    <strong>{maxPlayers}</strong> <small>คน</small>
+                  </span>
                   <button
-                    key={sec}
                     type="button"
-                    className={`time-select-pill ${timeLimit === sec ? 'active' : ''}`}
+                    className="stepper-btn"
                     onClick={() => {
-                      playSfx('select');
-                      setTimeLimit(sec);
+                      playSfx('pop');
+                      setMaxPlayers((prev) => Math.min(10, prev + 1));
                     }}
+                    disabled={maxPlayers >= 10}
                   >
-                    {sec} วินาที
+                    +
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Solid 3D Action Button (Light from above, no emoji padding) */}
-          <button className="btn-enter-arena" onClick={handleCreate}>
-            <UIIcon name="trophy" size={16} color="#ffffff" />
-            <span>{mode === 'multiplayer' ? 'สร้างห้องประลองการ์ด' : 'เริ่มเล่นทันที'}</span>
+            {mode === 'vs_bot' && (
+              <div className="param-config-row">
+                <div className="param-label-group">
+                  <span className="param-main-label">ระดับความฉลาด AI:</span>
+                  <span className="param-sub-desc">ปรับระดับความท้าทาย</span>
+                </div>
+                <div className="ai-difficulty-strip">
+                  {[
+                    { key: 'easy', label: 'ง่าย', icon: '🟢' },
+                    { key: 'medium', label: 'ปานกลาง', icon: '🟡' },
+                    { key: 'hard', label: 'ยากมาก', icon: '🔴' },
+                  ].map((d) => (
+                    <button
+                      key={d.key}
+                      type="button"
+                      className={`difficulty-pill-btn ${botDifficulty === d.key ? 'active-diff' : ''}`}
+                      onClick={() => {
+                        playSfx('click');
+                        setBotDifficulty(d.key);
+                      }}
+                    >
+                      <span>{d.icon}</span>
+                      <span>{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {mode === 'time_attack' && (
+              <div className="param-config-row">
+                <div className="param-label-group">
+                  <span className="param-main-label">เวลาที่กำหนด:</span>
+                  <span className="param-sub-desc">ทำแต้มให้ได้มากที่สุด</span>
+                </div>
+                <div className="time-options-strip">
+                  {TIME_OPTIONS.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`time-pill-btn ${timeLimit === t ? 'active-time' : ''}`}
+                      onClick={() => {
+                        playSfx('click');
+                        setTimeLimit(t);
+                      }}
+                    >
+                      {t} วิ
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Primary Action Dispatch Button */}
+          <button
+            type="button"
+            className="expedition-dispatch-button"
+            onClick={handleCreate}
+          >
+            <span className="dispatch-icon">⚔️</span>
+            <span className="dispatch-text">สร้างห้องประลองทันที</span>
           </button>
 
-          {/* Join Room Box */}
-          {mode !== 'time_attack' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div className="join-expedition-box">
-                <input
-                  className={`join-expedition-input${codeError ? ' input-error' : ''}`}
-                  type="text"
-                  placeholder="รหัสห้อง 6 หลัก"
-                  maxLength={6}
-                  value={roomCode}
-                  onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                />
-                <button className="btn-join-expedition" onClick={handleJoin}>
-                  <UIIcon name="exit" size={14} color="var(--forest-primary)" />
-                  <span>เข้าห้อง</span>
-                </button>
-              </div>
-              {codeError && <div className="input-error-msg">{codeError}</div>}
+          {/* Join Room Code Section */}
+          <div className="join-expedition-section">
+            <div className="join-divider-line">
+              <span>หรือเข้าร่วมด้วยรหัสห้อง</span>
             </div>
-          )}
+
+            <div className="join-input-group">
+              <input
+                className={`join-code-input${codeError ? ' input-error' : ''}`}
+                type="text"
+                placeholder="ใส่รหัสห้อง 6 หลัก..."
+                maxLength={6}
+                value={roomCode}
+                onChange={(e) => {
+                  setRoomCode(e.target.value.toUpperCase());
+                  if (codeError) setCodeError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+              />
+              <button
+                type="button"
+                className="join-action-btn"
+                onClick={handleJoin}
+              >
+                เข้าร่วม
+              </button>
+            </div>
+            {codeError && <div className="folio-error-alert">{codeError}</div>}
+          </div>
         </div>
       </div>
     </section>
