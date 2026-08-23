@@ -8,6 +8,7 @@ const EMOTES = ['🎉', '🔥', '😎', '🐾', '💡', '👏'];
 export default function HandDock({
   hand = [],
   selectedCardId,
+  isMyTurn = true,
   onSelectCard,
   onDiscardSingle,
   onDiscardSelectedOrFirst,
@@ -38,14 +39,22 @@ export default function HandDock({
   };
 
   return (
-    <div className="bottom-hand-dock">
+    <div className={`bottom-hand-dock ${isMyTurn ? 'my-turn-active' : 'waiting-turn'}`}>
       <div className="hand-top-header">
         <div className="hand-guide-text">
-          <UIIcon name="star" size={14} color="var(--warm-gold-light)" />
-          <span>การ์ดในมือ</span>
-          <span style={{ fontWeight: 500, color: 'var(--ink-on-dark-sub)', fontSize: '11px', marginLeft: 4 }}>
-            (แตะเลือกการ์ด หรือลากไปวางในช่อง)
-          </span>
+          {isMyTurn ? (
+            <>
+              <span className="turn-indicator-star">🌟</span>
+              <span style={{ color: 'var(--forest-primary)', fontWeight: 800 }}>ถึงตาของคุณแล้ว!</span>
+              <span className="hand-guide-subtext">(แตะเลือกการ์ด หรือลากไปวางในช่อง)</span>
+            </>
+          ) : (
+            <>
+              <span className="turn-indicator-hourglass">⏳</span>
+              <span style={{ color: 'var(--ink-muted)', fontWeight: 700 }}>รอเทิร์นของผู้เล่นอื่น...</span>
+              <span className="hand-guide-subtext">(การ์ดจะขยายเมื่อถึงตาคุณ)</span>
+            </>
+          )}
         </div>
 
         {/* Emotes */}

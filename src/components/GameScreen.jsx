@@ -95,10 +95,11 @@ export default function GameScreen({
         </div>
       </div>
 
-      {/* ─── Hand Dock ─── */}
+      {/* ─── Hand Dock (Dynamic Expansion based on Turn) ─── */}
       <HandDock
         hand={me?.hand || []}
         selectedCardId={selectedCardId}
+        isMyTurn={isMyTurn}
         onSelectCard={onSelectCard}
         onDiscardSingle={onDiscardSingle}
         onDiscardSelectedOrFirst={onDiscardSelectedOrFirst}
