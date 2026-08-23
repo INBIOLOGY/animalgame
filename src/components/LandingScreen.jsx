@@ -260,91 +260,108 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             })}
           </div>
 
-          {/* Max Players Selector for Multiplayer (Free Choice 2-10 Players) */}
+          {/* Max Players Selector for Multiplayer (Clean Number Input & Stepper) */}
           {mode === 'multiplayer' && (
-            <div className="time-select-strip" style={{ flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <span className="time-strip-label">
-                  <UIIcon name="users" size={14} color="var(--forest-primary)" />
-                  <span>รับผู้เล่น (2-10 คน):</span>
-                </span>
+            <div className="time-select-strip" style={{ justifyContent: 'space-between' }}>
+              <span className="time-strip-label">
+                <UIIcon name="users" size={14} color="var(--forest-primary)" />
+                <span>จำนวนผู้เล่นสูงสุด (2-10 คน):</span>
+              </span>
 
-                {/* Modern Stepper Counter */}
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f4f9ed', border: '1.5px solid #dce8ce', borderRadius: 'var(--r-pill)', padding: '2px 6px' }}>
-                  <button
-                    type="button"
-                    disabled={maxPlayers <= 2}
-                    onClick={() => {
-                      playSfx('select');
-                      setMaxPlayers((prev) => Math.max(2, prev - 1));
+              {/* Clean Direct Number Input with +/- buttons */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#f4f9ed', border: '1.5px solid #dce8ce', borderRadius: '12px', padding: '3px 6px' }}>
+                <button
+                  type="button"
+                  disabled={Number(maxPlayers) <= 2}
+                  onClick={() => {
+                    playSfx('select');
+                    setMaxPlayers((prev) => Math.max(2, (Number(prev) || 2) - 1));
+                  }}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: Number(maxPlayers) <= 2 ? '#e2ebd0' : 'var(--forest-primary)',
+                    color: '#ffffff',
+                    fontWeight: 900,
+                    cursor: Number(maxPlayers) <= 2 ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    lineHeight: 1,
+                  }}
+                  title="ลดจำนวนผู้เล่น"
+                >
+                  -
+                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <input
+                    type="number"
+                    min={2}
+                    max={10}
+                    value={maxPlayers}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (isNaN(val)) {
+                        setMaxPlayers('');
+                      } else {
+                        setMaxPlayers(Math.min(10, Math.max(1, val)));
+                      }
+                    }}
+                    onBlur={() => {
+                      const num = Number(maxPlayers);
+                      if (!num || num < 2) setMaxPlayers(2);
+                      else if (num > 10) setMaxPlayers(10);
                     }}
                     style={{
-                      width: '24px',
+                      width: '38px',
                       height: '24px',
-                      borderRadius: '50%',
-                      border: 'none',
-                      background: maxPlayers <= 2 ? '#e2ebd0' : 'var(--forest-primary)',
-                      color: '#ffffff',
+                      textAlign: 'center',
+                      fontFamily: 'var(--font-num)',
                       fontWeight: 900,
-                      cursor: maxPlayers <= 2 ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
                       fontSize: '14px',
-                      lineHeight: 1,
+                      color: 'var(--forest-primary)',
+                      background: '#ffffff',
+                      border: '1.5px solid #dce8ce',
+                      borderRadius: '6px',
+                      outline: 'none',
+                      padding: 0,
                     }}
-                    title="ลดจำนวนผู้เล่น"
-                  >
-                    -
-                  </button>
-                  <span style={{ fontFamily: 'var(--font-num)', fontWeight: 900, fontSize: '13.5px', color: 'var(--forest-primary)', minWidth: '42px', textAlign: 'center' }}>
-                    {maxPlayers} คน
+                  />
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--forest-primary)', paddingRight: '2px' }}>
+                    คน
                   </span>
-                  <button
-                    type="button"
-                    disabled={maxPlayers >= 10}
-                    onClick={() => {
-                      playSfx('select');
-                      setMaxPlayers((prev) => Math.min(10, prev + 1));
-                    }}
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      border: 'none',
-                      background: maxPlayers >= 10 ? '#e2ebd0' : 'var(--forest-primary)',
-                      color: '#ffffff',
-                      fontWeight: 900,
-                      cursor: maxPlayers >= 10 ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      lineHeight: 1,
-                    }}
-                    title="เพิ่มจำนวนผู้เล่น"
-                  >
-                    +
-                  </button>
                 </div>
-              </div>
 
-              {/* Quick Select Buttons (2 to 10) */}
-              <div className="time-pill-group" style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    className={`time-select-pill ${maxPlayers === num ? 'active' : ''}`}
-                    onClick={() => {
-                      playSfx('select');
-                      setMaxPlayers(num);
-                    }}
-                    style={{ flex: 1, minWidth: '25px', padding: '3px 0', fontSize: '11.5px', textAlign: 'center' }}
-                  >
-                    {num}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  disabled={Number(maxPlayers) >= 10}
+                  onClick={() => {
+                    playSfx('select');
+                    setMaxPlayers((prev) => Math.min(10, (Number(prev) || 2) + 1));
+                  }}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: Number(maxPlayers) >= 10 ? '#e2ebd0' : 'var(--forest-primary)',
+                    color: '#ffffff',
+                    fontWeight: 900,
+                    cursor: Number(maxPlayers) >= 10 ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    lineHeight: 1,
+                  }}
+                  title="เพิ่มจำนวนผู้เล่น"
+                >
+                  +
+                </button>
               </div>
             </div>
           )}
