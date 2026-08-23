@@ -6,24 +6,24 @@ import { playSfx } from '../utils/audio';
 import confetti from 'canvas-confetti';
 
 const ANIMAL_AVATARS = [
-  { id: 'lion', num: '01', name: 'สิงโต' },
-  { id: 'tiger', num: '02', name: 'เสือโคร่ง' },
-  { id: 'panda', num: '03', name: 'แพนด้า' },
-  { id: 'fox', num: '04', name: 'จิ้งจอก' },
-  { id: 'koala', num: '05', name: 'โคอาล่า' },
-  { id: 'rabbit', num: '06', name: 'กระต่าย' },
-  { id: 'owl', num: '07', name: 'นกฮูก' },
-  { id: 'dolphin', num: '08', name: 'โลมา' },
-  { id: 'eagle', num: '09', name: 'นกอินทรี' },
-  { id: 'giraffe', num: '10', name: 'ยีราฟ' },
-  { id: 'peacock', num: '11', name: 'นกยูง' },
-  { id: 'wolf', num: '12', name: 'หมาป่า' },
-  { id: 'frog', num: '13', name: 'กบ' },
-  { id: 'flamingo', num: '14', name: 'ฟลามิงโก้' },
-  { id: 'elephant', num: '15', name: 'ช้าง' },
-  { id: 'penguin', num: '16', name: 'เพนกวิน' },
-  { id: 'shark', num: '17', name: 'ฉลาม' },
-  { id: 'octopus', num: '18', name: 'หมึกยักษ์' },
+  { id: 'lion',       num: '01', name: 'สิงโต',        emoji: '🦁' },
+  { id: 'tiger',      num: '02', name: 'เสือโคร่ง',    emoji: '🐯' },
+  { id: 'cheetah',   num: '03', name: 'ชีตาห์',        emoji: '🐆' },
+  { id: 'elephant',  num: '04', name: 'ช้าง',          emoji: '🐘' },
+  { id: 'eagle',     num: '05', name: 'นกอินทรี',      emoji: '🦅' },
+  { id: 'owl',       num: '06', name: 'นกฮูก',         emoji: '🦉' },
+  { id: 'penguin',   num: '07', name: 'เพนกวิน',       emoji: '🐧' },
+  { id: 'shark',     num: '08', name: 'ฉลาม',          emoji: '🦈' },
+  { id: 'dolphin',   num: '09', name: 'โลมา',          emoji: '🐬' },
+  { id: 'frog',      num: '10', name: 'กบ',            emoji: '🐸' },
+  { id: 'turtle',    num: '11', name: 'เต่าบก',        emoji: '🐢' },
+  { id: 'octopus',   num: '12', name: 'หมึกยักษ์',     emoji: '🐙' },
+  { id: 'butterfly', num: '13', name: 'ผีเสื้อ',       emoji: '🦋' },
+  { id: 'kangaroo',  num: '14', name: 'จิงโจ้',        emoji: '🦘' },
+  { id: 'koala',     num: '15', name: 'โคอาลา',        emoji: '🐨' },
+  { id: 'wolf',      num: '16', name: 'หมาป่า',        emoji: '🐺' },
+  { id: 'chimp',     num: '17', name: 'ชิมแปนซี',      emoji: '🐵' },
+  { id: 'polar_bear',num: '18', name: 'หมีขั้วโลก',   emoji: '🐻‍❄️' },
 ];
 
 const MODES = [
@@ -144,7 +144,18 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
           >
             {/* Card Specimen Artwork Frame */}
             <div className="specimen-frame-box">
-              <AnimalSVG id={curAnimalData.id} size={68} />
+              <div style={{
+                fontSize: curAvatarMeta.id === 'polar_bear' ? '52px' : '60px',
+                lineHeight: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '84px',
+                userSelect: 'none',
+              }}>
+                {curAvatarMeta.emoji}
+              </div>
               <div className="specimen-rarity-seal">{curAnimalData.rarity?.toUpperCase()}</div>
             </div>
 
@@ -195,8 +206,9 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                   className={`specimen-stamp-btn ${isSelected ? 'active' : ''}`}
                   onClick={() => handleSelectAvatar(av.id)}
                   title={av.name}
+                  style={{ fontSize: '22px', lineHeight: 1 }}
                 >
-                  <AnimalSVG id={av.id} size={28} />
+                  {av.emoji}
                 </button>
               );
             })}
@@ -204,8 +216,8 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
 
           {/* Explorer Nickname Input */}
           <div className="explorer-name-wrap">
-            <div className="explorer-avatar-badge">
-              <AnimalSVG id={curAnimalData.id} size={24} />
+            <div className="explorer-avatar-badge" style={{ fontSize: '20px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {curAvatarMeta.emoji}
             </div>
             <input
               className={`explorer-name-input${nameError ? ' input-error' : ''}`}

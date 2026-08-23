@@ -395,18 +395,19 @@ body {
 }
 
 .specimen-frame-box {
-  width: 76px;
-  background: var(--bg-matcha-soft);
+  width: 88px;
+  min-height: 108px;
+  background: linear-gradient(145deg, #f0f8e8, #e8f5d4);
   border: 1.5px solid #bcd575;
   border-radius: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 6px 4px 4px;
   position: relative;
   flex-shrink: 0;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(191, 213, 117, 0.2);
 }
 
 .specimen-rarity-seal {
@@ -418,7 +419,7 @@ body {
   background: var(--forest-primary);
   padding: 1px 5px;
   border-radius: 4px;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .specimen-meta-box {
