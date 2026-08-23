@@ -59,6 +59,8 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   const [timeLimit, setTimeLimit] = useState(60);
   const [roomCode, setRoomCode] = useState('');
   const [mascotBounce, setMascotBounce] = useState(false);
+  const [nameError, setNameError] = useState('');
+  const [codeError, setCodeError] = useState('');
 
   const curAnimalData = ALL_ANIMALS_DATA.find((a) => a.id === selectedAvatarId) || ALL_ANIMALS_DATA[0];
   const curAvatarMeta = ANIMAL_AVATARS.find((a) => a.id === selectedAvatarId) || ANIMAL_AVATARS[0];
@@ -77,8 +79,11 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     const raw = playerName.trim();
     if (!raw) {
       playSfx('discard');
-      return alert('กรุณากรอกชื่อผู้เล่นของคุณ');
+      setNameError('กรุณากรอกชื่อผู้เล่นของคุณก่อน');
+      return;
     }
+    setNameError('');
+    setCodeError('');
     playSfx('fanfare');
     try {
       confetti({
@@ -96,12 +101,16 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
     const code = roomCode.trim();
     if (!raw) {
       playSfx('discard');
-      return alert('กรุณากรอกชื่อผู้เล่นของคุณ');
+      setNameError('กรุณากรอกชื่อผู้เล่นของคุณก่อน');
+      return;
     }
     if (!code || code.length !== 6) {
       playSfx('discard');
-      return alert('กรุณากรอกรหัสห้อง 6 หลักให้ถูกต้อง');
+      setCodeError('กรุณากรอกรหัสห้อง 6 หลักให้ถูกต้อง');
+      return;
     }
+    setNameError('');
+    setCodeError('');
     playSfx('select');
     onJoinRoom(getFullPlayerName(), selectedAvatarId, code);
   };
@@ -199,14 +208,15 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
               <AnimalSVG id={curAnimalData.id} size={24} />
             </div>
             <input
-              className="explorer-name-input"
+              className={`explorer-name-input${nameError ? ' input-error' : ''}`}
               type="text"
               placeholder="พิมพ์ชื่อนักสำรวจของคุณ..."
               maxLength={16}
               value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
+              onChange={(e) => { setPlayerName(e.target.value); if (nameError) setNameError(''); }}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             />
+            {nameError && <div className="input-error-msg">{nameError}</div>}
           </div>
         </div>
 
@@ -280,20 +290,23 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
 
           {/* Join Room Box */}
           {mode !== 'time_attack' && (
-            <div className="join-expedition-box">
-              <input
-                className="join-expedition-input"
-                type="text"
-                placeholder="รหัสห้อง 6 หลัก"
-                maxLength={6}
-                value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-              />
-              <button className="btn-join-expedition" onClick={handleJoin}>
-                <UIIcon name="exit" size={14} color="var(--forest-primary)" />
-                <span>เข้าห้อง</span>
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div className="join-expedition-box">
+                <input
+                  className={`join-expedition-input${codeError ? ' input-error' : ''}`}
+                  type="text"
+                  placeholder="รหัสห้อง 6 หลัก"
+                  maxLength={6}
+                  value={roomCode}
+                  onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                />
+                <button className="btn-join-expedition" onClick={handleJoin}>
+                  <UIIcon name="exit" size={14} color="var(--forest-primary)" />
+                  <span>เข้าห้อง</span>
+                </button>
+              </div>
+              {codeError && <div className="input-error-msg">{codeError}</div>}
             </div>
           )}
         </div>

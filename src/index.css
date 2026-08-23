@@ -712,6 +712,37 @@ body {
   border-color: #c2410c;
 }
 
+/* Input Validation Error States */
+.input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+  animation: shake 0.3s ease;
+}
+
+.input-error-msg {
+  font-family: var(--font-thai);
+  font-size: 11px;
+  font-weight: 600;
+  color: #dc2626;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.input-error-msg::before {
+  content: '⚠';
+  font-size: 10px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
 .btn-enter-arena {
   width: 100%;
   padding: 11px 16px;

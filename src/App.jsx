@@ -52,6 +52,15 @@ export default function App() {
       playSfx('pop');
       setRoom(newRoom);
       setShowVictory(false);
+
+      // Auto-start for vs_bot and time_attack modes (no need to wait in lobby)
+      if (newRoom.roomMode === 'vs_bot' || newRoom.roomMode === 'time_attack') {
+        setTimeout(() => {
+          socket.emit('start_game', (res) => {
+            if (res && !res.ok) console.warn('Auto-start failed:', res.error);
+          });
+        }, 300);
+      }
     });
 
     socket.on('room_updated', (newRoom) => {
