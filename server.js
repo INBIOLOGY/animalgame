@@ -17,7 +17,7 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
-const MAX_PLAYERS = 4;
+const MAX_PLAYERS = 8;
 const MIN_NAME_LEN = 1;
 const MAX_NAME_LEN = 16;
 const RECONNECT_GRACE_MS = 15000;
@@ -294,7 +294,7 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   // 1. สร้างห้องใหม่
-  socket.on('create_room', ({ playerName, avatarId = 'lion', roomMode = 'multiplayer', timeLimitSec = 60 } = {}, ack) => {
+  socket.on('create_room', ({ playerName, avatarId = 'lion', roomMode = 'multiplayer', timeLimitSec = 60, maxPlayers = 8 } = {}, ack) => {
     const name = sanitizeName(playerName);
     if (!name) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นให้ถูกต้อง (1-16 ตัวอักษร)';
@@ -303,11 +303,22 @@ io.on('connection', (socket) => {
     }
 
     const roomId = createUniqueRoomCode();
-    const player = { id: socket.id, name, avatarId: avatarId || 'lion', isHost: true, connected: true, isBot: false, score: 0, hand: [] };
-    const players = [player];
+    const hostPlayer = {
+      id: socket.id,
+      name,
+      avatarId: avatarId || 'lion',
+      isHost: true,
+      connected: true,
+      isBot: false,
+      score: 0,
+      hand: []
+    };
 
+    const players = [hostPlayer];
+
+    // ถ้าเป็นโหมด vs_bot ให้สร้าง Bot 3 ตัว
     if (roomMode === 'vs_bot') {
-      const botAvatars = ['owl', 'fox', 'panda'];
+      const botAvatars = ['owl', 'tiger', 'cheetah'];
       for (let i = 1; i <= 3; i++) {
         players.push({
           id: `bot_${roomId}_${i}`,
@@ -322,12 +333,14 @@ io.on('connection', (socket) => {
       }
     }
 
+    const finalMaxPlayers = roomMode === 'time_attack' ? 1 : Math.min(8, Math.max(2, Number(maxPlayers) || 8));
+
     const newRoom = {
       roomId,
       roomMode,
       timeLimitSec: Number(timeLimitSec) || 60,
       players,
-      maxPlayers: roomMode === 'time_attack' ? 1 : MAX_PLAYERS,
+      maxPlayers: finalMaxPlayers,
       status: 'waiting',
       currentTurnIndex: 0,
       animalDeck: [],
@@ -365,7 +378,7 @@ io.on('connection', (socket) => {
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
     if (room.players.length >= room.maxPlayers) {
-      const msg = 'ห้องนี้ผู้เล่นเต็มแล้ว (สูงสุด 4 คน)';
+      const msg = `ห้องนี้ผู้เล่นเต็มแล้ว (สูงสุด ${room.maxPlayers} คน)`;
       socket.emit('error_message', msg);
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
@@ -401,12 +414,12 @@ io.on('connection', (socket) => {
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
     if (room.players.length >= room.maxPlayers) {
-      const msg = 'ห้องผู้เล่นเต็มแล้ว';
+      const msg = `ห้องผู้เล่นเต็มแล้ว (สูงสุด ${room.maxPlayers} คน)`;
       socket.emit('error_message', msg);
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
 
-    const botAvatars = ['owl', 'fox', 'panda', 'koala', 'dolphin'];
+    const botAvatars = ['owl', 'tiger', 'cheetah', 'koala', 'dolphin', 'elephant', 'wolf', 'penguin'];
     const botIndex = room.players.filter((p) => p.isBot).length + 1;
     const botPlayer = {
       id: `bot_${roomId}_${Date.now()}_${botIndex}`,
@@ -442,6 +455,9 @@ io.on('connection', (socket) => {
     }
 
     room.animalDeck = shuffle(ALL_ANIMALS);
+    while (room.animalDeck.length < room.players.length * 4 + 10) {
+      room.animalDeck = [...room.animalDeck, ...shuffle(ALL_ANIMALS)];
+    }
     const selectedCats = shuffle(ALL_CATEGORIES).slice(0, 12);
     room.totalCategories = selectedCats.length;
     room.categoryDeck = selectedCats;

@@ -894,18 +894,21 @@ body {
 .lobby-slots-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 7px;
   margin-top: 4px;
+  max-height: 270px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .lobby-player-slot {
   background: #ffffff;
   border: 1.5px solid #dce8ce;
-  border-radius: 16px;
-  padding: 8px 12px;
+  border-radius: 14px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 

@@ -190,8 +190,8 @@ export default function App() {
   }, []);
 
   // Socket Actions
-  const handleCreateRoom = (playerName, avatarId, roomMode, timeLimitSec) => {
-    socket.emit('create_room', { playerName, avatarId, roomMode, timeLimitSec }, (res) => {
+  const handleCreateRoom = (playerName, avatarId, roomMode, timeLimitSec, maxPlayers = 8) => {
+    socket.emit('create_room', { playerName, avatarId, roomMode, timeLimitSec, maxPlayers }, (res) => {
       if (res && !res.ok) showToastMsg(res.error || 'สร้างห้องไม่สำเร็จ');
     });
   };

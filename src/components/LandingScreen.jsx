@@ -31,7 +31,7 @@ const MODES = [
     key: 'multiplayer',
     iconName: 'users',
     title: 'เล่นกับเพื่อน',
-    desc: 'สร้างห้องประลองออนไลน์ 2-4 คน ชวนเพื่อนมาร่วมโต๊ะ',
+    desc: 'สร้างห้องประลองออนไลน์ 2-8 คน ชวนเพื่อนมาร่วมโต๊ะ',
     tag: 'ออนไลน์',
   },
   {
@@ -51,12 +51,14 @@ const MODES = [
 ];
 
 const TIME_OPTIONS = [30, 60, 90, 120];
+const PLAYER_OPTIONS = [2, 4, 6, 8];
 
 export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
   const [selectedAvatarId, setSelectedAvatarId] = useState('lion');
   const [playerName, setPlayerName] = useState('');
   const [mode, setMode] = useState('multiplayer');
   const [timeLimit, setTimeLimit] = useState(60);
+  const [maxPlayers, setMaxPlayers] = useState(8);
   const [roomCode, setRoomCode] = useState('');
   const [mascotBounce, setMascotBounce] = useState(false);
   const [nameError, setNameError] = useState('');
@@ -93,7 +95,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
         colors: ['#285422', '#487a39', '#bfd575', '#d49a26', '#ffffff']
       });
     } catch (e) {}
-    onCreateRoom(getFullPlayerName(), selectedAvatarId, mode, timeLimit);
+    onCreateRoom(getFullPlayerName(), selectedAvatarId, mode, timeLimit, maxPlayers);
   };
 
   const handleJoin = () => {
@@ -257,6 +259,31 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
               );
             })}
           </div>
+
+          {/* Max Players Selector for Multiplayer */}
+          {mode === 'multiplayer' && (
+            <div className="time-select-strip">
+              <span className="time-strip-label">
+                <UIIcon name="users" size={14} color="var(--forest-primary)" />
+                <span>รับผู้เล่น:</span>
+              </span>
+              <div className="time-pill-group">
+                {PLAYER_OPTIONS.map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    className={`time-select-pill ${maxPlayers === num ? 'active' : ''}`}
+                    onClick={() => {
+                      playSfx('select');
+                      setMaxPlayers(num);
+                    }}
+                  >
+                    {num} คน
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Speedrun Duration Selector */}
           {mode === 'time_attack' && (

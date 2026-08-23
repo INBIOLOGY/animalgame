@@ -42,7 +42,7 @@ export default function VictoryModal({ room, myId, onRematch, onLeave }) {
           คะแนนรวมจากการพิชิตเควสต์จำแนกคุณสมบัติสัตว์
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px', maxHeight: '280px', overflowY: 'auto', paddingRight: '4px' }}>
           {sorted.map((p, rank) => {
             const isMe = p.id === myId;
             const rStyle = rankColors[rank] || rankColors[3];
