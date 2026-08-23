@@ -260,15 +260,78 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             })}
           </div>
 
-          {/* Max Players Selector for Multiplayer */}
+          {/* Max Players Selector for Multiplayer (Free Choice 2-10 Players) */}
           {mode === 'multiplayer' && (
-            <div className="time-select-strip">
-              <span className="time-strip-label">
-                <UIIcon name="users" size={14} color="var(--forest-primary)" />
-                <span>รับผู้เล่น:</span>
-              </span>
-              <div className="time-pill-group">
-                {PLAYER_OPTIONS.map((num) => (
+            <div className="time-select-strip" style={{ flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span className="time-strip-label">
+                  <UIIcon name="users" size={14} color="var(--forest-primary)" />
+                  <span>รับผู้เล่น (2-10 คน):</span>
+                </span>
+
+                {/* Modern Stepper Counter */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f4f9ed', border: '1.5px solid #dce8ce', borderRadius: 'var(--r-pill)', padding: '2px 6px' }}>
+                  <button
+                    type="button"
+                    disabled={maxPlayers <= 2}
+                    onClick={() => {
+                      playSfx('select');
+                      setMaxPlayers((prev) => Math.max(2, prev - 1));
+                    }}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      background: maxPlayers <= 2 ? '#e2ebd0' : 'var(--forest-primary)',
+                      color: '#ffffff',
+                      fontWeight: 900,
+                      cursor: maxPlayers <= 2 ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      lineHeight: 1,
+                    }}
+                    title="ลดจำนวนผู้เล่น"
+                  >
+                    -
+                  </button>
+                  <span style={{ fontFamily: 'var(--font-num)', fontWeight: 900, fontSize: '13.5px', color: 'var(--forest-primary)', minWidth: '42px', textAlign: 'center' }}>
+                    {maxPlayers} คน
+                  </span>
+                  <button
+                    type="button"
+                    disabled={maxPlayers >= 10}
+                    onClick={() => {
+                      playSfx('select');
+                      setMaxPlayers((prev) => Math.min(10, prev + 1));
+                    }}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      background: maxPlayers >= 10 ? '#e2ebd0' : 'var(--forest-primary)',
+                      color: '#ffffff',
+                      fontWeight: 900,
+                      cursor: maxPlayers >= 10 ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      lineHeight: 1,
+                    }}
+                    title="เพิ่มจำนวนผู้เล่น"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Select Buttons (2 to 10) */}
+              <div className="time-pill-group" style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+                {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                   <button
                     key={num}
                     type="button"
@@ -277,8 +340,9 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                       playSfx('select');
                       setMaxPlayers(num);
                     }}
+                    style={{ flex: 1, minWidth: '25px', padding: '3px 0', fontSize: '11.5px', textAlign: 'center' }}
                   >
-                    {num} คน
+                    {num}
                   </button>
                 ))}
               </div>

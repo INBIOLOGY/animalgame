@@ -17,7 +17,7 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
-const MAX_PLAYERS = 8;
+const MAX_PLAYERS = 10;
 const MIN_NAME_LEN = 1;
 const MAX_NAME_LEN = 16;
 const RECONNECT_GRACE_MS = 15000;
@@ -333,7 +333,7 @@ io.on('connection', (socket) => {
       }
     }
 
-    const finalMaxPlayers = roomMode === 'time_attack' ? 1 : Math.min(8, Math.max(2, Number(maxPlayers) || 8));
+    const finalMaxPlayers = roomMode === 'time_attack' ? 1 : Math.min(10, Math.max(2, Number(maxPlayers) || 4));
 
     const newRoom = {
       roomId,
