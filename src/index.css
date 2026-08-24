@@ -170,6 +170,103 @@ body {
   gap: 8px;
 }
 
+/* Desktop shows all buttons, mobile shows hamburger */
+.topbar-mobile-only {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.topbar-desktop-only {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Hamburger Button ─── */
+.topbar-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-matcha-soft);
+  border: 1.5px solid var(--matcha-border);
+  border-radius: var(--r-lg);
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-bounce);
+}
+
+.topbar-hamburger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--forest-primary);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.topbar-hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.topbar-hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+.topbar-hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ─── Popup Dropdown Menu ─── */
+.topbar-popup-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 9999;
+  min-width: 200px;
+  animation: popupSlideIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes popupSlideIn {
+  0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.topbar-popup-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 2px solid var(--matcha-border);
+  border-radius: var(--r-xl);
+  padding: 12px;
+  box-shadow: 0 12px 36px rgba(45, 90, 35, 0.18), 0 4px 12px rgba(0,0,0,0.08);
+  backdrop-filter: blur(8px);
+}
+
+.topbar-popup-inner .cute-nav-btn {
+  width: 100%;
+  justify-content: flex-start;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+.topbar-popup-inner .cute-deck-pill {
+  width: 100%;
+  justify-content: center;
+}
+
+.mobile-conn {
+  padding: 4px 8px;
+}
+
+.mobile-deck {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
 .cute-nav-btn {
   font-family: var(--font-thai);
   font-size: 12px;
@@ -1073,6 +1170,33 @@ body {
   max-height: 290px;
   align-items: center;
   justify-content: center;
+}
+
+/* Make category grid fully adaptive on small screens */
+@media (max-width: 1180px) {
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    max-height: none;
+    height: auto;
+  }
+
+  .vertical-quest-card {
+    max-height: 195px;
+  }
+
+  .cute-hand-dock.my-turn-active {
+    min-height: 190px;
+  }
+
+  .cute-hand-cards-row {
+    height: 155px;
+  }
+
+  .cute-hand-dock.waiting-turn .cute-hand-cards-row {
+    height: 95px;
+  }
 }
 
 /* 🎴 VERTICAL QUESTION CARD (1395 x 1949 Portrait) */
@@ -2862,53 +2986,13 @@ body {
   display: block;
 }
 
-/* ═══════════════════════════════════════════════
-   📱 TABLET & SMALL LAPTOP  (max-width: 1024px)
-   ═══════════════════════════════════════════════ */
-@media (max-width: 1024px) {
-  /* Topbar: shrink buttons so they all fit */
-  .cute-nav-btn {
-    font-size: 11px;
-    padding: 4px 9px;
-    gap: 4px;
+/* Tablet: switch to hamburger menu */
+@media (max-width: 860px) {
+  .topbar-desktop-only {
+    display: none;
   }
-
-  .cute-topbar {
-    padding: 0 12px;
-    gap: 6px;
-  }
-
-  .cute-topbar-right {
-    gap: 5px;
-    flex-wrap: wrap;
-    max-height: 56px;
-    overflow: hidden;
-  }
-
-  /* iPad category grid — 2 rows × 3 cols instead of 1 row × 6 */
-  .category-grid {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 10px;
-    max-height: none;
-    height: auto;
-  }
-
-  .vertical-quest-card {
-    max-height: 200px;
-  }
-
-  /* Hand dock: taller on tablet */
-  .cute-hand-dock.my-turn-active {
-    min-height: 195px;
-  }
-
-  .cute-hand-cards-row {
-    height: 155px;
-  }
-
-  .cute-hand-dock.waiting-turn .cute-hand-cards-row {
-    height: 95px;
+  .topbar-mobile-only {
+    display: flex;
   }
 }
 
@@ -3055,32 +3139,17 @@ body {
     height: calc(100vh - 48px);
   }
 
-  /* Phone topbar: collapse some labels, keep it single row */
   .cute-topbar {
     padding: 0 8px;
     height: 48px;
-    overflow: hidden;
   }
 
-  .cute-topbar-right {
-    gap: 4px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    max-width: calc(100vw - 130px);
-  }
-
-  .cute-topbar-right::-webkit-scrollbar {
+  /* Phone always uses hamburger menu */
+  .topbar-desktop-only {
     display: none;
   }
-
-  .cute-nav-btn {
-    font-size: 10px;
-    padding: 3px 7px;
-    white-space: nowrap;
-    flex-shrink: 0;
+  .topbar-mobile-only {
+    display: flex;
   }
 
   .cute-brand-sub {
@@ -3091,53 +3160,73 @@ body {
     font-size: 13px;
   }
 
+  /* ─── Game screen on phone ─── */
+  .game-screen-wrap {
+    gap: 5px;
+    overflow-y: auto;
+  }
+
   .game-header-bar {
-    padding: 3px 6px;
-    gap: 4px;
+    padding: 4px 8px;
+    gap: 5px;
     flex-wrap: wrap;
+    flex-shrink: 0;
   }
 
   .turn-badge {
-    font-size: 11px;
+    font-size: 10px;
     padding: 3px 8px;
+    white-space: normal;
+    flex: 1;
+  }
+
+  /* Phone category grid: 2 rows × 3 cols, cards have explicit height */
+  .categories-board-area {
+    flex: none;
+    padding: 0 4px;
   }
 
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
     gap: 6px;
     max-height: none;
     height: auto;
   }
 
   .vertical-quest-card {
-    max-height: 155px;
+    height: 140px;
+    max-height: 140px;
     border-radius: 6px;
     border-width: 1.5px;
+    aspect-ratio: auto;
   }
 
   .quest-pill-idx, .quest-pill-pts {
-    font-size: 8px;
-    padding: 1px 4px;
+    font-size: 7px;
+    padding: 1px 3px;
   }
 
+  /* Phone hand dock */
   .cute-hand-dock.my-turn-active {
-    min-height: 145px;
+    min-height: 135px;
     padding: 4px 8px;
+    flex-shrink: 0;
   }
 
   .cute-hand-dock.waiting-turn {
-    min-height: 95px;
+    min-height: 85px;
     padding: 2px 6px;
+    flex-shrink: 0;
   }
 
   .cute-hand-cards-row {
-    height: 115px;
+    height: 100px;
     gap: 8px;
   }
 
   .cute-hand-dock.waiting-turn .cute-hand-cards-row {
-    height: 72px;
+    height: 60px;
   }
 
   .vertical-hand-card {
@@ -3148,21 +3237,22 @@ body {
   .vertical-discard-card {
     border-radius: 6px;
     padding: 3px;
+    min-width: 50px;
   }
 
   .cute-discard-icon-frame {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
   .cute-discard-main {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   /* Special card use button — smaller on phone */
   .btn-use-special-floating {
     font-size: 9px;
-    padding: 3px 8px;
+    padding: 3px 7px;
     bottom: 4px;
   }
 }
