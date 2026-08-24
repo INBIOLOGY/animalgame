@@ -75,22 +75,23 @@ export default function HandDock({
         <div id="playerHandScroll" className="hand-vertical-scroll-list">
           {hand.length > 0 ? (
             hand.map((card, idx) => {
-              const isSelected = card.id === selectedCardId;
+              const cardIdKey = card.cardInstanceId || card.id;
+              const isSelected = cardIdKey === selectedCardId;
               const isSpecial = card.cardType === 'special';
               const cardImg = card.image || card.origImage || '/cards/animals/animal_01.png';
 
               return (
                 <div
-                  key={card.id}
-                  id={`handCard-${card.id}`}
+                  key={cardIdKey}
+                  id={`handCard-${cardIdKey}`}
                   className={`vertical-hand-card card-deal-anim ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
                   style={{ animationDelay: `${idx * 0.07}s` }}
                   draggable={true}
                   onDragStart={(e) => {
-                    e.dataTransfer.setData('text/plain', card.id);
-                    onSelectCard(card.id);
+                    e.dataTransfer.setData('text/plain', cardIdKey);
+                    onSelectCard(cardIdKey);
                   }}
-                  onClick={() => onSelectCard(card.id)}
+                  onClick={() => onSelectCard(cardIdKey)}
                 >
                   {/* Full Vertical Trading Card Image */}
                   <img
@@ -107,7 +108,7 @@ export default function HandDock({
                       className="card-quick-discard-tag"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDiscardSingle(card.id);
+                        onDiscardSingle(cardIdKey);
                       }}
                       title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
                     >
@@ -122,7 +123,7 @@ export default function HandDock({
                       className="btn-use-special-floating"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (onPlaySpecialCard) onPlaySpecialCard(card.id);
+                        if (onPlaySpecialCard) onPlaySpecialCard(cardIdKey);
                       }}
                       title="กดใช้ความสามารถการ์ดพิเศษใบนี้ทันที"
                     >
@@ -140,19 +141,19 @@ export default function HandDock({
           )}
         </div>
 
-        {/* Discard Zone */}
+        {/* Realistic Vertical Discard Bin */}
         <div
-          id="discardDropZone"
+          id="discardZone"
           className="vertical-discard-card"
-          onClick={onDiscardSelectedOrFirst}
           onDragOver={handleDiscardDragOver}
           onDragEnter={handleDiscardDragEnter}
           onDragLeave={handleDiscardDragLeave}
           onDrop={handleDrop}
-          title="แตะหรือลากการ์ดมาที่นี่เพื่อทิ้งและจั่วใบใหม่"
+          onClick={onDiscardSelectedOrFirst}
+          title="ลากการ์ดมาวางที่นี่ หรือคลิกเพื่อทิ้งการ์ดที่เลือกแล้วจั่วใบใหม่"
         >
           <div className="cute-discard-icon-frame">
-            <UIIcon name="recycle" size={20} color="#EA580C" />
+            <UIIcon name="recycle" size={16} color="var(--terracotta-primary)" />
           </div>
           <span className="cute-discard-main">ทิ้งการ์ด</span>
           <span className="cute-discard-sub">(จั่วใหม่)</span>

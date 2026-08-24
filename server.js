@@ -76,20 +76,33 @@ function shuffle(array) {
 
 function buildGameDeck() {
   const deck = [];
-  // เพิ่มการ์ดสัตว์ทั้งหมด (56 ชนิด)
+  // เพิ่มการ์ดสัตว์ทั้งหมด (56 ชนิด) พร้อม cardInstanceId เฉพาะใบ
   ALL_ANIMALS.forEach(animal => {
-    deck.push({ ...animal, cardType: 'animal' });
+    deck.push({
+      ...animal,
+      cardInstanceId: `${animal.id}_${Math.random().toString(36).substr(2, 7)}`,
+      cardType: 'animal'
+    });
   });
 
   // เพิ่มการ์ดพิเศษตามจำนวน copies
   ALL_SPECIALS.forEach(special => {
     const count = special.copiesInDeck || 2;
     for (let i = 0; i < count; i++) {
-      deck.push({ ...special, cardType: 'special' });
+      deck.push({
+        ...special,
+        cardInstanceId: `${special.id}_${i}_${Math.random().toString(36).substr(2, 7)}`,
+        cardType: 'special'
+      });
     }
   });
 
-  return shuffle(deck);
+  // 3-pass Fisher-Yates shuffle เพื่อการกระจายไพ่ที่สมบูรณ์แบบ
+  let shuffled = deck;
+  for (let pass = 0; pass < 3; pass++) {
+    shuffled = shuffle(shuffled);
+  }
+  return shuffled;
 }
 
 function findRoomBySocket(socketId) {
@@ -405,7 +418,7 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
     return { ok: false, error: 'ช่องนี้มีคนวางการ์ดไปแล้ว' };
   }
 
-  const animalIdx = player.hand.findIndex((a) => a.id === animalCardId);
+  const animalIdx = player.hand.findIndex((a) => (a.cardInstanceId && a.cardInstanceId === animalCardId) || a.id === animalCardId);
   if (animalIdx === -1) return { ok: false, error: 'ไม่มีการ์ดใบนี้ในมือ' };
   const cardToPlace = player.hand[animalIdx];
 
@@ -696,10 +709,24 @@ io.on('connection', (socket) => {
       room.players = shuffle(room.players);
     }
 
+    // แจกการ์ด 4 ใบเริ่มต้นโดยกระจายความหลากหลายของไฟลัม
     room.players.forEach((p) => {
       p.score = 0;
       p.wonCount = 0;
-      p.hand = room.animalDeck.splice(0, 4);
+      p.hand = [];
+      const phylaInHand = new Set();
+      let attempts = 0;
+      while (p.hand.length < 4 && room.animalDeck.length > 0 && attempts < 100) {
+        attempts++;
+        const candidateIdx = room.animalDeck.findIndex(c => !phylaInHand.has(c.phylum || c.id));
+        if (candidateIdx !== -1) {
+          const card = room.animalDeck.splice(candidateIdx, 1)[0];
+          p.hand.push(card);
+          if (card.phylum) phylaInHand.add(card.phylum);
+        } else {
+          p.hand.push(room.animalDeck.pop());
+        }
+      }
     });
 
     room.status = 'playing';
@@ -822,7 +849,7 @@ io.on('connection', (socket) => {
         return typeof ack === 'function' && ack({ ok: false, error: msg });
       }
 
-      const cardIdx = activePlayer.hand.findIndex(c => c.id === animalCardId);
+      const cardIdx = activePlayer.hand.findIndex(c => (c.cardInstanceId && c.cardInstanceId === animalCardId) || c.id === animalCardId);
       const discardedCard = cardIdx !== -1 ? activePlayer.hand.splice(cardIdx, 1)[0] : activePlayer.hand.shift();
 
       if (room.animalDeck.length === 0) {
@@ -843,7 +870,7 @@ io.on('connection', (socket) => {
     } else {
       const player = room.players.find(p => p.id === socket.id);
       if (player && player.hand.length > 0) {
-        const cardIdx = player.hand.findIndex(c => c.id === animalCardId);
+        const cardIdx = player.hand.findIndex(c => (c.cardInstanceId && c.cardInstanceId === animalCardId) || c.id === animalCardId);
         const discardedCard = cardIdx !== -1 ? player.hand.splice(cardIdx, 1)[0] : player.hand.shift();
 
         if (room.animalDeck.length === 0) {
