@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import QuestCard from './QuestCard';
 import ScoreboardChips from './ScoreboardChips';
 import HandDock from './HandDock';
-import GameStartSplash from './GameStartSplash';
 import { UIIcon } from '../assets/natureIcons';
 
 export default function GameScreen({
@@ -10,7 +9,9 @@ export default function GameScreen({
   myId,
   selectedCardId,
   timeAttackSeconds,
+  showDropHints = true,
   onSelectCard,
+  onPlaySpecialCard,
   onSlotClick,
   onDropCardOnSlot,
   onPassTurn,
@@ -19,11 +20,6 @@ export default function GameScreen({
   onSendEmote,
   onLeaveRoom,
 }) {
-  const [showStartSplash, setShowStartSplash] = useState(() => {
-    // Show splash if game started less than 3 seconds ago
-    return room && room.startTime && Date.now() - room.startTime < 4000;
-  });
-
   if (!room) return null;
 
   const me = room.players.find((p) => p.id === myId);
@@ -35,6 +31,10 @@ export default function GameScreen({
   const selectedAnimal = me?.hand?.find((c) => c.id === selectedCardId);
   const activeAnimal = selectedAnimal || null;
 
+  const isShielded = room.shieldedPlayerIds?.includes(myId);
+  const isDoublePlay = room.doublePlayPlayerId === myId;
+  const playDirText = (room.playDirection || 1) === 1 ? '↻ ตามเข็ม' : '↺ ทวนเข็ม';
+
   const turnMessage = isTimeAttack
     ? '⏱️ โหมดจับเวลา: ลากหรือแตะการ์ดวางลงช่อง'
     : isMyTurn
@@ -42,31 +42,29 @@ export default function GameScreen({
     : `⏳ รอตาของ: ${activePlayer?.name || 'ผู้เล่นอื่น'}`;
 
   const passLabel = selectedAnimal
-    ? `ทิ้ง "${selectedAnimal.name}"`
+    ? `ทิ้ง "${selectedAnimal.name || selectedAnimal.title}"`
     : 'ข้ามตา / จั่วใหม่';
 
   return (
     <section className="game-screen-wrap page-screen-anim">
-      {/* 🎲 Randomized Turn Order Intro Splash */}
-      {showStartSplash && (
-        <GameStartSplash
-          room={room}
-          myId={myId}
-          onDismiss={() => setShowStartSplash(false)}
-        />
-      )}
       {/* ─── Header Bar ─── */}
       <div className="game-header-bar">
         <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''}`}>
           <span>{turnMessage}</span>
+          {isDoublePlay && <span className="double-play-tag">⚔️ เล่นได้ 2 ใบ!</span>}
+          {isShielded && <span className="shield-active-tag">🛡️ มีเกราะ</span>}
         </div>
 
         {isTimeAttack && (
-          <div className="timer-pill" style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+          <div className="timer-pill">
             <UIIcon name="timer" size={14} color="#fff" />
             <span>{timeAttackSeconds}s</span>
           </div>
         )}
+
+        <div className="turn-direction-indicator" title="ทิศทางการเล่น">
+          <span>{playDirText}</span>
+        </div>
 
         <ScoreboardChips
           players={room.players}
@@ -75,24 +73,31 @@ export default function GameScreen({
           myId={myId}
         />
 
-        <div style={{ display: 'flex', gap: 5, flexShrink: 0, alignItems: 'center' }}>
+        <div className="game-header-actions">
           <button
-            className="btn btn-dark btn-sm"
+            type="button"
+            className="cute-action-btn cute-btn-pass"
             onClick={onPassTurn}
             disabled={!isMyTurn && !isTimeAttack}
             title="ทิ้งการ์ดเพื่อข้ามตาและจั่วใบใหม่"
           >
-            <UIIcon name="recycle" size={13} color="var(--terracotta-light)" />
+            <UIIcon name="recycle" size={14} color="#EA580C" />
             <span>{passLabel}</span>
           </button>
-          <button className="btn btn-danger btn-sm" onClick={onLeaveRoom} title="ออกจากห้อง">
-            <UIIcon name="exit" size={13} color="#ffffff" />
+
+          <button
+            type="button"
+            className="cute-action-btn cute-btn-leave"
+            onClick={onLeaveRoom}
+            title="ออกจากห้อง"
+          >
+            <UIIcon name="exit" size={14} color="#DC2626" />
             <span>ออก</span>
           </button>
         </div>
       </div>
 
-      {/* ─── 3x2 Category Quests ─── */}
+      {/* ─── 3x2 Category Quests with Real Card Images ─── */}
       <div className="categories-board-area">
         <div className="category-grid">
           {room.centerCategories.map((categoryItem, centerIdx) => (
@@ -102,6 +107,7 @@ export default function GameScreen({
               categoryItem={categoryItem}
               activeAnimal={activeAnimal}
               isMyTurn={isMyTurn}
+              showDropHints={showDropHints}
               onSlotClick={onSlotClick}
               onDropCard={onDropCardOnSlot}
             />
@@ -109,12 +115,13 @@ export default function GameScreen({
         </div>
       </div>
 
-      {/* ─── Hand Dock (Dynamic Expansion based on Turn) ─── */}
+      {/* ─── Hand Dock ─── */}
       <HandDock
         hand={me?.hand || []}
         selectedCardId={selectedCardId}
         isMyTurn={isMyTurn}
         onSelectCard={onSelectCard}
+        onPlaySpecialCard={onPlaySpecialCard}
         onDiscardSingle={onDiscardSingle}
         onDiscardSelectedOrFirst={onDiscardSelectedOrFirst}
         onSendEmote={onSendEmote}

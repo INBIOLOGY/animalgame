@@ -59,7 +59,8 @@ const MODES = [
 
 const TIME_OPTIONS = [30, 60, 90, 120];
 
-export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
+export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial }) {
+  const [activeTab, setActiveTab] = useState('create'); // 'create' | 'join' (Mobile & Desktop Tab switcher)
   const [selectedAvatarId, setSelectedAvatarId] = useState('lion');
   const [playerName, setPlayerName] = useState('');
   const [mode, setMode] = useState('multiplayer');
@@ -136,8 +137,32 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
       />
       <div className="cute-meadow-overlay" aria-hidden="true" />
 
-      {/* 🍡 Cozy Minimalist Two-Column Container */}
-      <div className="cute-lobby-card">
+      {/* 📱 Mobile Mode Switcher Tabs (สร้างห้อง vs เข้าร่วมห้อง) */}
+      <div className="mobile-main-tab-bar">
+        <button
+          type="button"
+          className={`mobile-tab-btn ${activeTab === 'create' ? 'active-tab' : ''}`}
+          onClick={() => {
+            playSfx('pop');
+            setActiveTab('create');
+          }}
+        >
+          <span>✨ สร้างห้องเล่น</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-tab-btn ${activeTab === 'join' ? 'active-tab' : ''}`}
+          onClick={() => {
+            playSfx('pop');
+            setActiveTab('join');
+          }}
+        >
+          <span>🔑 ใส่รหัสเข้าห้อง</span>
+        </button>
+      </div>
+
+      {/* 🍡 Cozy Minimalist Container */}
+      <div className={`cute-lobby-card view-tab-${activeTab}`}>
         {/* ─── LEFT: Cute Character Card & Avatar Picker ─── */}
         <div className="cute-lobby-column left-column">
           <div className="cute-column-header">
@@ -151,7 +176,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             onClick={() => handleSelectAvatar(selectedAvatarId)}
           >
             <div className="cute-mascot-avatar-wrap">
-              <AnimalAvatar id={curAnimalData.id} size={70} />
+              <AnimalAvatar id={curAnimalData.id} size={64} />
             </div>
 
             <div className="cute-mascot-info">
@@ -188,7 +213,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
           {/* 18-Animal Cute Avatar Picker Grid */}
           <div className="cute-avatar-picker-section">
             <div className="cute-picker-header">
-              <span className="cute-picker-label">เลือกสัตว์ที่ชอบ (18 ชนิด):</span>
+              <span className="cute-picker-label">เลือกสัตว์ประจำตัว (18 ชนิด):</span>
             </div>
 
             <div className="cute-avatar-grid">
@@ -202,7 +227,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                     onClick={() => handleSelectAvatar(av.id)}
                     title={av.name}
                   >
-                    <AnimalAvatar id={av.id} size={30} />
+                    <AnimalAvatar id={av.id} size={28} />
                     {isSelected && <span className="cute-active-dot" />}
                   </button>
                 );
@@ -227,10 +252,44 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
                   setPlayerName(e.target.value);
                   if (nameError) setNameError('');
                 }}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (activeTab === 'join') handleJoin();
+                    else handleCreate();
+                  }
+                }}
               />
             </div>
             {nameError && <div className="cute-error-text">{nameError}</div>}
+          </div>
+
+          {/* 📱 Mobile Instant Join Box (เมื่อกดแท็บ 'ใส่รหัสเข้าห้อง') */}
+          <div className="mobile-join-panel">
+            <div className="mobile-join-header">
+              <span className="mobile-join-title">🔑 กรอกรหัสห้อง 6 หลักเพื่อเข้าร่วม</span>
+            </div>
+            <div className="cute-join-inputs">
+              <input
+                className={`cute-code-input${codeError ? ' input-error' : ''}`}
+                type="text"
+                placeholder="รหัส 6 หลัก (เช่น 123456)"
+                maxLength={6}
+                value={roomCode}
+                onChange={(e) => {
+                  setRoomCode(e.target.value.toUpperCase());
+                  if (codeError) setCodeError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+              />
+              <button
+                type="button"
+                className="cute-btn-join"
+                onClick={handleJoin}
+              >
+                🚀 เข้าร่วม
+              </button>
+            </div>
+            {codeError && <div className="cute-error-text">{codeError}</div>}
           </div>
         </div>
 
@@ -238,7 +297,17 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
         <div className="cute-lobby-column right-column">
           <div className="cute-column-header">
             <span className="cute-column-title">🎮 เลือกโหมดการเล่น</span>
-            <span className="cute-badge-tag">MODE</span>
+            <button
+              type="button"
+              className="cute-tutorial-pill-btn"
+              onClick={() => {
+                playSfx('pop');
+                if (onOpenTutorial) onOpenTutorial();
+              }}
+              title="เปิดโหมดสอนเล่น (Interactive Tutorial)"
+            >
+              🎓 วิธีเล่น
+            </button>
           </div>
 
           {/* Mode Options List */}
@@ -380,8 +449,8 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom }) {
             <span>✨ สร้างห้องเล่นเกม</span>
           </button>
 
-          {/* Join with Code */}
-          <div className="cute-join-section">
+          {/* Join with Code (Desktop View) */}
+          <div className="cute-join-section desktop-join-section">
             <div className="cute-join-divider">
               <span>หรือใส่รหัสห้องเพื่อเข้าร่วม</span>
             </div>

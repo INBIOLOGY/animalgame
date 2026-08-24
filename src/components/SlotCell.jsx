@@ -1,29 +1,27 @@
 import React from 'react';
-import { TRAIT_MAP, TRAIT_COLORS } from '../utils/traits';
-import { AnimalAvatar } from '../assets/animalIllustrations';
-import { TraitIcon, UIIcon } from '../assets/natureIcons';
+import { TRAIT_MAP } from '../utils/traits';
+import { UIIcon } from '../assets/natureIcons';
 
 export default function SlotCell({
   centerIdx,
   slotIdx,
   slotData,
-  requiredTrait,
+  slotConfig,
   isCompatible,
   isMyTurn,
+  showDropHints = true,
   onSlotClick,
   onDropCard,
 }) {
-  const traitLabel = TRAIT_MAP[requiredTrait] || requiredTrait;
-  const traitColor = TRAIT_COLORS[requiredTrait] || {
-    bg: '#E8F5E9',
-    text: '#2E7D32',
-    border: '#A5D6A7',
-    iconName: 'backbone'
-  };
-  const slotItemClass = `cute-slot-${slotIdx}`;
+  const reqTraitKey = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
+  const slotName = typeof slotConfig === 'object' ? slotConfig.name : (TRAIT_MAP[reqTraitKey] || reqTraitKey);
+  const position = typeof slotConfig === 'object' ? slotConfig.position : (slotIdx === 0 ? 'top' : 'bottom');
+
+  const slotPosClass = `slot-pos-${position}`;
 
   if (slotData === null) {
     const canDrop = isMyTurn && isCompatible;
+    const canShowHighlight = canDrop && showDropHints;
 
     const handleDragOver = (e) => {
       if (canDrop) {
@@ -52,7 +50,7 @@ export default function SlotCell({
     return (
       <div
         id={`slot-${centerIdx}-${slotIdx}`}
-        className={`cute-slot-cell empty-slot ${slotItemClass} ${canDrop ? 'droppable' : ''}`}
+        className={`real-slot-zone empty-slot ${slotPosClass} ${canShowHighlight ? 'droppable-highlight' : ''}`}
         data-center-idx={centerIdx}
         data-slot-idx={slotIdx}
         onClick={() => onSlotClick(centerIdx, slotIdx)}
@@ -60,47 +58,44 @@ export default function SlotCell({
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        title={slotName}
       >
-        <div className="cute-slot-trait-label">
-          <div className="cute-slot-icon-box" style={{ background: traitColor.bg, borderColor: traitColor.border }}>
-            <TraitIcon name={traitColor.iconName} size={13} color={traitColor.text} />
+        {canShowHighlight && (
+          <div className="slot-place-hint">
+            <UIIcon name="check" size={12} color="#ffffff" />
+            <span>วางที่นี่</span>
           </div>
-          <span className="cute-trait-name">{traitLabel}</span>
-        </div>
-
-        {canDrop && (
-          <span className="cute-droppable-pill">
-            <UIIcon name="check" size={10} color="#ffffff" />
-            <span>วางตรงนี้</span>
-          </span>
         )}
       </div>
     );
   }
 
-  // Filled Slot Cell
-  return (
-    <div className={`cute-slot-cell filled-slot ${slotItemClass}`}>
-      <div className="cute-filled-left">
-        <AnimalAvatar id={slotData.animalCard?.id} size={22} />
-        <span className="cute-filled-name">{slotData.animalCard?.name}</span>
-      </div>
+  // Placed Answer Card (การ์ดคำตอบที่วางทับบนการ์ดคำถามจริงๆ)
+  const animalCard = slotData.animalCard;
+  const isBot = slotData.isBot;
+  const cardImg = animalCard?.image || animalCard?.origImage || '/cards/animals/animal_01.png';
 
-      <div className="cute-filled-right">
-        <span
-          className="cute-filled-trait-tag"
-          style={{
-            background: traitColor.bg,
-            color: traitColor.text,
-            border: `1px solid ${traitColor.border}`,
+  return (
+    <div
+      id={`slot-${centerIdx}-${slotIdx}`}
+      className={`real-slot-zone filled-slot ${slotPosClass}`}
+      title={`${animalCard?.name || 'การ์ด'} (วางโดย ${slotData.playerName})`}
+    >
+      <div className="stacked-mini-card animate-slam-down">
+        <img
+          src={cardImg}
+          alt={animalCard?.name || 'Placed Card'}
+          className="stacked-mini-img"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/cards/specials/special_fit_free.png';
           }}
-        >
-          <TraitIcon name={traitColor.iconName} size={10} color={traitColor.text} />
-          <span>{traitLabel}</span>
-        </span>
-        <span className="cute-filled-player-tag">
-          {slotData.playerName}
-        </span>
+        />
+        <div className="stacked-card-badge">
+          <span className="stacked-owner-tag" style={{ background: isBot ? '#4F46E5' : '#10B981' }}>
+            {isBot ? '🤖' : '👤'} {slotData.playerName}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,5 @@
 import React from 'react';
-import { TRAIT_MAP, TRAIT_COLORS, ANIMAL_RARITIES, ALL_ANIMALS_DATA } from '../utils/traits';
-import { TraitIcon, UIIcon } from '../assets/natureIcons';
-import { AnimalAvatar } from '../assets/animalIllustrations';
+import { UIIcon } from '../assets/natureIcons';
 
 const CUTE_EMOTES = ['🎉', '💖', '🐾', '🦁', '✨', '👏'];
 
@@ -10,6 +8,7 @@ export default function HandDock({
   selectedCardId,
   isMyTurn = true,
   onSelectCard,
+  onPlaySpecialCard,
   onDiscardSingle,
   onDiscardSelectedOrFirst,
   onSendEmote,
@@ -30,9 +29,9 @@ export default function HandDock({
   const handleDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over');
-    const animalId = e.dataTransfer.getData('text/plain');
-    if (animalId) {
-      onDiscardSingle(animalId);
+    const cardId = e.dataTransfer.getData('text/plain');
+    if (cardId) {
+      onDiscardSingle(cardId);
     } else if (selectedCardId) {
       onDiscardSingle(selectedCardId);
     }
@@ -46,18 +45,17 @@ export default function HandDock({
             <>
               <span className="cute-turn-star">🌟</span>
               <span className="cute-turn-bold">ถึงตาของคุณแล้ว!</span>
-              <span className="cute-turn-sub">(แตะเลือกการ์ด หรือลากไปวางในช่องเควสต์)</span>
+              <span className="cute-turn-sub">(แตะเลือกการ์ด หรือลากไปวางในช่องคำถาม หรือกดใช้การ์ดพิเศษ)</span>
             </>
           ) : (
             <>
               <span className="cute-turn-hourglass">⏳</span>
               <span className="cute-turn-muted">รอตาของผู้เล่นอื่น...</span>
-              <span className="cute-turn-sub">(การ์ดจะขยายเมื่อถึงตาคุณ)</span>
             </>
           )}
         </div>
 
-        {/* Cute Emotes */}
+        {/* Emotes Bar */}
         <div className="cute-emotes-bar">
           {CUTE_EMOTES.map((emoji) => (
             <button
@@ -74,89 +72,63 @@ export default function HandDock({
       </div>
 
       <div className="cute-hand-cards-row">
-        <div id="playerHandScroll" className="cute-cards-scroll-list">
+        <div id="playerHandScroll" className="hand-vertical-scroll-list">
           {hand.length > 0 ? (
-            hand.map((animal, idx) => {
-              const isSelected = animal.id === selectedCardId;
-              const animalInfo = ALL_ANIMALS_DATA.find((a) => a.id === animal.id);
-              const rarity = animalInfo?.rarity || 'common';
-              const rData = ANIMAL_RARITIES[rarity] || ANIMAL_RARITIES.common;
-              const distinctTraits = Array.from(
-                new Set((animal.traits || []).map((t) => TRAIT_MAP[t] || t))
-              ).slice(0, 3);
+            hand.map((card, idx) => {
+              const isSelected = card.id === selectedCardId;
+              const isSpecial = card.cardType === 'special';
+              const cardImg = card.image || card.origImage || '/cards/animals/animal_01.png';
 
               return (
                 <div
-                  key={animal.id}
-                  id={`handCard-${animal.id}`}
-                  className={`cute-hand-card card-deal-anim ${isSelected ? 'selected' : ''}`}
-                  style={{ animationDelay: `${idx * 0.08}s` }}
+                  key={card.id}
+                  id={`handCard-${card.id}`}
+                  className={`vertical-hand-card card-deal-anim ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
+                  style={{ animationDelay: `${idx * 0.07}s` }}
                   draggable={true}
                   onDragStart={(e) => {
-                    e.dataTransfer.setData('text/plain', animal.id);
-                    onSelectCard(animal.id);
+                    e.dataTransfer.setData('text/plain', card.id);
+                    onSelectCard(card.id);
                   }}
-                  onClick={() => onSelectCard(animal.id)}
+                  onClick={() => onSelectCard(card.id)}
                 >
-                  {/* Card Top: Rarity Pill & Discard Action */}
-                  <div className="cute-card-top-bar">
-                    <div
-                      className="cute-rarity-pill"
-                      style={{
-                        color: rData.color,
-                        background: rData.bg,
-                        border: `1px solid ${rData.border}`,
+                  {/* Full Vertical Trading Card Image */}
+                  <img
+                    src={cardImg}
+                    alt={card.name || card.title}
+                    className="hand-card-img"
+                    loading="lazy"
+                  />
+
+                  {/* Top Discard Pill on Selected */}
+                  {isSelected && (
+                    <button
+                      type="button"
+                      className="card-quick-discard-tag"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDiscardSingle(card.id);
                       }}
+                      title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
                     >
-                      {rData.label}
-                    </div>
+                      ✕ ทิ้งใบนี้
+                    </button>
+                  )}
 
-                    {isSelected && (
-                      <button
-                        type="button"
-                        className="cute-quick-discard"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDiscardSingle(animal.id);
-                        }}
-                        title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
-                      >
-                        ทิ้งใบนี้
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Animal Vernacular Name */}
-                  <div className="cute-card-name" title={animal.name}>
-                    {animal.name}
-                  </div>
-
-                  {/* Cute Animal Mascot Avatar */}
-                  <div className="cute-card-avatar-box">
-                    <AnimalAvatar id={animal.id} size={46} />
-                  </div>
-
-                  {/* Deduplicated Trait Pills */}
-                  <div className="cute-card-traits-stack">
-                    {distinctTraits.map((tLabel, tIdx) => {
-                      const originalKey = animal.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
-                      const colors = TRAIT_COLORS[originalKey] || { bg: '#E8F5E9', text: '#2E7D32', border: '#A5D6A7', iconName: 'backbone' };
-                      return (
-                        <span
-                          key={tIdx}
-                          className="cute-trait-chip"
-                          style={{
-                            background: colors.bg,
-                            color: colors.text,
-                            border: `1px solid ${colors.border}`,
-                          }}
-                        >
-                          <TraitIcon name={colors.iconName} size={9} color={colors.text} />
-                          <span>{tLabel}</span>
-                        </span>
-                      );
-                    })}
-                  </div>
+                  {/* Special Action Card Trigger Button */}
+                  {isSpecial && card.actionType !== 'wildcard' && isMyTurn && (
+                    <button
+                      type="button"
+                      className="btn-use-special-floating"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onPlaySpecialCard) onPlaySpecialCard(card.id);
+                      }}
+                      title="กดใช้ความสามารถการ์ดพิเศษใบนี้ทันที"
+                    >
+                      ✨ ใช้ความสามารถ
+                    </button>
+                  )}
                 </div>
               );
             })
@@ -168,10 +140,10 @@ export default function HandDock({
           )}
         </div>
 
-        {/* Cute Discard Zone */}
+        {/* Discard Zone */}
         <div
           id="discardDropZone"
-          className="cute-discard-zone"
+          className="vertical-discard-card"
           onClick={onDiscardSelectedOrFirst}
           onDragOver={handleDiscardDragOver}
           onDragEnter={handleDiscardDragEnter}
@@ -180,7 +152,7 @@ export default function HandDock({
           title="แตะหรือลากการ์ดมาที่นี่เพื่อทิ้งและจั่วใบใหม่"
         >
           <div className="cute-discard-icon-frame">
-            <UIIcon name="recycle" size={18} color="#EA580C" />
+            <UIIcon name="recycle" size={20} color="#EA580C" />
           </div>
           <span className="cute-discard-main">ทิ้งการ์ด</span>
           <span className="cute-discard-sub">(จั่วใหม่)</span>

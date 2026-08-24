@@ -1,0 +1,86 @@
+[
+  {
+    "id": "special_fit_free",
+    "title": "Fit Free",
+    "name": "Fit Free (วางตรงไหนก็ได้)",
+    "image": "/cards/specials/special_fit_free.png",
+    "actionType": "wildcard",
+    "cardType": "special",
+    "rarity": "legendary",
+    "copiesInDeck": 4,
+    "description": "การ์ดสารพัดนึก สามารถนำไปวางลงในช่องคำถามใดก็ได้บนกระดานทันที",
+    "isPlayableOnSlot": true
+  },
+  {
+    "id": "special_crab_shield",
+    "title": "Crab Shield !",
+    "name": "Crab Shield ! (โล่ปูป้องกัน)",
+    "image": "/cards/specials/special_crab_shield.png",
+    "actionType": "shield",
+    "cardType": "special",
+    "rarity": "epic",
+    "copiesInDeck": 3,
+    "description": "สร้างเกราะป้องกันผลของการ์ดพิเศษ (เช่น Drop It, Skip) จากผู้เล่นอื่นได้ 1 ครั้ง",
+    "isPlayableOnSlot": false
+  },
+  {
+    "id": "special_play_double",
+    "title": "Play Double !!",
+    "name": "Play Double !! (เล่น 2 ใบใน 1 ตา)",
+    "image": "/cards/specials/special_play_double.png",
+    "actionType": "double_play",
+    "cardType": "special",
+    "rarity": "epic",
+    "copiesInDeck": 3,
+    "description": "กดใช้ก่อนวางการ์ด เพื่อให้วางการ์ดลงกระดานได้ 2 ใบในเทิร์นเดียวกัน",
+    "isPlayableOnSlot": false
+  },
+  {
+    "id": "special_reverse",
+    "title": "Reverse",
+    "name": "Reverse (หมุนทิศทางการเล่นใหม่)",
+    "image": "/cards/specials/special_reverse.png",
+    "actionType": "reverse",
+    "cardType": "special",
+    "rarity": "rare",
+    "copiesInDeck": 3,
+    "description": "สลับทิศทางการเดินเทิร์นของผู้เล่นทุกคนทันที",
+    "isPlayableOnSlot": false
+  },
+  {
+    "id": "special_skip",
+    "title": "Skip",
+    "name": "Skip (ข้ามตาคนต่อไป)",
+    "image": "/cards/specials/special_skip.png",
+    "actionType": "skip",
+    "cardType": "special",
+    "rarity": "rare",
+    "copiesInDeck": 3,
+    "description": "สั่งข้ามเทิร์นของผู้เล่นคนถัดไปทันที",
+    "isPlayableOnSlot": false
+  },
+  {
+    "id": "special_shuffle",
+    "title": "Shuffle",
+    "name": "Shuffle (สุ่มไพ่ใหม่ทุกคน)",
+    "image": "/cards/specials/special_shuffle.png",
+    "actionType": "shuffle",
+    "cardType": "special",
+    "rarity": "epic",
+    "copiesInDeck": 3,
+    "description": "นำการ์ดบนมือของผู้เล่นทุกคนเข้ากอง สับใหม่ แล้วแจกเท่าเดิมให้ทุกคน",
+    "isPlayableOnSlot": false
+  },
+  {
+    "id": "special_drop_it",
+    "title": "Drop It !!",
+    "name": "Drop It !! (บังคับทิ้งการ์ด)",
+    "image": "/cards/specials/special_drop_it.png",
+    "actionType": "drop_it",
+    "cardType": "special",
+    "rarity": "rare",
+    "copiesInDeck": 3,
+    "description": "บังคับให้คู่ต่อสู้ทิ้งการ์ด 1 ใบบนมือลงกองทิ้งทันที",
+    "isPlayableOnSlot": false
+  }
+]

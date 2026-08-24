@@ -1,98 +1,608 @@
 [
   {
-    "id": "cat_mammal_carnivore",
-    "title": "สัตว์เลี้ยงลูกด้วยนมกินเนื้อ",
-    "points": 25,
-    "slots": ["has_backbone", "mammal", "carnivore"]
-  },
-  {
-    "id": "cat_bird_fly",
-    "title": "สัตว์ปีกบินได้",
+    "id": "q_01",
+    "title": "หนอนตัวกลมและการเคลื่อนที่",
+    "image": "/cards/questions/q_01.png",
     "points": 20,
-    "slots": ["has_backbone", "bird", "can_fly"]
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีผิวลำตัวมันวาว ส่วนใหญ่ดำรงชีวิตเป็นปรสิต",
+        "requiredTrait": "shiny_parasite",
+        "position": "top",
+        "targetPhylum": "Nematoda"
+      },
+      {
+        "name": "การเคลื่อนที่ใช้กล้ามเนื้อตามยาวเพียงชุดเดียว",
+        "requiredTrait": "longitudinal_muscle",
+        "position": "bottom",
+        "targetPhylum": "Nematoda"
+      }
+    ]
   },
   {
-    "id": "cat_fish_cold",
-    "title": "สัตว์น้ำปลาเลือดเย็น",
+    "id": "q_02",
+    "title": "ช่องลำตัวเทียมและแกนสันหลัง",
+    "image": "/cards/questions/q_02.png",
     "points": 20,
-    "slots": ["has_backbone", "fish", "cold_blooded"]
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "พบหาง (post anal tail) และ notochord",
+        "requiredTrait": "post_anal_tail",
+        "position": "top",
+        "targetPhylum": "Chordata"
+      },
+      {
+        "name": "ช่องลำตัวแบบเทียม (pseudocoelom)",
+        "requiredTrait": "pseudocoelom",
+        "position": "bottom",
+        "targetPhylum": "Nematoda"
+      }
+    ]
   },
   {
-    "id": "cat_reptile_cold",
-    "title": "สัตว์เลื้อยคลานเลือดเย็น",
+    "id": "q_03",
+    "title": "การขับถ่ายและระบบเลือดหนอนปล้อง",
+    "image": "/cards/questions/q_03.png",
     "points": 20,
-    "slots": ["has_backbone", "reptile", "cold_blooded"]
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ขับถ่ายโดยใช้ nephridium",
+        "requiredTrait": "nephridium",
+        "position": "top",
+        "targetPhylum": "Annelida"
+      },
+      {
+        "name": "ตัวอ่อน Lophophore ที่ทุกชนิดเป็นระบบหมุนเวียนเลือดแบบปิด",
+        "requiredTrait": "lophophore_closed_blood",
+        "position": "bottom",
+        "targetPhylum": "Annelida"
+      }
+    ]
   },
   {
-    "id": "cat_warm_land_mammal",
-    "title": "สัตว์บกเลี้ยงลูกด้วยนม",
+    "id": "q_04",
+    "title": "คิวติเคิลและตัวอ่อนเอคไดโซซัว",
+    "image": "/cards/questions/q_04.png",
     "points": 20,
-    "slots": ["warm_blooded", "mammal", "land_living"]
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ตัวอ่อนแบบ Ecdysozoa ที่มีช่องลำตัวแบบเทียม",
+        "requiredTrait": "ecdysozoa_pseudocoelom",
+        "position": "top",
+        "targetPhylum": "Nematoda"
+      },
+      {
+        "name": "มี Cuticle หนาปกคลุม",
+        "requiredTrait": "thick_cuticle",
+        "position": "bottom",
+        "targetPhylum": "Nematoda"
+      }
+    ]
   },
   {
-    "id": "cat_invertebrate",
-    "title": "สัตว์ไม่มีกระดูกสันหลัง",
-    "points": 15,
-    "slots": ["no_backbone", "cold_blooded"]
-  },
-  {
-    "id": "cat_water_backbone",
-    "title": "สัตว์น้ำมีกระดูกสันหลัง",
-    "points": 15,
-    "slots": ["has_backbone", "water_living"]
-  },
-  {
-    "id": "cat_herbivore_backbone",
-    "title": "สัตว์กินพืชมีกระดูกสันหลัง",
-    "points": 15,
-    "slots": ["has_backbone", "herbivore"]
-  },
-  {
-    "id": "cat_amphibian",
-    "title": "สัตว์สะเทินน้ำสะเทินบก",
-    "points": 15,
-    "slots": ["has_backbone", "amphibian"]
-  },
-  {
-    "id": "cat_warm_fly",
-    "title": "สัตว์เลือดอุ่นที่บินได้",
-    "points": 15,
-    "slots": ["warm_blooded", "can_fly"]
-  },
-  {
-    "id": "cat_cold_carnivore",
-    "title": "สัตว์นักล่าเลือดเย็น",
+    "id": "q_05",
+    "title": "พาราโพเดียและปล้องลำตัว",
+    "image": "/cards/questions/q_05.png",
     "points": 20,
-    "slots": ["cold_blooded", "carnivore"]
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ลำตัวกลมยาวและเป็นปล้อง",
+        "requiredTrait": "segmented_round_body",
+        "position": "top",
+        "targetPhylum": "Annelida"
+      },
+      {
+        "name": "บางชนิดมี parapodia ใช้ในการแลกเปลี่ยนแก๊ส",
+        "requiredTrait": "parapodia",
+        "position": "bottom",
+        "targetPhylum": "Annelida"
+      }
+    ]
   },
   {
-    "id": "cat_water_mammal",
-    "title": "สัตว์เลี้ยงลูกด้วยนมในน้ำ",
-    "points": 25,
-    "slots": ["has_backbone", "mammal", "water_living"]
-  },
-  {
-    "id": "cat_warm_land_carnivore",
-    "title": "สัตว์บกเลือดอุ่นกินเนื้อ",
-    "points": 25,
-    "slots": ["warm_blooded", "carnivore", "land_living"]
-  },
-  {
-    "id": "cat_invertebrate_fly",
-    "title": "แมลงไร้กระดูกสันหลังบินได้",
+    "id": "q_06",
+    "title": "ผิวหนามและเซลล์ปลอกคอ",
+    "image": "/cards/questions/q_06.png",
     "points": 20,
-    "slots": ["no_backbone", "can_fly"]
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีรูพรุน พบ Choanocyte",
+        "requiredTrait": "choanocyte",
+        "position": "top",
+        "targetPhylum": "Porifera"
+      },
+      {
+        "name": "ผิวเป็นหนาม ใช้ water circular system",
+        "requiredTrait": "spiny_water_vascular",
+        "position": "bottom",
+        "targetPhylum": "Echinodermata"
+      }
+    ]
   },
   {
-    "id": "cat_omnivore_backbone",
-    "title": "สัตว์กินทั้งพืชและสัตว์",
-    "points": 15,
-    "slots": ["has_backbone", "omnivore"]
+    "id": "q_07",
+    "title": "แมนเทิล ช่องเทียม และท่อประสาท",
+    "image": "/cards/questions/q_07.png",
+    "points": 30,
+    "layout": "three_slots",
+    "slots": [
+      {
+        "name": "ช่องว่างลำตัวเทียม (pseudocoelom)",
+        "requiredTrait": "pseudocoelom",
+        "position": "left_top",
+        "targetPhylum": "Nematoda"
+      },
+      {
+        "name": "พบ mantle cavity",
+        "requiredTrait": "mantle_cavity",
+        "position": "left_bottom",
+        "targetPhylum": "Mollusca"
+      },
+      {
+        "name": "พบ dorsal hollow nerve",
+        "requiredTrait": "dorsal_nerve_cord",
+        "position": "right",
+        "targetPhylum": "Chordata"
+      }
+    ]
   },
   {
-    "id": "cat_cold_water_carnivore",
-    "title": "สัตว์น้ำนักล่าเลือดเย็น",
-    "points": 25,
-    "slots": ["cold_blooded", "water_living", "carnivore"]
+    "id": "q_08",
+    "title": "แกนสันหลังและท่อประสาทกลวง",
+    "image": "/cards/questions/q_08.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีระบบประสาทท่อกลวงด้านหลัง (dorsal nerve)",
+        "requiredTrait": "dorsal_nerve_cord",
+        "position": "top",
+        "targetPhylum": "Chordata"
+      },
+      {
+        "name": "พบ notochord ช่วงใดช่วงหนึ่งของชีวิต",
+        "requiredTrait": "notochord",
+        "position": "bottom",
+        "targetPhylum": "Chordata"
+      }
+    ]
+  },
+  {
+    "id": "q_09",
+    "title": "ลักษณะเด่นไฟลัมคอร์ดาตา",
+    "image": "/cards/questions/q_09.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีระบบประสาทท่อกลวงด้านหลัง (dorsal nerve)",
+        "requiredTrait": "dorsal_nerve_cord",
+        "position": "top",
+        "targetPhylum": "Chordata"
+      },
+      {
+        "name": "พบ notochord ช่วงใดช่วงหนึ่งของชีวิต",
+        "requiredTrait": "notochord",
+        "position": "bottom",
+        "targetPhylum": "Chordata"
+      }
+    ]
+  },
+  {
+    "id": "q_10",
+    "title": "สปอนจินและไร้เนื้อเยื่อ",
+    "image": "/cards/questions/q_10.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ไม่มีเนื้อเยื่อ",
+        "requiredTrait": "no_tissue",
+        "position": "top",
+        "targetPhylum": "Porifera"
+      },
+      {
+        "name": "มี endoskeleton เป็น Spongin หรือ Spicule",
+        "requiredTrait": "spongin_spicule",
+        "position": "bottom",
+        "targetPhylum": "Porifera"
+      }
+    ]
+  },
+  {
+    "id": "q_11",
+    "title": "วงแหวนประสาทและท่อเท้า",
+    "image": "/cards/questions/q_11.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มี Nerve ring",
+        "requiredTrait": "nerve_ring",
+        "position": "top",
+        "targetPhylum": "Echinodermata"
+      },
+      {
+        "name": "เคลื่อนที่โดยอาศัย Tube feet",
+        "requiredTrait": "tube_feet",
+        "position": "bottom",
+        "targetPhylum": "Echinodermata"
+      }
+    ]
+  },
+  {
+    "id": "q_12",
+    "title": "ช่องเหงือกและกระดูกสันหลัง",
+    "image": "/cards/questions/q_12.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีช่องเหงือก (gill slit)",
+        "requiredTrait": "gill_slits",
+        "position": "top",
+        "targetPhylum": "Chordata"
+      },
+      {
+        "name": "สามารถพัฒนาเป็นกระดูกสันหลังได้ ระบบหมุนเวียนเลือดแบบปิด",
+        "requiredTrait": "vertebrate_closed_blood",
+        "position": "bottom",
+        "targetPhylum": "Chordata"
+      }
+    ]
+  },
+  {
+    "id": "q_13",
+    "title": "ไซฟอนและเปลือกหอย",
+    "image": "/cards/questions/q_13.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีทั้งชนิดที่มีโครงร่างแข็งภายนอกและชนิดที่มีโครงร่างแข็งภายใน",
+        "requiredTrait": "exoskeleton_endoskeleton_shell",
+        "position": "top",
+        "targetPhylum": "Mollusca"
+      },
+      {
+        "name": "บางชนิดมี Siphon ช่วยในการเคลื่อนที่",
+        "requiredTrait": "siphon",
+        "position": "bottom",
+        "targetPhylum": "Mollusca"
+      }
+    ]
+  },
+  {
+    "id": "q_14",
+    "title": "ไคติน กึ๋น และท่อเท้า",
+    "image": "/cards/questions/q_14.png",
+    "points": 30,
+    "layout": "three_slots",
+    "slots": [
+      {
+        "name": "มี chitin เป็นองค์ประกอบของเปลือก บางกลุ่มมี trunk หรือ cephalothorax",
+        "requiredTrait": "exoskeleton_chitin",
+        "position": "left_top",
+        "targetPhylum": "Arthropoda"
+      },
+      {
+        "name": "มีระบบเลือดแบบปิด และช่องว่างลำตัว กลุ่มแรก มี กึ๋น และกระเพาะพักในการย่อยอาหาร",
+        "requiredTrait": "gizzard_crop",
+        "position": "left_bottom",
+        "targetPhylum": "Annelida"
+      },
+      {
+        "name": "มี tube feet",
+        "requiredTrait": "tube_feet",
+        "position": "right",
+        "targetPhylum": "Echinodermata"
+      }
+    ]
+  },
+  {
+    "id": "q_15",
+    "title": "ฟองน้ำ ไนดาเรีย และหนอนตัวแบน",
+    "image": "/cards/questions/q_15.png",
+    "points": 30,
+    "layout": "three_slots",
+    "slots": [
+      {
+        "name": "มี ostia spongocoel และ osculum",
+        "requiredTrait": "spongocoel_osculum",
+        "position": "left_top",
+        "targetPhylum": "Porifera"
+      },
+      {
+        "name": "มีรูปร่างแบบ polyp และ medusa",
+        "requiredTrait": "polyp_medusa",
+        "position": "left_bottom",
+        "targetPhylum": "Cnidaria"
+      },
+      {
+        "name": "ทางเดินอาหารไม่สมบูรณ์ พบ pharynx ลำตัวแบน",
+        "requiredTrait": "pharynx_incomplete_gut",
+        "position": "right",
+        "targetPhylum": "Platyhelminthes"
+      }
+    ]
+  },
+  {
+    "id": "q_16",
+    "title": "สมมาตรรัศมีและร่างแหประสาท",
+    "image": "/cards/questions/q_16.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ระบบประสาทแบบร่างแห (Nerve net)",
+        "requiredTrait": "nerve_net",
+        "position": "top",
+        "targetPhylum": "Cnidaria"
+      },
+      {
+        "name": "มีสมมาตรรัศมีและมีทางเดินอาหารไม่สมบูรณ์",
+        "requiredTrait": "radial_symmetry",
+        "position": "bottom",
+        "targetPhylum": "Cnidaria"
+      }
+    ]
+  },
+  {
+    "id": "q_17",
+    "title": "เครื่องในและปุ่มดูดเกาะ",
+    "image": "/cards/questions/q_17.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ดำรงชีวิตแบบปรสิตเป็นหลัก บางตัวมี sucker",
+        "requiredTrait": "parasitic_sucker",
+        "position": "top",
+        "targetPhylum": "Platyhelminthes / Annelida"
+      },
+      {
+        "name": "มีเครื่องใน (visceral mass)",
+        "requiredTrait": "visceral_mass",
+        "position": "bottom",
+        "targetPhylum": "Mollusca"
+      }
+    ]
+  },
+  {
+    "id": "q_18",
+    "title": "ประสาทขั้นบันไดและไร้ช่องตัว",
+    "image": "/cards/questions/q_18.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีเนื้อเยื่อ 3 ชั้น แต่ไม่มีโพรงลำตัว",
+        "requiredTrait": "triploblastic_acoelomate",
+        "position": "top",
+        "targetPhylum": "Platyhelminthes"
+      },
+      {
+        "name": "ระบบประสาทแบบขั้นบันได",
+        "requiredTrait": "ladder_nerve",
+        "position": "bottom",
+        "targetPhylum": "Platyhelminthes"
+      }
+    ]
+  },
+  {
+    "id": "q_19",
+    "title": "เข็มพิษและรยางค์ข้อปล้อง",
+    "image": "/cards/questions/q_19.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "พบเซลล์เข็มพิษ (cnidocyte)",
+        "requiredTrait": "cnidocyte",
+        "position": "top",
+        "targetPhylum": "Cnidaria"
+      },
+      {
+        "name": "ลำตัวเป็นปล้อง (segment body) มีรยางค์เป็นปล้อง (joint appendage)",
+        "requiredTrait": "jointed_appendages",
+        "position": "bottom",
+        "targetPhylum": "Arthropoda"
+      }
+    ]
+  },
+  {
+    "id": "q_20",
+    "title": "ไคลเทลลัมและหนอนไร้ช่องตัว",
+    "image": "/cards/questions/q_20.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "เนื้อเยื่อ 3 ชั้น ไม่มีช่องว่างลำตัว (acoelomate)",
+        "requiredTrait": "triploblastic_acoelomate",
+        "position": "top",
+        "targetPhylum": "Platyhelminthes"
+      },
+      {
+        "name": "ลำตัวเป็นปล้อง พบ clitela",
+        "requiredTrait": "clitellum",
+        "position": "bottom",
+        "targetPhylum": "Annelida"
+      }
+    ]
+  },
+  {
+    "id": "q_21",
+    "title": "สัตว์ทะเลและสมมาตรรัศมี",
+    "image": "/cards/questions/q_21.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "สัตว์กลุ่มที่อาศัยอยู่ในทะเลทั้งหมด",
+        "requiredTrait": "all_marine",
+        "position": "top",
+        "targetPhylum": "Echinodermata"
+      },
+      {
+        "name": "ตัวอ่อนสมมาตรครึ่งซีก แต่ตัวเต็มวัยสมมาตรรัศมี",
+        "requiredTrait": "bilateral_larva_radial_adult",
+        "position": "bottom",
+        "targetPhylum": "Echinodermata"
+      }
+    ]
+  },
+  {
+    "id": "q_22",
+    "title": "ช่องเหงือกและระบบเลือดปิด",
+    "image": "/cards/questions/q_22.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีช่องเหงือก (gill slit)",
+        "requiredTrait": "gill_slits",
+        "position": "top",
+        "targetPhylum": "Chordata"
+      },
+      {
+        "name": "สามารถพัฒนาเป็นกระดูกสันหลังได้ ระบบหมุนเวียนเลือดแบบปิด",
+        "requiredTrait": "vertebrate_closed_blood",
+        "position": "bottom",
+        "targetPhylum": "Chordata"
+      }
+    ]
+  },
+  {
+    "id": "q_23",
+    "title": "ฟันลิ้นและแมนเทิลหอย",
+    "image": "/cards/questions/q_23.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มี Mantle ห่อหุ้มอวัยวะภายใน",
+        "requiredTrait": "mantle",
+        "position": "top",
+        "targetPhylum": "Mollusca"
+      },
+      {
+        "name": "ส่วนใหญ่มี Radula ช่วยในการขุดหาอาหาร",
+        "requiredTrait": "radula",
+        "position": "bottom",
+        "targetPhylum": "Mollusca"
+      }
+    ]
+  },
+  {
+    "id": "q_24",
+    "title": "เฟลมเซลล์และทางเดินอาหารไม่สมบูรณ์",
+    "image": "/cards/questions/q_24.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มี Flame cell ช่วยในการขับถ่าย",
+        "requiredTrait": "flame_cell",
+        "position": "top",
+        "targetPhylum": "Platyhelminthes"
+      },
+      {
+        "name": "ส่วนใหญ่มีทางเดินอาหารไม่สมบูรณ์ แต่บางชนิดไม่มีทางเดินอาหาร",
+        "requiredTrait": "pharynx_incomplete_gut",
+        "position": "bottom",
+        "targetPhylum": "Platyhelminthes"
+      }
+    ]
+  },
+  {
+    "id": "q_25",
+    "title": "การลอกคราบและข้อปล้อง",
+    "image": "/cards/questions/q_25.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "ระบบหมุนเวียนเลือดแบบเปิด ตัวอ่อนลอกคราบ",
+        "requiredTrait": "open_circulatory_molting",
+        "position": "top",
+        "targetPhylum": "Arthropoda"
+      },
+      {
+        "name": "เนื้อเยื่อ 3 ชั้น ร่างกายมีข้อปล้อง",
+        "requiredTrait": "triploblastic_jointed",
+        "position": "bottom",
+        "targetPhylum": "Arthropoda"
+      }
+    ]
+  },
+  {
+    "id": "q_26",
+    "title": "โครงร่างภายนอกและสามส่วนลำตัว",
+    "image": "/cards/questions/q_26.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "โครงร่างแข็งภายนอก (exoskeleton)",
+        "requiredTrait": "exoskeleton_chitin",
+        "position": "top",
+        "targetPhylum": "Arthropoda"
+      },
+      {
+        "name": "ลำตัวแบ่งส่วนเป็น หัว อก ท้อง",
+        "requiredTrait": "head_thorax_abdomen",
+        "position": "bottom",
+        "targetPhylum": "Arthropoda"
+      }
+    ]
+  },
+  {
+    "id": "q_27",
+    "title": "หนวดเข็มพิษและรูปร่างสองแบบ",
+    "image": "/cards/questions/q_27.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "มีรูปร่างได้ทั้งแบบ Polyp และ medusa",
+        "requiredTrait": "polyp_medusa",
+        "position": "top",
+        "targetPhylum": "Cnidaria"
+      },
+      {
+        "name": "ใช้ tentacle & nematocysts ในการจับเหยื่อ",
+        "requiredTrait": "tentacle_nematocyst",
+        "position": "bottom",
+        "targetPhylum": "Cnidaria"
+      }
+    ]
+  },
+  {
+    "id": "q_28",
+    "title": "อสมมาตรและไร้ระบบประสาท",
+    "image": "/cards/questions/q_28.png",
+    "points": 20,
+    "layout": "two_slots",
+    "slots": [
+      {
+        "name": "อสมมาตร (Asymmetry)",
+        "requiredTrait": "asymmetry",
+        "position": "top",
+        "targetPhylum": "Porifera"
+      },
+      {
+        "name": "ไม่มีระบบประสาทและทางเดินอาหาร",
+        "requiredTrait": "no_nervous_digestive",
+        "position": "bottom",
+        "targetPhylum": "Porifera"
+      }
+    ]
   }
 ]

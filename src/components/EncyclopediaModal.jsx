@@ -1,28 +1,38 @@
-import React, { useState } from 'react';
-import { ALL_ANIMALS_DATA, TRAIT_MAP, TRAIT_COLORS, ANIMAL_RARITIES } from '../utils/traits';
-import { AnimalAvatar } from '../assets/animalIllustrations';
+import React, { useState, useEffect } from 'react';
+import { PHYLA_MAP, TRAIT_MAP, TRAIT_COLORS, ANIMAL_RARITIES } from '../utils/traits';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 import { playSfx } from '../utils/audio';
 
 export default function EncyclopediaModal({ onClose }) {
+  const [animalsData, setAnimalsData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTrait, setSelectedTrait] = useState('all');
+  const [selectedPhylum, setSelectedPhylum] = useState('all');
   const [selectedRarity, setSelectedRarity] = useState('all');
-  const [selectedAnimal, setSelectedAnimal] = useState(ALL_ANIMALS_DATA[0]);
+  const [selectedAnimal, setSelectedAnimal] = useState(null);
 
-  const traitsList = Object.keys(TRAIT_MAP);
+  useEffect(() => {
+    fetch('/data/animals.json')
+      .then((res) => res.json())
+      .then((data) => {
+        setAnimalsData(data);
+        if (data.length > 0) setSelectedAnimal(data[0]);
+      })
+      .catch((err) => console.error('Failed to load animals data:', err));
+  }, []);
+
+  const phylaList = Object.keys(PHYLA_MAP);
   const raritiesList = Object.keys(ANIMAL_RARITIES);
 
-  const filteredAnimals = ALL_ANIMALS_DATA.filter((animal) => {
+  const filteredAnimals = animalsData.filter((animal) => {
     const matchesSearch =
       animal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      animal.englishName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      animal.desc.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTrait =
-      selectedTrait === 'all' || animal.traits.includes(selectedTrait);
+      (animal.englishName && animal.englishName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (animal.desc && animal.desc.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesPhylum =
+      selectedPhylum === 'all' || animal.phylum === selectedPhylum;
     const matchesRarity =
       selectedRarity === 'all' || animal.rarity === selectedRarity;
-    return matchesSearch && matchesTrait && matchesRarity;
+    return matchesSearch && matchesPhylum && matchesRarity;
   });
 
   const curRarity = ANIMAL_RARITIES[selectedAnimal?.rarity] || ANIMAL_RARITIES.common;
@@ -37,11 +47,11 @@ export default function EncyclopediaModal({ onClose }) {
         <div className="cute-dex-header">
           <div className="cute-dex-title-row">
             <div className="cute-dex-icon-frame">
-              <UIIcon name="book" size={20} color="var(--forest-primary)" />
+              <UIIcon name="book" size={24} color="#FBBF24" />
             </div>
             <div>
-              <h2 className="cute-dex-title">📖 สารานุกรมสัตว์น่ารู้</h2>
-              <p className="cute-dex-subtitle">ข้อมูลชีววิทยาและการจำแนกคุณสมบัติสัตว์ทั้ง 32 ชนิด</p>
+              <h2 className="cute-dex-title">📖 สารานุกรมสัตว์และอนุกรมวิธานชีววิทยา</h2>
+              <p className="cute-dex-subtitle">ข้อมูลการจำแนก 56 สิ่งมีชีวิต ครอบคลุม 9 ไฟลัมแห่งอาณาจักรสัตว์</p>
             </div>
           </div>
           <button
@@ -59,27 +69,27 @@ export default function EncyclopediaModal({ onClose }) {
         {/* Search & Filters */}
         <div className="cute-dex-filters">
           <div className="cute-dex-search-wrap">
-            <UIIcon name="search" size={15} color="var(--forest-primary)" />
+            <UIIcon name="search" size={15} color="#A7F3D0" />
             <input
               type="text"
-              placeholder="ค้นหาชื่อสัตว์, ถิ่นที่อยู่..."
+              placeholder="ค้นหาชื่อสัตว์, ไฟลัม, ถิ่นที่อยู่..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="cute-dex-search-input"
             />
           </div>
 
-          {/* Rarity & Trait Dropdowns */}
+          {/* Phylum & Rarity Dropdowns */}
           <div className="cute-dex-dropdowns">
             <select
               className="cute-dex-select"
-              value={selectedTrait}
-              onChange={(e) => setSelectedTrait(e.target.value)}
+              value={selectedPhylum}
+              onChange={(e) => setSelectedPhylum(e.target.value)}
             >
-              <option value="all">🔍 คุณสมบัติทั้งหมด</option>
-              {traitsList.map((t) => (
-                <option key={t} value={t}>
-                  {TRAIT_MAP[t]}
+              <option value="all">🌐 ไฟลัมทั้งหมด (9 Phyla)</option>
+              {phylaList.map((pKey) => (
+                <option key={pKey} value={pKey}>
+                  {PHYLA_MAP[pKey]}
                 </option>
               ))}
             </select>
@@ -89,7 +99,7 @@ export default function EncyclopediaModal({ onClose }) {
               value={selectedRarity}
               onChange={(e) => setSelectedRarity(e.target.value)}
             >
-              <option value="all">⭐ ระดับความหายากทั้งหมด</option>
+              <option value="all">⭐ ความหายากทั้งหมด</option>
               {raritiesList.map((r) => (
                 <option key={r} value={r}>
                   {ANIMAL_RARITIES[r].label}
@@ -105,6 +115,7 @@ export default function EncyclopediaModal({ onClose }) {
           <div className="cute-dex-grid">
             {filteredAnimals.map((animal) => {
               const isSelected = selectedAnimal?.id === animal.id;
+              const thumbImg = animal.image || `/cards/animals/${animal.id}.png`;
               return (
                 <div
                   key={animal.id}
@@ -114,14 +125,14 @@ export default function EncyclopediaModal({ onClose }) {
                     setSelectedAnimal(animal);
                   }}
                 >
-                  <AnimalAvatar id={animal.id} size={36} />
+                  <img src={thumbImg} alt={animal.name} className="dex-thumb-img" loading="lazy" />
                   <span className="cute-dex-item-name">{animal.name}</span>
                 </div>
               );
             })}
             {filteredAnimals.length === 0 && (
               <div className="cute-dex-empty">
-                <span>🔍 ไม่พบสัตว์ที่ตรงกับคำค้นหา</span>
+                <span>🔍 ไม่พบสัตว์ที่ตรงกับเงื่อนไข</span>
               </div>
             )}
           </div>
@@ -130,8 +141,12 @@ export default function EncyclopediaModal({ onClose }) {
           {selectedAnimal && (
             <div className="cute-dex-detail-pane">
               <div className="cute-detail-header">
-                <div className="cute-detail-avatar-box">
-                  <AnimalAvatar id={selectedAnimal.id} size={64} />
+                <div className="dex-large-card-preview">
+                  <img
+                    src={selectedAnimal.image || '/cards/animals/animal_01.png'}
+                    alt={selectedAnimal.name}
+                    className="dex-large-card-img"
+                  />
                 </div>
                 <div className="cute-detail-title-group">
                   <div className="cute-detail-name-row">
@@ -148,20 +163,38 @@ export default function EncyclopediaModal({ onClose }) {
                     </span>
                   </div>
                   <div className="cute-detail-subname">{selectedAnimal.englishName}</div>
-                  <div className="cute-detail-habitat">📍 {selectedAnimal.habitat}</div>
+                  <div className="dex-taxonomy-pills">
+                    <span className="taxonomy-pill phylum-pill">
+                      🧬 ไฟลัม: {selectedAnimal.phylum} ({PHYLA_MAP[selectedAnimal.phylum] || selectedAnimal.phylum})
+                    </span>
+                    {selectedAnimal.className && (
+                      <span className="taxonomy-pill class-pill">
+                        🏷️ คลาส: {selectedAnimal.className}
+                      </span>
+                    )}
+                  </div>
+                  <div className="cute-detail-habitat">📍 ถิ่นที่อยู่: {selectedAnimal.habitat}</div>
                 </div>
               </div>
 
               {/* Bio Description */}
               <p className="cute-detail-desc">{selectedAnimal.desc}</p>
 
+              {/* Fun Fact Callout */}
+              {selectedAnimal.funFact && (
+                <div className="dex-fun-fact-box">
+                  <span className="fun-fact-icon">💡</span>
+                  <span className="fun-fact-text">{selectedAnimal.funFact}</span>
+                </div>
+              )}
+
               {/* Traits Breakdown */}
               <div className="cute-detail-traits-section">
-                <div className="cute-detail-traits-label">คุณสมบัติทางชีววิทยา:</div>
+                <div className="cute-detail-traits-label">คุณสมบัติทางชีววิทยาที่ตรงกับช่องคำถาม:</div>
                 <div className="cute-detail-traits-grid">
                   {distinctTraits.map((tLabel, idx) => {
-                    const originalKey = selectedAnimal.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
-                    const colors = TRAIT_COLORS[originalKey] || { bg: '#E8F5E9', text: '#2E7D32', border: '#A5D6A7', iconName: 'backbone' };
+                    const originalKey = selectedAnimal.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'no_tissue';
+                    const colors = TRAIT_COLORS[originalKey] || { bg: '#252F28', text: '#EDE8DC', border: '#3D4B40', iconName: 'backbone' };
                     return (
                       <span
                         key={idx}

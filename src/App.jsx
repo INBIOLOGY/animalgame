@@ -7,6 +7,7 @@ import LobbyScreen from './components/LobbyScreen';
 import GameScreen from './components/GameScreen';
 import VictoryModal from './components/VictoryModal';
 import EncyclopediaModal from './components/EncyclopediaModal';
+import TutorialModal from './components/TutorialModal';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
 
@@ -24,6 +25,10 @@ export default function App() {
   const [timeAttackSeconds, setTimeAttackSeconds] = useState(60);
   const [showVictory, setShowVictory] = useState(false);
   const [showDex, setShowDex] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showDropHints, setShowDropHints] = useState(() => {
+    return localStorage.getItem('animalgame_drop_hints') !== 'false';
+  });
 
   const toastTimerRef = useRef(null);
   const timeAttackTimerRef = useRef(null);
@@ -33,7 +38,18 @@ export default function App() {
     clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => {
       setToast((prev) => ({ ...prev, visible: false }));
-    }, 3000);
+    }, 3200);
+  };
+
+  const handleToggleDropHints = () => {
+    const nextState = !showDropHints;
+    setShowDropHints(nextState);
+    localStorage.setItem('animalgame_drop_hints', nextState ? 'true' : 'false');
+    if (nextState) {
+      showToastMsg('💡 เปิดตัวช่วยบอกช่องวางการ์ดแล้ว', 'info');
+    } else {
+      showToastMsg('🔒 ปิดตัวช่วยแล้ว (โหมดท้าทายความรู้ชีววิทยา!)', 'info');
+    }
   };
 
   useEffect(() => {
@@ -56,7 +72,7 @@ export default function App() {
       setRoom(newRoom);
       setShowVictory(false);
 
-      // Auto-start for vs_bot and time_attack modes (no need to wait in lobby)
+      // Auto-start for vs_bot and time_attack modes
       if (newRoom.roomMode === 'vs_bot' || newRoom.roomMode === 'time_attack') {
         setTimeout(() => {
           socket.emit('start_game', (res) => {
@@ -92,19 +108,33 @@ export default function App() {
       }
     });
 
+    socket.on('special_card_played', (info) => {
+      playSfx('sparkle');
+      try {
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          origin: { y: 0.7 },
+          colors: ['#F59E0B', '#EF4444', '#8B5CF6', '#10B981']
+        });
+      } catch (e) {}
+
+      showToastMsg(info.message || `${info.actorName} ใช้การ์ดพิเศษ "${info.cardTitle}"`, 'success');
+    });
+
     socket.on('category_completed', (info) => {
       playSfx('fanfare');
       try {
         confetti({
-          particleCount: 50,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#2E7D32', '#0288D1', '#F57F17', '#7C3AED', '#5D4037']
+          particleCount: 60,
+          spread: 80,
+          origin: { y: 0.5 },
+          colors: ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899']
         });
       } catch (e) {}
 
       showToastMsg(
-        `${info.winnerName} พิชิตการ์ดหมวด "${info.categoryTitle}" (+${info.points} แต้ม)`,
+        `🏆 ${info.winnerName} พิชิตการ์ดคำถาม "${info.categoryTitle}" (+${info.points} แต้ม)`,
         'success'
       );
 
@@ -131,11 +161,11 @@ export default function App() {
       if (isMe) {
         playSfx('draw');
         showToastMsg(
-          `ทิ้ง "${info.discardedAnimal?.name || 'การ์ด'}" ➜ จั่วได้ "${info.newAnimal?.name || 'การ์ดใหม่'}"`,
+          `ทิ้ง "${info.discardedAnimal?.name || info.discardedAnimal?.title || 'การ์ด'}" ➜ จั่วได้ "${info.newAnimal?.name || info.newAnimal?.title || 'การ์ดใหม่'}"`,
           'success'
         );
       } else {
-        showToastMsg(`${info.playerName} ทิ้ง "${info.discardedAnimal?.name || 'การ์ด'}" แล้วจั่วใบใหม่`, 'info');
+        showToastMsg(`${info.playerName} ทิ้งการ์ดแล้วจั่วใบใหม่`, 'info');
       }
     });
 
@@ -156,10 +186,10 @@ export default function App() {
       playSfx('victory');
       try {
         confetti({
-          particleCount: 100,
-          spread: 90,
+          particleCount: 120,
+          spread: 100,
           origin: { y: 0.5 },
-          colors: ['#2E7D32', '#0288D1', '#F57F17', '#7C3AED', '#5D4037']
+          colors: ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899']
         });
       } catch (e) {}
       setRoom(finalRoom);
@@ -180,6 +210,7 @@ export default function App() {
       socket.off('room_created');
       socket.off('room_updated');
       socket.off('game_started');
+      socket.off('special_card_played');
       socket.off('category_completed');
       socket.off('card_discarded');
       socket.off('player_emote');
@@ -237,12 +268,12 @@ export default function App() {
     socket.emit('send_emote', { emote });
   };
 
-  const handleSelectCard = (animalId) => {
+  const handleSelectCard = (cardId) => {
     playSfx('select');
-    setSelectedCardId((prev) => (prev === animalId ? null : animalId));
+    setSelectedCardId((prev) => (prev === cardId ? null : cardId));
   };
 
-  const executeMoveAction = (centerIdx, slotIdx, animalId) => {
+  const handlePlaySpecialCard = (cardId) => {
     if (!room) return;
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
     if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
@@ -250,13 +281,32 @@ export default function App() {
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
-    socket.emit('play_card', { centerIdx, slotIdx, animalCardId: animalId }, (res) => {
+    playSfx('sparkle');
+    socket.emit('play_special_card', { cardId }, (res) => {
+      if (res && res.ok) {
+        setSelectedCardId(null);
+      } else {
+        playSfx('discard');
+        showToastMsg(res?.error || 'ไม่สามารถใช้การ์ดพิเศษใบนี้ได้');
+      }
+    });
+  };
+
+  const executeMoveAction = (centerIdx, slotIdx, cardId) => {
+    if (!room) return;
+    const activePlayer = room.players[room.currentTurnIndex ?? 0];
+    if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
+      playSfx('discard');
+      return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
+    }
+
+    socket.emit('play_card', { centerIdx, slotIdx, animalCardId: cardId }, (res) => {
       if (res && res.ok) {
         playSfx('snap');
         setSelectedCardId(null);
       } else {
         playSfx('discard');
-        showToastMsg(res?.error || 'คุณสมบัติของการ์ดไม่ตรงกับช่องนี้');
+        showToastMsg(res?.error || 'คุณสมบัติของการ์ดไม่ตรงกับช่องคำถามนี้');
       }
     });
   };
@@ -264,12 +314,12 @@ export default function App() {
   const handleSlotClick = (centerIdx, slotIdx) => {
     if (!selectedCardId) {
       playSfx('select');
-      return showToastMsg('กรุณาแตะเลือกการ์ดสัตว์ในมือ หรือลากมาวางที่ช่อง');
+      return showToastMsg('กรุณาแตะเลือกการ์ดในมือ หรือลากมาวางที่ช่อง');
     }
     executeMoveAction(centerIdx, slotIdx, selectedCardId);
   };
 
-  const handleDiscardSingleCard = (animalCardId) => {
+  const handleDiscardSingleCard = (cardId) => {
     if (!room) return;
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
     if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
@@ -277,12 +327,12 @@ export default function App() {
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
-    const cardEl = document.getElementById(`handCard-${animalCardId}`);
+    const cardEl = document.getElementById(`handCard-${cardId}`);
     if (cardEl) cardEl.classList.add('burn-discard-anim');
 
     playSfx('discard');
 
-    socket.emit('discard_card', { animalCardId }, (res) => {
+    socket.emit('discard_card', { animalCardId: cardId }, (res) => {
       if (res && res.ok) {
         setSelectedCardId(null);
       } else {
@@ -310,7 +360,10 @@ export default function App() {
         showDeckCounter={room && room.status === 'playing'}
         deckCount={deckRemaining}
         totalDeck={room?.totalCategories || 12}
+        showDropHints={showDropHints}
+        onToggleDropHints={handleToggleDropHints}
         onOpenDex={() => setShowDex(true)}
+        onOpenTutorial={() => setShowTutorial(true)}
       />
 
       {/* Global Toast */}
@@ -323,6 +376,7 @@ export default function App() {
           <LandingScreen
             onCreateRoom={handleCreateRoom}
             onJoinRoom={handleJoinRoom}
+            onOpenTutorial={() => setShowTutorial(true)}
           />
         )}
 
@@ -344,7 +398,9 @@ export default function App() {
             myId={socket.id}
             selectedCardId={selectedCardId}
             timeAttackSeconds={timeAttackSeconds}
+            showDropHints={showDropHints}
             onSelectCard={handleSelectCard}
+            onPlaySpecialCard={handlePlaySpecialCard}
             onSlotClick={handleSlotClick}
             onDropCardOnSlot={executeMoveAction}
             onPassTurn={handleDiscardSelectedOrFirst}
@@ -372,6 +428,16 @@ export default function App() {
       {/* Dex Encyclopedia Modal */}
       {showDex && (
         <EncyclopediaModal onClose={() => setShowDex(false)} />
+      )}
+
+      {/* Interactive Animated Tutorial Modal */}
+      {showTutorial && (
+        <TutorialModal
+          onClose={() => setShowTutorial(false)}
+          onStartPlaying={() => {
+            setShowTutorial(false);
+          }}
+        />
       )}
 
       {/* Cookie Consent Banner */}

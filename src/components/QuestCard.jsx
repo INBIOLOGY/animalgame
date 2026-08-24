@@ -8,55 +8,68 @@ export default function QuestCard({
   categoryItem,
   activeAnimal,
   isMyTurn,
+  showDropHints = true,
   onSlotClick,
   onDropCard,
 }) {
   if (!categoryItem || !categoryItem.category) {
     return (
-      <div className="cute-quest-card empty-cat">
-        <UIIcon name="trophy" size={24} color="var(--warm-gold-dark)" />
-        <span style={{ color: 'var(--ink-secondary)', fontWeight: 800, marginTop: '4px' }}>
-          ✨ พิชิตหมวดนี้แล้ว
-        </span>
+      <div className="vertical-quest-card conquered-state">
+        <div className="conquered-badge-box">
+          <UIIcon name="trophy" size={28} color="#FBBF24" />
+          <span className="conquered-text">พิชิตแล้ว!</span>
+        </div>
       </div>
     );
   }
 
   const cat = categoryItem.category;
-  const numSlots = cat.slots.length;
-  const layoutClass = `layout-${numSlots}`;
+  const layout = cat.layout || (cat.slots.length === 3 ? 'three_slots' : 'two_slots');
+  const questionImg = cat.image || `/cards/questions/q_${String(centerIdx + 1).padStart(2, '0')}.png`;
 
   return (
-    <div id={`catCard-${centerIdx}`} className="cute-quest-card">
-      <div className="cute-card-header">
-        <div className="cute-quest-title-wrap">
-          <span className="cute-quest-num">หมวด #{centerIdx + 1}</span>
-          <span className="cute-card-title">{cat.title}</span>
-        </div>
-        <span className="cute-card-pts">
-          ⭐ +{cat.points} แต้ม
-        </span>
+    <div id={`catCard-${centerIdx}`} className={`vertical-quest-card layout-${layout}`}>
+      {/* Top Header Floating Badge */}
+      <div className="quest-card-top-pill">
+        <span className="quest-pill-idx">#{centerIdx + 1}</span>
+        <span className="quest-pill-pts">+{cat.points || 20}★</span>
       </div>
 
-      <div className={`cute-slots-layout ${layoutClass}`}>
-        {categoryItem.filledSlots.map((slotData, slotIdx) => {
-          const requiredTrait = cat.slots[slotIdx];
-          const isCompatible = activeAnimal && isTraitCompatible(activeAnimal.traits, requiredTrait);
+      {/* Real Full-Sized Question Card Artwork (1395x1949 Portrait) */}
+      <div className="quest-card-art-wrap">
+        <img
+          src={questionImg}
+          alt={cat.title || 'Question Card'}
+          className="quest-card-full-img"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.style.opacity = '0.3';
+          }}
+        />
 
-          return (
-            <SlotCell
-              key={slotIdx}
-              centerIdx={centerIdx}
-              slotIdx={slotIdx}
-              slotData={slotData}
-              requiredTrait={requiredTrait}
-              isCompatible={isCompatible}
-              isMyTurn={isMyTurn}
-              onSlotClick={onSlotClick}
-              onDropCard={onDropCard}
-            />
-          );
-        })}
+        {/* Overlay Interactive Drop Slots */}
+        <div className={`quest-overlay-slots layout-${layout}`}>
+          {categoryItem.filledSlots.map((slotData, slotIdx) => {
+            const slotConfig = cat.slots[slotIdx];
+            const requiredTrait = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
+            const isCompatible = activeAnimal && isTraitCompatible(activeAnimal.traits, requiredTrait);
+
+            return (
+              <SlotCell
+                key={slotIdx}
+                centerIdx={centerIdx}
+                slotIdx={slotIdx}
+                slotData={slotData}
+                slotConfig={slotConfig}
+                isCompatible={isCompatible}
+                isMyTurn={isMyTurn}
+                showDropHints={showDropHints}
+                onSlotClick={onSlotClick}
+                onDropCard={onDropCard}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );
