@@ -1,10 +1,13 @@
 const express = require('express');
+const compression = require('compression');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { Server } = require('socket.io');
 
 const app = express();
+app.use(compression()); // ⚡ Ultra-fast Gzip / Deflate compression for all HTTP assets
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -25,18 +28,26 @@ const RECONNECT_GRACE_MS = 15000;
 // ให้ความสำคัญกับไฟล์ build ของ React (dist) ก่อน พร้อมตั้งค่า Cache-Control เพื่อความเร็วสูงสุด
 if (fs.existsSync(path.join(__dirname, 'dist'))) {
   app.use(express.static(path.join(__dirname, 'dist'), {
+    maxAge: '1y',
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.html')) {
         // ห้ามแคช HTML เพื่อให้ผู้ใช้ได้รับเวอร์ชันล่าสุดเสมอทันที
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      } else if (filePath.includes('assets')) {
+      } else if (filePath.includes('assets') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
         // แคชไฟล์ JS/CSS ที่มี hash ได้ยาวนานเพื่อความเร็วสูงสุด
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       }
     }
   }));
 }
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d',
+  setHeaders: (res, filePath) => {
+    if (filePath.match(/\.(png|jpg|jpeg|webp|svg|gif|mp3|ogg|wav)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    }
+  }
+}));
 
 // โหลดฐานข้อมูลการ์ดสัตว์ การ์ดคำถาม และการ์ดพิเศษ
 const ALL_ANIMALS = JSON.parse(fs.readFileSync(path.join(__dirname, 'public/data/animals.json'), 'utf8'));
@@ -186,10 +197,11 @@ function runBotTurn(room, botPlayer) {
 
   const difficulty = room.botDifficulty || 'medium';
 
-  // 1. ตรวจสอบการ์ดพิเศษบนมือบอท
+  // 1. ตรวจสอบการ์ดพิเศษบนมือบอท (ยกเว้น wildcard Fit Free ที่จะนำไปวางลงช่อง)
   const specialCard = botPlayer.hand?.find(c => c.cardType === 'special' && c.actionType !== 'wildcard');
   if (specialCard && Math.random() < 0.6) {
-    executeSpecialCard(room, botPlayer.id, specialCard.id);
+    const cardRef = specialCard.cardInstanceId || specialCard.id;
+    executeSpecialCard(room, botPlayer.id, cardRef);
     return;
   }
 
@@ -253,26 +265,28 @@ function runBotTurn(room, botPlayer) {
     }
 
     if (chosen) {
-      executeMove(room, botPlayer.id, chosen.centerIdx, chosen.slotIdx, chosen.card.id);
+      const cardRef = chosen.card.cardInstanceId || chosen.card.id;
+      executeMove(room, botPlayer.id, chosen.centerIdx, chosen.slotIdx, cardRef);
       return;
     }
   }
 
   // หากไม่มีท่าที่ลงได้ ให้บอททิ้งการ์ด 1 ใบ แล้วจั่วใหม่
-  let discardIdx = 0;
-  const discardedCard = botPlayer.hand.splice(discardIdx, 1)[0] || botPlayer.hand.shift();
-  if (room.animalDeck.length === 0) {
-    room.animalDeck = buildGameDeck();
-  }
-  const newCard = room.animalDeck.pop();
-  botPlayer.hand.push(newCard);
+  if (botPlayer.hand && botPlayer.hand.length > 0) {
+    const discardedCard = botPlayer.hand.shift();
+    if (room.animalDeck.length === 0) {
+      room.animalDeck = buildGameDeck();
+    }
+    const newCard = room.animalDeck.pop();
+    botPlayer.hand.push(newCard);
 
-  io.to(room.roomId).emit('card_discarded', {
-    playerId: botPlayer.id,
-    playerName: botPlayer.name,
-    discardedAnimal: discardedCard,
-    newAnimal: newCard
-  });
+    io.to(room.roomId).emit('card_discarded', {
+      playerId: botPlayer.id,
+      playerName: botPlayer.name,
+      discardedAnimal: discardedCard,
+      newAnimal: newCard
+    });
+  }
   advanceTurn(room);
 }
 
@@ -287,21 +301,26 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
     }
   }
 
-  const cardIdx = player.hand.findIndex(c => c.id === cardId);
+  const cardIdx = player.hand.findIndex(c => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
   if (cardIdx === -1) return { ok: false, error: 'ไม่มีการ์ดใบนี้ในมือ' };
   const card = player.hand[cardIdx];
 
-  // นำการ์ดออกจากมือ และจั่วใบใหม่
+  // นำการ์ดออกจากมือ และจั่วใบใหม่ทันที
   player.hand.splice(cardIdx, 1);
   if (room.animalDeck.length === 0) {
     room.animalDeck = buildGameDeck();
   }
-  player.hand.push(room.animalDeck.pop());
+  const drawnCard = room.animalDeck.pop();
+  player.hand.push(drawnCard);
 
   let actionNotice = {
     actorId: player.id,
     actorName: player.name,
+    actorAvatar: player.avatarId || 'lion',
+    cardId: card.id,
     cardTitle: card.title || card.name,
+    cardDesc: card.description || '',
+    cardImg: card.image || card.origImage || '/cards/specials/special_fit_free.png',
     actionType: card.actionType,
     message: ''
   };
@@ -333,6 +352,7 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
     case 'skip': {
       actionNotice.message = `⏭️ ${player.name} ใช้ Skip ข้ามตาผู้เล่นคนถัดไปทันที!`;
       io.to(room.roomId).emit('special_card_played', actionNotice);
+      broadcastRoomState(room.roomId);
       advanceTurn(room, 2);
       return { ok: true, room };
     }
@@ -358,7 +378,6 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
     }
 
     case 'drop_it': {
-      // เลือกเป้าหมาย (targetPlayerId หรือคนถัดไป)
       let target = null;
       if (targetPlayerId) {
         target = room.players.find(p => p.id === targetPlayerId);
@@ -369,7 +388,6 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
       }
 
       if (target) {
-        // ตรวจสอบว่าเป้าหมายมี Shield หรือไม่
         if (room.shieldedPlayerIds.includes(target.id)) {
           room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== target.id);
           actionNotice.message = `🛡️ ${target.name} ใช้ Crab Shield บล็อก Drop It ของ ${player.name} ได้สำเร็จ!`;
@@ -377,7 +395,7 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
           const droppedCard = target.hand.shift();
           if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
           target.hand.push(room.animalDeck.pop());
-          actionNotice.message = `💥 ${player.name} บังคับให้ ${target.name} ทิ้งการ์ด "${droppedCard.name}" ลงกองทิ้ง!`;
+          actionNotice.message = `💥 ${player.name} บังคับให้ ${target.name} ทิ้งการ์ด "${droppedCard.name || droppedCard.title}" ลงกองทิ้ง!`;
         }
       }
       break;
@@ -393,6 +411,9 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
   // การใช้ Shield, Double Play ไม่นับเป็นการจบเทิร์น สามารถวางการ์ดต่อได้
   if (card.actionType === 'shield' || card.actionType === 'double_play') {
     broadcastRoomState(room.roomId);
+    if (player.isBot) {
+      setTimeout(() => runBotTurn(room, player), 1000);
+    }
   } else {
     advanceTurn(room, 1);
   }
@@ -484,6 +505,9 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
   if (room.doublePlayPlayerId === playerId) {
     room.doublePlayPlayerId = null; // ใช้สิทธิ์ใบที่ 1 แล้ว เหลือใบที่ 2 ในเทิร์นนี้
     broadcastRoomState(room.roomId);
+    if (player.isBot) {
+      setTimeout(() => runBotTurn(room, player), 1100);
+    }
     return { ok: true, doublePlayRemaining: true };
   }
 

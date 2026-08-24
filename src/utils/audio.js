@@ -1,13 +1,22 @@
-// 🎵 Studio-Grade Procedural Web Audio Engine (AAA Game Sound Design)
+// 🎵 Cozy Wildlife & Biology TCG — Procedural Cute BGM & Sound Engine
+// 100% Royalty-Free, Zero Copyright, Procedurally Synthesized with Web Audio API
+
 let audioCtx = null;
-let bgmOscillators = [];
+let bgmMasterGain = null;
 let bgmPlaying = false;
 let bgmInterval = null;
 
 function getAudioContext() {
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!audioCtx) audioCtx = new AudioCtx();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx) {
+    audioCtx = new AudioCtx();
+    bgmMasterGain = audioCtx.createGain();
+    bgmMasterGain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+    bgmMasterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
   return audioCtx;
 }
 
@@ -26,16 +35,16 @@ export function playSfx(type) {
       const g = ctx.createGain();
       o1.type = 'sine';
       o2.type = 'triangle';
-      o1.frequency.setValueAtTime(540, now);
-      o1.frequency.exponentialRampToValueAtTime(1180, now + 0.08);
-      o2.frequency.setValueAtTime(1080, now);
-      o2.frequency.exponentialRampToValueAtTime(2360, now + 0.08);
-      g.gain.setValueAtTime(0.16, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      o1.frequency.setValueAtTime(587.33, now); // D5
+      o1.frequency.exponentialRampToValueAtTime(1174.66, now + 0.08);
+      o2.frequency.setValueAtTime(880, now); // A5
+      o2.frequency.exponentialRampToValueAtTime(1760, now + 0.08);
+      g.gain.setValueAtTime(0.18, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
       o1.connect(g); o2.connect(g);
       g.connect(ctx.destination);
       o1.start(now); o2.start(now);
-      o1.stop(now + 0.08); o2.stop(now + 0.08);
+      o1.stop(now + 0.09); o2.stop(now + 0.09);
     } else if (type === 'click' || type === 'tap') {
       // Crisp mechanical UI tap
       const osc = ctx.createOscillator();
@@ -87,7 +96,7 @@ export function playSfx(type) {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(320, now);
       osc.frequency.exponentialRampToValueAtTime(780, now + 0.12);
-      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.setValueAtTime(0.14, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
       osc.connect(gain); gain.connect(ctx.destination);
       osc.start(now); osc.stop(now + 0.12);
@@ -115,76 +124,130 @@ export function playSfx(type) {
         const gain = ctx.createGain();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-        gain.gain.setValueAtTime(0.15, now + idx * 0.07);
+        gain.gain.setValueAtTime(0.16, now + idx * 0.07);
         gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.45);
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(now + idx * 0.07);
         osc.stop(now + idx * 0.07 + 0.45);
       });
-    } else if (type === 'sparkle' || type === 'cheer') {
-      // Star twinkle arpeggio
-      [1046.5, 1318.5, 1567.98, 2093.0].forEach((freq, i) => {
+    } else if (type === 'sparkle' || type === 'cheer' || type === 'special') {
+      // Magical sparkling star shimmer for special card activation
+      [783.99, 1046.5, 1318.5, 1567.98, 2093.0, 2637.0].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + i * 0.04);
-        gain.gain.setValueAtTime(0.09, now + i * 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.18);
+        osc.frequency.setValueAtTime(freq, now + i * 0.05);
+        gain.gain.setValueAtTime(0.12, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.28);
         osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(now + i * 0.04);
-        osc.stop(now + i * 0.04 + 0.18);
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.28);
       });
-    } else if (type === 'roar' || type === 'fierce') {
-      // Low warm playful rumble
+    } else if (type === 'whoosh') {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.linearRampToValueAtTime(90, now + 0.22);
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
       osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.22);
+      osc.start(now); osc.stop(now + 0.2);
     }
   } catch (e) {}
 }
 
-// 🍃 Cozy Island Lofi Pentatonic Ambient Music
+// 🌸 Playful & Cozy Island Kalimba / Marimba BGM (Animal Crossing / Pokemon Cafe Style)
+// 100% Procedurally Synthesized & Royalty-Free
 export function toggleBgm(onState) {
   try {
     const ctx = getAudioContext();
     if (onState === false || (onState === undefined && bgmPlaying)) {
       bgmPlaying = false;
       clearInterval(bgmInterval);
-      bgmOscillators.forEach(o => { try { o.stop(); } catch(e){} });
-      bgmOscillators = [];
       return false;
     }
 
     bgmPlaying = true;
-    const melody = [523.25, 587.33, 659.25, 783.99, 880.00, 783.99, 659.25, 587.33, 523.25, 659.25, 880.00, 783.99];
-    let noteIdx = 0;
 
-    bgmInterval = setInterval(() => {
+    // Charming pentatonic cute melodic patterns & warm bassline
+    // C Major / G Major Pentatonic (C4, D4, E4, G4, A4, C5, D5, E5, G5)
+    const melodySeq = [
+      { note: 523.25, dur: 0.35, bass: 261.63 }, // C5 + C4
+      { note: 659.25, dur: 0.35 },               // E5
+      { note: 783.99, dur: 0.35 },               // G5
+      { note: 659.25, dur: 0.35 },               // E5
+      { note: 880.00, dur: 0.45, bass: 220.00 }, // A5 + A3
+      { note: 783.99, dur: 0.35 },               // G5
+      { note: 659.25, dur: 0.35 },               // E5
+      { note: 587.33, dur: 0.35 },               // D5
+      { note: 523.25, dur: 0.45, bass: 174.61 }, // C5 + F3
+      { note: 587.33, dur: 0.35 },               // D5
+      { note: 659.25, dur: 0.35 },               // E5
+      { note: 523.25, dur: 0.35 },               // C5
+      { note: 783.99, dur: 0.50, bass: 196.00 }, // G5 + G3
+      { note: 880.00, dur: 0.35 },               // A5
+      { note: 1046.50, dur: 0.55 },              // C6
+      { note: 783.99, dur: 0.35 },               // G5
+    ];
+
+    let step = 0;
+
+    const playStep = () => {
       if (!bgmPlaying) return;
       try {
         const now = ctx.currentTime;
+        const current = melodySeq[step % melodySeq.length];
+
+        // 1. Kalimba / Marimba Melody Bell
         const osc = ctx.createOscillator();
+        const oscHarmonic = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(melody[noteIdx % melody.length], now);
-        gain.gain.setValueAtTime(0.025, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(current.note, now);
+
+        oscHarmonic.type = 'sine';
+        oscHarmonic.frequency.setValueAtTime(current.note * 2, now);
+
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + (current.dur || 0.35));
+
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        oscHarmonic.connect(gain);
+        gain.connect(bgmMasterGain || ctx.destination);
+
         osc.start(now);
-        osc.stop(now + 0.45);
-        noteIdx++;
-      } catch(e) {}
-    }, 420);
+        oscHarmonic.start(now);
+        osc.stop(now + (current.dur || 0.35));
+        oscHarmonic.stop(now + (current.dur || 0.35));
+
+        // 2. Soft Ambient Warm Bass
+        if (current.bass) {
+          const bassOsc = ctx.createOscillator();
+          const bassGain = ctx.createGain();
+          bassOsc.type = 'sine';
+          bassOsc.frequency.setValueAtTime(current.bass, now);
+          bassGain.gain.setValueAtTime(0.035, now);
+          bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
+
+          bassOsc.connect(bassGain);
+          bassGain.connect(bgmMasterGain || ctx.destination);
+
+          bassOsc.start(now);
+          bassOsc.stop(now + 0.65);
+        }
+
+        step++;
+      } catch (e) {}
+    };
+
+    playStep();
+    bgmInterval = setInterval(playStep, 380);
 
     return true;
   } catch (e) {
     return false;
   }
 }
+

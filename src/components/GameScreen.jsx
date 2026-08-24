@@ -28,7 +28,7 @@ export default function GameScreen({
   const isMyTurn = room.roomMode === 'time_attack' || (activePlayer && activePlayer.id === myId);
   const isTimeAttack = room.roomMode === 'time_attack';
 
-  const selectedAnimal = me?.hand?.find((c) => c.id === selectedCardId);
+  const selectedAnimal = me?.hand?.find((c) => (c.cardInstanceId && c.cardInstanceId === selectedCardId) || c.id === selectedCardId);
   const activeAnimal = selectedAnimal || null;
 
   const isShielded = room.shieldedPlayerIds?.includes(myId);
@@ -42,7 +42,7 @@ export default function GameScreen({
     : `⏳ รอตาของ: ${activePlayer?.name || 'ผู้เล่นอื่น'}`;
 
   const passLabel = selectedAnimal
-    ? `ทิ้ง "${selectedAnimal.name || selectedAnimal.title}"`
+    ? `ทิ้ง "${selectedAnimal.name || selectedAnimal.title || 'การ์ดนี้'}"`
     : 'ข้ามตา / จั่วใหม่';
 
   return (

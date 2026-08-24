@@ -8,6 +8,7 @@ import GameScreen from './components/GameScreen';
 import VictoryModal from './components/VictoryModal';
 import EncyclopediaModal from './components/EncyclopediaModal';
 import TutorialModal from './components/TutorialModal';
+import SpecialCardShowcase from './components/SpecialCardShowcase';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
 
@@ -26,6 +27,7 @@ export default function App() {
   const [showVictory, setShowVictory] = useState(false);
   const [showDex, setShowDex] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [activeSpecialEvent, setActiveSpecialEvent] = useState(null);
   const [showDropHints, setShowDropHints] = useState(() => {
     return localStorage.getItem('animalgame_drop_hints') !== 'false';
   });
@@ -110,11 +112,12 @@ export default function App() {
 
     socket.on('special_card_played', (info) => {
       playSfx('sparkle');
+      setActiveSpecialEvent(info);
       try {
         confetti({
-          particleCount: 40,
-          spread: 60,
-          origin: { y: 0.7 },
+          particleCount: 45,
+          spread: 70,
+          origin: { y: 0.6 },
           colors: ['#F59E0B', '#EF4444', '#8B5CF6', '#10B981']
         });
       } catch (e) {}
@@ -437,6 +440,14 @@ export default function App() {
           onStartPlaying={() => {
             setShowTutorial(false);
           }}
+        />
+      )}
+
+      {/* Cinematic Special Card Showcase Overlay */}
+      {activeSpecialEvent && (
+        <SpecialCardShowcase
+          specialEvent={activeSpecialEvent}
+          onComplete={() => setActiveSpecialEvent(null)}
         />
       )}
 

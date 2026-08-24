@@ -3065,4 +3065,296 @@ body {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   ✨ SPECIAL CARD CINEMATIC 3D SHOWCASE & FOIL SYSTEM
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Special Card Shimmer Foil in Hand */
+.vertical-hand-card.special-foil {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45), 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+  position: relative;
+}
+
+.vertical-hand-card.special-foil::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(245, 158, 11, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Floating Action Button for Special Cards in Hand */
+.btn-use-special-floating {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+  color: #ffffff;
+  border: 1.5px solid #FEF08A;
+  border-radius: var(--r-pill);
+  padding: 5px 12px;
+  font-family: var(--font-thai);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  z-index: 10;
+  animation: specialBtnPulse 1.4s ease-in-out infinite alternate;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-use-special-floating:hover {
+  transform: translateX(-50%) scale(1.08);
+}
+
+.btn-use-special-floating:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+@keyframes specialBtnPulse {
+  0% {
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
+  }
+  100% {
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.75), 0 0 8px rgba(254, 240, 138, 0.8);
+  }
+}
+
+/* ─── Cinematic Fullscreen Showcase Overlay ─── */
+.special-showcase-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  perspective: 1200px;
+  user-select: none;
+}
+
+.special-showcase-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, rgba(15, 23, 42, 0.78) 0%, rgba(10, 15, 30, 0.92) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: showcaseBackdropFade 0.3s ease-out forwards;
+}
+
+@keyframes showcaseBackdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Announcement Header Pill */
+.special-actor-pill {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #FCD34D;
+  border-radius: var(--r-pill);
+  padding: 6px 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(245, 158, 11, 0.4);
+  margin-bottom: 24px;
+  animation: specialActorSlideDown 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.special-actor-name {
+  font-family: var(--font-thai);
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E293B;
+}
+
+.special-actor-action {
+  font-family: var(--font-thai);
+  font-size: 13px;
+  font-weight: 600;
+  color: #D97706;
+}
+
+@keyframes specialActorSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 3D Showcase Card Stage */
+.special-card-stage-box {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-style: preserve-3d;
+  transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Stage: 3D Spin In Entrance */
+.special-card-stage-box.stage-spinIn {
+  animation: specialCard3DSpinIn 0.75s cubic-bezier(0.2, 0.85, 0.35, 1.15) forwards;
+}
+
+/* Stage: Showcase Center Hover & Glow */
+.special-card-stage-box.stage-showcase {
+  animation: specialCardShowcaseHover 1.4s ease-in-out infinite alternate;
+}
+
+/* Stage: Fly & Float towards Bottom-Right Discard Pile */
+.special-card-stage-box.stage-flyToDiscard {
+  animation: specialCardFlyToDiscard 0.7s cubic-bezier(0.55, 0.05, 0.2, 1) forwards;
+}
+
+@keyframes specialCard3DSpinIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.1) rotateY(720deg) rotateZ(30deg) translateY(120px);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.1) rotateY(20deg) rotateZ(-5deg) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg) rotateZ(0deg) translateY(0);
+  }
+}
+
+@keyframes specialCardShowcaseHover {
+  0% {
+    transform: scale(1) translateY(0) rotateZ(0deg);
+  }
+  100% {
+    transform: scale(1.04) translateY(-12px) rotateZ(1deg);
+  }
+}
+
+@keyframes specialCardFlyToDiscard {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+  40% {
+    opacity: 0.95;
+    transform: scale(0.7) translate(15vw, 15vh) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.08) translate(40vw, 42vh) rotate(45deg);
+  }
+}
+
+/* Halo Glow Effect behind Card */
+.special-card-halo {
+  position: absolute;
+  width: 260px;
+  height: 380px;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.6) 0%, rgba(239, 68, 68, 0.3) 50%, rgba(255, 255, 255, 0) 80%);
+  filter: blur(28px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: haloPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes haloPulse {
+  0% { transform: translateX(-50%) scale(0.9); opacity: 0.6; }
+  100% { transform: translateX(-50%) scale(1.3); opacity: 1; }
+}
+
+/* Physical Card Frame in Showcase */
+.special-card-frame {
+  width: 210px;
+  height: 310px;
+  border-radius: 18px;
+  border: 4px solid #FCD34D;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 30px rgba(245, 158, 11, 0.6);
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.special-card-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Bottom Announcement Callout Banner */
+.special-card-banner {
+  margin-top: 18px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #F59E0B;
+  border-radius: 16px;
+  padding: 12px 24px;
+  text-align: center;
+  max-width: 380px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 16px rgba(245, 158, 11, 0.3);
+  animation: specialBannerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.special-banner-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-thai);
+  font-size: 18px;
+  font-weight: 800;
+  color: #FEF08A;
+  margin-bottom: 4px;
+}
+
+.special-badge-emoji {
+  font-size: 22px;
+}
+
+.special-banner-desc {
+  font-family: var(--font-thai);
+  font-size: 12px;
+  color: #E2E8F0;
+  line-height: 1.4;
+}
+
+.special-banner-msg {
+  font-family: var(--font-thai);
+  font-size: 11px;
+  font-weight: 600;
+  color: #A7F3D0;
+  margin-top: 4px;
+}
+
+@keyframes specialBannerPop {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
 
