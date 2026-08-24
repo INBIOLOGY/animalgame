@@ -1518,8 +1518,8 @@ body {
 .cute-hand-cards-row {
   display: flex;
   gap: 12px;
-  align-items: center;
-  height: 165px;
+  align-items: flex-end; /* align to bottom so cards fill up and button sits below */
+  height: 185px;
   transition: height 0.35s var(--ease-bounce);
 }
 
@@ -1539,16 +1539,29 @@ body {
 }
 
 /* 🎴 VERTICAL HAND CARD */
+
+/* Wrapper that holds the card + special button together */
+.hand-card-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
 .vertical-hand-card {
   position: relative;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   aspect-ratio: 1395 / 1949;
   border-radius: 10px;
   border: 2px solid #334155;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
-  overflow: visible; /* allow button to show above card edge */
+  overflow: hidden;
   cursor: pointer;
-  flex-shrink: 0;
+  width: 100%;
   background: #0F172A;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
   user-select: none;
@@ -1564,7 +1577,7 @@ body {
 }
 
 .vertical-hand-card:hover {
-  transform: translateY(-8px) scale(1.06);
+  transform: translateY(-5px) scale(1.05);
   border-color: #38BDF8;
   box-shadow: 0 10px 24px rgba(56, 189, 248, 0.3);
   z-index: 10;
@@ -1573,8 +1586,12 @@ body {
 .vertical-hand-card.is-selected {
   border-color: #F59E0B !important;
   border-width: 2.5px !important;
-  transform: translateY(-12px) scale(1.1) !important;
+  transform: translateY(-8px) scale(1.08) !important;
   box-shadow: 0 0 0 3px #F59E0B, 0 14px 32px rgba(245, 158, 11, 0.4) !important;
+  z-index: 20;
+}
+
+.wrap-selected {
   z-index: 20;
 }
 
@@ -1589,14 +1606,23 @@ body {
   100% { box-shadow: 0 0 8px rgba(236, 72, 153, 0.4); }
 }
 
+.hand-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Remove the old inner-clip div rule — no longer needed */
+.hand-card-inner-clip {
+  display: contents;
+}
+
 /* hand-card-img now defined above */
 
 /* Inner clip wrapper: clips the art to rounded rect without clipping the action button */
 .hand-card-inner-clip {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  overflow: hidden;
+  display: contents;
 }
 
 
@@ -1617,23 +1643,26 @@ body {
 }
 
 .btn-use-special-floating {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  right: 6px;
+  /* Now a flex sibling BELOW the card — no position:absolute needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 90%;
   background: linear-gradient(135deg, #F59E0B, #EF4444);
   color: white;
   border: none;
   font-family: var(--font-thai);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 900;
-  padding: 3px 6px;
+  padding: 4px 6px;
   border-radius: var(--r-pill);
   cursor: pointer;
-  z-index: 15;
+  flex-shrink: 0;
   box-shadow: 0 3px 10px rgba(239, 68, 68, 0.5);
   text-align: center;
   animation: pulseDroppable 1.2s infinite alternate ease-in-out;
+  white-space: nowrap;
 }
 
 /* Vertical Discard Box */
@@ -3279,42 +3308,40 @@ body {
 }
 
 /* Floating Action Button for Special Cards in Hand */
+/* Now a static flex item below the card — NOT position:absolute */
 .btn-use-special-floating {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 90%;
   background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
   color: #ffffff;
   border: 1.5px solid #FEF08A;
   border-radius: var(--r-pill);
-  padding: 5px 12px;
+  padding: 5px 10px;
   font-family: var(--font-thai);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45);
   cursor: pointer;
-  z-index: 10;
+  flex-shrink: 0;
   animation: specialBtnPulse 1.4s ease-in-out infinite alternate;
   transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-use-special-floating:hover {
-  transform: translateX(-50%) scale(1.08);
+  transform: scale(1.08);
 }
 
 .btn-use-special-floating:active {
-  transform: translateX(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 @keyframes specialBtnPulse {
-  0% {
-    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
-  }
-  100% {
-    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.75), 0 0 8px rgba(254, 240, 138, 0.8);
-  }
+  0% { box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35); }
+  100% { box-shadow: 0 6px 18px rgba(245, 158, 11, 0.75), 0 0 8px rgba(254, 240, 138, 0.8); }
 }
 
 /* ─── Cinematic Fullscreen Showcase Overlay ─── */

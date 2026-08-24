@@ -84,41 +84,43 @@ export default function HandDock({
                 <div
                   key={cardIdKey}
                   id={`handCard-${cardIdKey}`}
-                  className={`vertical-hand-card card-deal-anim ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
+                  className={`hand-card-wrap ${isSpecial ? 'has-special' : ''} ${isSelected ? 'wrap-selected' : ''}`}
                   style={{ animationDelay: `${idx * 0.07}s` }}
-                  draggable={true}
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('text/plain', cardIdKey);
-                    onSelectCard(cardIdKey);
-                  }}
-                  onClick={() => onSelectCard(cardIdKey)}
                 >
-                  {/* Inner clip wrapper: clips the image without clipping the special button */}
-                  <div className="hand-card-inner-clip">
+                  {/* The actual card — overflow hidden, no button inside */}
+                  <div
+                    className={`vertical-hand-card card-deal-anim ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
+                    draggable={true}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('text/plain', cardIdKey);
+                      onSelectCard(cardIdKey);
+                    }}
+                    onClick={() => onSelectCard(cardIdKey)}
+                  >
                     <img
                       src={cardImg}
                       alt={card.name || card.title}
                       className="hand-card-img"
                       loading="lazy"
                     />
+
+                    {/* Top Discard Pill on Selected */}
+                    {isSelected && (
+                      <button
+                        type="button"
+                        className="card-quick-discard-tag"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDiscardSingle(cardIdKey);
+                        }}
+                        title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
+                      >
+                        ✕ ทิ้งใบนี้
+                      </button>
+                    )}
                   </div>
 
-                  {/* Top Discard Pill on Selected */}
-                  {isSelected && (
-                    <button
-                      type="button"
-                      className="card-quick-discard-tag"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDiscardSingle(cardIdKey);
-                      }}
-                      title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
-                    >
-                      ✕ ทิ้งใบนี้
-                    </button>
-                  )}
-
-                  {/* Special Action Card Trigger Button */}
+                  {/* Special Action Button — sibling BELOW the card, NOT inside it */}
                   {isSpecial && card.actionType !== 'wildcard' && isMyTurn && (
                     <button
                       type="button"
@@ -129,7 +131,7 @@ export default function HandDock({
                       }}
                       title="กดใช้ความสามารถการ์ดพิเศษใบนี้ทันที"
                     >
-                      ✨ ใช้ความสามารถ
+                      ✨ ใช้
                     </button>
                   )}
                 </div>
