@@ -369,9 +369,19 @@ export default function App() {
         onOpenTutorial={() => setShowTutorial(true)}
       />
 
-      {/* Global Toast */}
-      <div id="toastBox" className={`${toast.type} ${toast.visible ? 'show' : ''}`}>
-        {toast.text}
+      {/* ─── Global Toast Notification ─── */}
+      <div
+        id="toastBox"
+        className={`game-toast game-toast-${toast.type} ${toast.visible ? 'game-toast-show' : ''}`}
+        role="status"
+        aria-live="polite"
+      >
+        <span className="game-toast-icon">
+          {toast.type === 'error' && '⚠️'}
+          {toast.type === 'info'  && '💬'}
+          {toast.type === 'success' && '✨'}
+        </span>
+        <span className="game-toast-text">{toast.text}</span>
       </div>
 
       <main className="app-screen">
