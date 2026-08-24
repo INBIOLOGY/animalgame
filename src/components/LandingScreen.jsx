@@ -210,32 +210,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
             </div>
           </div>
 
-          {/* 18-Animal Cute Avatar Picker Grid */}
-          <div className="cute-avatar-picker-section">
-            <div className="cute-picker-header">
-              <span className="cute-picker-label">เลือกสัตว์ประจำตัว (18 ชนิด):</span>
-            </div>
-
-            <div className="cute-avatar-grid">
-              {ANIMAL_AVATARS.map((av) => {
-                const isSelected = selectedAvatarId === av.id;
-                return (
-                  <button
-                    key={av.id}
-                    type="button"
-                    className={`cute-avatar-btn ${isSelected ? 'active-avatar' : ''}`}
-                    onClick={() => handleSelectAvatar(av.id)}
-                    title={av.name}
-                  >
-                    <AnimalAvatar id={av.id} size={28} />
-                    {isSelected && <span className="cute-active-dot" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Player Name Input */}
+          {/* Player Name Input — moved ABOVE avatar grid */}
           <div className="cute-name-input-group">
             <label className="cute-input-label">ชื่อผู้เล่น:</label>
             <div className="cute-input-box">
@@ -261,6 +236,31 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
               />
             </div>
             {nameError && <div className="cute-error-text">{nameError}</div>}
+          </div>
+
+          {/* 18-Animal Cute Avatar Picker Grid */}
+          <div className="cute-avatar-picker-section">
+            <div className="cute-picker-header">
+              <span className="cute-picker-label">เลือกสัตว์ประจำตัว (18 ชนิด):</span>
+            </div>
+
+            <div className="cute-avatar-grid">
+              {ANIMAL_AVATARS.map((av) => {
+                const isSelected = selectedAvatarId === av.id;
+                return (
+                  <button
+                    key={av.id}
+                    type="button"
+                    className={`cute-avatar-btn ${isSelected ? 'active-avatar' : ''}`}
+                    onClick={() => handleSelectAvatar(av.id)}
+                    title={av.name}
+                  >
+                    <AnimalAvatar id={av.id} size={28} />
+                    {isSelected && <span className="cute-active-dot" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* 📱 Mobile Instant Join Box (เมื่อกดแท็บ 'ใส่รหัสเข้าห้อง') */}

@@ -93,13 +93,15 @@ export default function HandDock({
                   }}
                   onClick={() => onSelectCard(cardIdKey)}
                 >
-                  {/* Full Vertical Trading Card Image */}
-                  <img
-                    src={cardImg}
-                    alt={card.name || card.title}
-                    className="hand-card-img"
-                    loading="lazy"
-                  />
+                  {/* Inner clip wrapper: clips the image without clipping the special button */}
+                  <div className="hand-card-inner-clip">
+                    <img
+                      src={cardImg}
+                      alt={card.name || card.title}
+                      className="hand-card-img"
+                      loading="lazy"
+                    />
+                  </div>
 
                   {/* Top Discard Pill on Selected */}
                   {isSelected && (
