@@ -69,13 +69,11 @@ function MobileSheet({ open, onClose, title, children }) {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className={`mobile-sheet-backdrop ${open ? 'open' : ''}`}
         onClick={onClose}
         aria-hidden="true"
       />
-      {/* Sheet */}
       <div className={`mobile-sheet ${open ? 'open' : ''}`} role="dialog" aria-modal="true">
         <div className="mobile-sheet-handle" />
         <div className="mobile-sheet-header">
@@ -89,7 +87,7 @@ function MobileSheet({ open, onClose, title, children }) {
 }
 
 // ─── Mode Selection Content ───────────────────────────────────────
-function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setMaxPlayers, botDifficulty, setBotDifficulty }) {
+function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setMaxPlayers, botDifficulty, setBotDifficulty, onConfirm }) {
   return (
     <div className="mobile-mode-selector">
       <div className="cute-modes-list">
@@ -99,7 +97,10 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
             <div
               key={m.key}
               className={`cute-mode-card ${isActive ? 'active-mode' : ''}`}
-              onClick={() => { playSfx('select'); setMode(m.key); }}
+              onClick={() => {
+                playSfx('select');
+                setMode(m.key);
+              }}
             >
               <div className="cute-mode-icon-box">
                 <UIIcon name={m.iconName} size={18} color={isActive ? '#2D6A28' : '#64748B'} />
@@ -163,13 +164,18 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
           </div>
         )}
       </div>
+
+      {onConfirm && (
+        <button type="button" className="phone-create-btn" style={{ marginTop: 14 }} onClick={onConfirm}>
+          ✓ ตกลงเลือกโหมดนี้
+        </button>
+      )}
     </div>
   );
 }
 
 // ─── Main LandingScreen ──────────────────────────────────────────
 export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial }) {
-  const [activeTab, setActiveTab] = useState('create');
   const [selectedAvatarId, setSelectedAvatarId] = useState('lion');
   const [playerName, setPlayerName] = useState('');
   const [mode, setMode] = useState('multiplayer');
@@ -182,8 +188,9 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
   const [codeError, setCodeError] = useState('');
 
   // Mobile bottom sheets
-  const [sheetMode, setSheetMode] = useState(false);   // mode selector sheet
-  const [sheetJoin, setSheetJoin] = useState(false);   // join room sheet
+  const [sheetAnimal, setSheetAnimal] = useState(false); // Animal selection sheet
+  const [sheetMode, setSheetMode] = useState(false);     // Mode selection sheet
+  const [sheetJoin, setSheetJoin] = useState(false);     // Join room sheet
 
   const curAnimalData = ALL_ANIMALS_DATA.find((a) => a.id === selectedAvatarId) || ALL_ANIMALS_DATA[0];
   const curAvatarMeta = ANIMAL_AVATARS.find((a) => a.id === selectedAvatarId) || ANIMAL_AVATARS[0];
@@ -194,10 +201,22 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
 
   const handleCreate = () => {
     const raw = playerName.trim();
-    if (!raw) { playSfx('discard'); setNameError('กรุณาพิมพ์ชื่อของคุณก่อนนะ'); return; }
-    setNameError(''); setCodeError('');
+    if (!raw) {
+      playSfx('discard');
+      setNameError('กรุณาพิมพ์ชื่อของคุณก่อนนะ');
+      return;
+    }
+    setNameError('');
+    setCodeError('');
     playSfx('fanfare');
-    try { confetti({ particleCount: 45, spread: 75, origin: { y: 0.65 }, colors: ['#A8C686', '#FDE68A', '#FED7AA', '#93C5FD', '#FFFFFF'] }); } catch (e) {}
+    try {
+      confetti({
+        particleCount: 45,
+        spread: 75,
+        origin: { y: 0.65 },
+        colors: ['#A8C686', '#FDE68A', '#FED7AA', '#93C5FD', '#FFFFFF'],
+      });
+    } catch (e) {}
     setSheetMode(false);
     onCreateRoom(raw, selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty);
   };
@@ -205,9 +224,18 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
   const handleJoin = () => {
     const raw = playerName.trim();
     const code = roomCode.trim();
-    if (!raw) { playSfx('discard'); setNameError('กรุณาพิมพ์ชื่อของคุณก่อนนะ'); return; }
-    if (!code || code.length !== 6) { playSfx('discard'); setCodeError('กรุณากรอกรหัสห้อง 6 หลัก'); return; }
-    setNameError(''); setCodeError('');
+    if (!raw) {
+      playSfx('discard');
+      setNameError('กรุณาพิมพ์ชื่อของคุณก่อนนะ');
+      return;
+    }
+    if (!code || code.length !== 6) {
+      playSfx('discard');
+      setCodeError('กรุณากรอกรหัสห้อง 6 หลัก');
+      return;
+    }
+    setNameError('');
+    setCodeError('');
     playSfx('select');
     setSheetJoin(false);
     onJoinRoom(raw, selectedAvatarId, code);
@@ -220,9 +248,20 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
     setTimeout(() => setMascotBounce(false), 400);
   };
 
-  // ── Mode label for button ──────────────────────────────────────
-  const modeLabel = MODES.find(m => m.key === mode)?.tag || 'เลือกโหมด';
-  const modeIcon = mode === 'multiplayer' ? '👥' : mode === 'vs_bot' ? '🤖' : '⏱️';
+  // Select avatar and auto-close sheet on mobile
+  const handleSelectAvatarMobile = (id) => {
+    handleSelectAvatar(id);
+    setSheetAnimal(false);
+  };
+
+  // Mode summary text for mobile button
+  const curModeObj = MODES.find((m) => m.key === mode) || MODES[0];
+  const modeSubtitle =
+    mode === 'multiplayer'
+      ? `${maxPlayers} คน`
+      : mode === 'vs_bot'
+      ? `ระดับ ${botDifficulty === 'easy' ? 'ง่าย' : botDifficulty === 'hard' ? 'ยาก' : 'ปานกลาง'}`
+      : `${timeLimit} วินาที`;
 
   return (
     <section className="cute-landing-section page-screen-anim">
@@ -231,7 +270,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
       <div className="cute-meadow-overlay" aria-hidden="true" />
 
       {/* ════════════════════════════════════════════════
-          DESKTOP layout (>860px) — unchanged two-column
+          DESKTOP layout (>600px) — classic 2-column
           ════════════════════════════════════════════════ */}
       <div className="cute-lobby-card desktop-lobby-card">
         {/* ─── LEFT: Avatar Picker ─── */}
@@ -398,20 +437,37 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
       </div>
 
       {/* ════════════════════════════════════════════════
-          PHONE layout (≤600px) — clean scrollable card
+          PHONE layout (≤600px) — Compact Tap-to-Popup
           ════════════════════════════════════════════════ */}
       <div className="phone-lobby-card">
-        {/* Scrollable content area */}
+        {/* Scrollable Main Area */}
         <div className="phone-lobby-scroll">
 
-          {/* ─── Player Identity ─── */}
-          <div className="phone-section">
-            <div className="phone-section-label">👤 ชื่อผู้เล่น</div>
+          {/* Top Bar: Title + Tutorial button */}
+          <div className="phone-top-row">
+            <div className="phone-top-title">
+              <span className="phone-top-emoji">🐾</span>
+              <span>เข้าสู่ห้องเล่น</span>
+            </div>
+            <button
+              type="button"
+              className="phone-tutorial-btn"
+              onClick={() => { playSfx('pop'); if (onOpenTutorial) onOpenTutorial(); }}
+            >
+              🎓 วิธีเล่น
+            </button>
+          </div>
+
+          {/* ─── 1. Player Name Input ─── */}
+          <div className="phone-field-group">
+            <label className="phone-field-label">👤 ชื่อผู้เล่น</label>
             <div className="cute-input-box">
               <div className="cute-input-avatar"><AnimalAvatar id={curAnimalData.id} size={22} /></div>
               <input
                 className={`cute-text-input${nameError ? ' input-error' : ''}`}
-                type="text" placeholder="พิมพ์ชื่อของคุณ..." maxLength={16}
+                type="text"
+                placeholder="พิมพ์ชื่อของคุณที่นี่..."
+                maxLength={16}
                 value={playerName}
                 onChange={(e) => { setPlayerName(e.target.value); if (nameError) setNameError(''); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
@@ -420,104 +476,156 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
             {nameError && <div className="cute-error-text">{nameError}</div>}
           </div>
 
-          {/* ─── Selected Animal Preview ─── */}
-          <div className="phone-section phone-animal-preview">
-            <div className="phone-animal-badge">
-              <AnimalAvatar id={curAnimalData.id} size={52} />
-              <div className="phone-animal-info">
-                <div className="phone-animal-name">{curAnimalData.name}</div>
-                <div className="phone-animal-eng">{curAnimalData.englishName}</div>
-                <div className="cute-traits-list" style={{ marginTop: 3 }}>
-                  {distinctTraits.slice(0, 2).map((tLabel, idx) => {
-                    const originalKey = curAnimalData.traits.find((k) => (TRAIT_MAP[k] || k) === tLabel) || 'backbone';
-                    const colors = TRAIT_COLORS[originalKey] || { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', iconName: 'backbone' };
-                    return (
-                      <span key={idx} className="cute-trait-tag" style={{ background: colors.bg, color: colors.text, borderColor: colors.border, fontSize: 9 }}>
-                        <TraitIcon name={colors.iconName} size={9} color={colors.text} /><span>{tLabel}</span>
-                      </span>
-                    );
-                  })}
+          {/* ─── 2. Animal Selection Card Button (Tap to open Animal Sheet) ─── */}
+          <div className="phone-field-group">
+            <div className="phone-field-header">
+              <label className="phone-field-label">🐾 สัตว์ประจำตัว</label>
+              <span className="phone-tap-hint">แตะเพื่อเปลี่ยน</span>
+            </div>
+            <button
+              type="button"
+              className="phone-select-card-btn"
+              onClick={() => { playSfx('pop'); setSheetAnimal(true); }}
+            >
+              <div className="phone-select-card-left">
+                <AnimalAvatar id={curAnimalData.id} size={50} />
+                <div className="phone-select-card-info">
+                  <div className="phone-select-card-title">
+                    <span>{curAnimalData.name}</span>
+                    <span className="phone-select-card-eng">({curAnimalData.englishName})</span>
+                  </div>
+                  <div className="phone-select-card-sub">
+                    📍 {curAnimalData.habitat}
+                  </div>
                 </div>
               </div>
-            </div>
+              <div className="phone-select-card-chevron">
+                <span>เปลี่ยน</span>
+                <span className="phone-chevron-arrow">▾</span>
+              </div>
+            </button>
           </div>
 
-          {/* ─── Avatar 2-column Grid ─── */}
-          <div className="phone-section">
-            <div className="phone-section-label">🐾 เลือกสัตว์ประจำตัว</div>
-            <div className="phone-avatar-grid">
-              {ANIMAL_AVATARS.map((av) => {
-                const isSelected = selectedAvatarId === av.id;
-                return (
-                  <button key={av.id} type="button"
-                    className={`phone-avatar-btn ${isSelected ? 'active-avatar' : ''}`}
-                    onClick={() => handleSelectAvatar(av.id)} title={av.name}
-                  >
-                    <AnimalAvatar id={av.id} size={32} />
-                    <span className="phone-avatar-name">{av.name}</span>
-                    {isSelected && <span className="cute-active-dot phone-active-dot" />}
-                  </button>
-                );
-              })}
+          {/* ─── 3. Game Mode Card Button (Tap to open Mode Sheet) ─── */}
+          <div className="phone-field-group">
+            <div className="phone-field-header">
+              <label className="phone-field-label">🎮 โหมดการเล่น</label>
+              <span className="phone-tap-hint">แตะเพื่อตั้งค่า</span>
             </div>
+            <button
+              type="button"
+              className="phone-select-card-btn"
+              onClick={() => { playSfx('select'); setSheetMode(true); }}
+            >
+              <div className="phone-select-card-left">
+                <div className="phone-mode-icon-circle">
+                  <UIIcon name={curModeObj.iconName} size={22} color="#2D6A28" />
+                </div>
+                <div className="phone-select-card-info">
+                  <div className="phone-select-card-title">
+                    <span>{curModeObj.title}</span>
+                  </div>
+                  <div className="phone-select-card-sub" style={{ color: '#2D6A28', fontWeight: 800 }}>
+                    ⚙️ {modeSubtitle}
+                  </div>
+                </div>
+              </div>
+              <div className="phone-select-card-chevron">
+                <span>ปรับโหมด</span>
+                <span className="phone-chevron-arrow">▾</span>
+              </div>
+            </button>
           </div>
+
+          {/* ─── 4. Join Room Button ─── */}
+          <button
+            type="button"
+            className="phone-join-room-pill-btn"
+            onClick={() => { playSfx('pop'); setSheetJoin(true); }}
+          >
+            <span>🔑 มีรหัสห้องแล้ว? แตะเพื่อเข้าร่วมห้อง</span>
+          </button>
+
         </div>
 
-        {/* ─── Fixed Bottom Action Bar ─── */}
-        <div className="phone-lobby-actions">
-          {/* Tutorial */}
-          <button type="button" className="phone-action-pill phone-action-tutorial"
-            onClick={() => { playSfx('pop'); if (onOpenTutorial) onOpenTutorial(); }}>
-            🎓 วิธีเล่น
-          </button>
-
-          {/* Mode selector button */}
-          <button type="button" className="phone-action-pill phone-action-mode"
-            onClick={() => { playSfx('select'); setSheetMode(true); }}>
-            {modeIcon} {modeLabel}
-            <span className="phone-action-chevron">▾</span>
-          </button>
-
-          {/* Join room */}
-          <button type="button" className="phone-action-pill phone-action-join"
-            onClick={() => { playSfx('pop'); setSheetJoin(true); }}>
-            🔑 เข้าห้อง
-          </button>
-
-          {/* Create room — full width primary */}
+        {/* ─── Fixed Bottom Create Room Action Button ─── */}
+        <div className="phone-bottom-bar">
           <button type="button" className="phone-create-btn" onClick={handleCreate}>
-            ✨ สร้างห้องเล่นเกม
+            <span>✨ สร้างห้องเล่นเกม</span>
           </button>
         </div>
       </div>
 
-      {/* ─── Mode Selector Bottom Sheet ─── */}
-      <MobileSheet open={sheetMode} onClose={() => setSheetMode(false)} title="🎮 เลือกโหมดการเล่น">
+      {/* ════════════════════════════════════════════════
+          BOTTOM SHEET: Animal Avatar Picker (18 Animals)
+          Tap animal -> updates & auto-closes!
+          ════════════════════════════════════════════════ */}
+      <MobileSheet
+        open={sheetAnimal}
+        onClose={() => setSheetAnimal(false)}
+        title="🐾 เลือกสัตว์ประจำตัว (18 ชนิด)"
+      >
+        <div className="phone-sheet-avatar-grid">
+          {ANIMAL_AVATARS.map((av) => {
+            const isSelected = selectedAvatarId === av.id;
+            return (
+              <button
+                key={av.id}
+                type="button"
+                className={`phone-sheet-avatar-btn ${isSelected ? 'active-sheet-avatar' : ''}`}
+                onClick={() => handleSelectAvatarMobile(av.id)}
+              >
+                <AnimalAvatar id={av.id} size={42} />
+                <span className="phone-sheet-avatar-name">{av.name}</span>
+                {isSelected && <span className="phone-sheet-active-check">✓</span>}
+              </button>
+            );
+          })}
+        </div>
+      </MobileSheet>
+
+      {/* ════════════════════════════════════════════════
+          BOTTOM SHEET: Mode Selection & Params
+          ════════════════════════════════════════════════ */}
+      <MobileSheet
+        open={sheetMode}
+        onClose={() => setSheetMode(false)}
+        title="🎮 เลือกโหมดการเล่น"
+      >
         <ModeSelector
           mode={mode} setMode={setMode}
           timeLimit={timeLimit} setTimeLimit={setTimeLimit}
           maxPlayers={maxPlayers} setMaxPlayers={setMaxPlayers}
           botDifficulty={botDifficulty} setBotDifficulty={setBotDifficulty}
+          onConfirm={() => setSheetMode(false)}
         />
-        <button type="button" className="phone-create-btn" style={{ marginTop: 16 }} onClick={handleCreate}>
-          ✨ สร้างห้องเล่นเกม
-        </button>
       </MobileSheet>
 
-      {/* ─── Join Room Bottom Sheet ─── */}
-      <MobileSheet open={sheetJoin} onClose={() => setSheetJoin(false)} title="🔑 ใส่รหัสเข้าห้อง">
+      {/* ════════════════════════════════════════════════
+          BOTTOM SHEET: Join Room with Code
+          ════════════════════════════════════════════════ */}
+      <MobileSheet
+        open={sheetJoin}
+        onClose={() => setSheetJoin(false)}
+        title="🔑 ใส่รหัสห้องเพื่อเข้าร่วม"
+      >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <p style={{ fontSize: 13, color: '#64748B', margin: 0 }}>กรอกรหัสห้อง 6 หลักที่เพื่อนแชร์มาให้</p>
           <div className="cute-join-inputs" style={{ flexDirection: 'column' }}>
             <input
               className={`cute-code-input${codeError ? ' input-error' : ''}`}
-              type="text" placeholder="รหัส 6 หลัก (เช่น A1B2C3)" maxLength={6}
-              value={roomCode} onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
+              type="text"
+              placeholder="รหัส 6 หลัก (เช่น A1B2C3)"
+              maxLength={6}
+              value={roomCode}
+              onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-              style={{ width: '100%', fontSize: 22, letterSpacing: 6, textAlign: 'center' }}
+              style={{ width: '100%', fontSize: 24, letterSpacing: 6, textAlign: 'center', height: 48 }}
             />
             {codeError && <div className="cute-error-text">{codeError}</div>}
-            <button type="button" className="phone-create-btn" onClick={handleJoin}>🚀 เข้าร่วมเลย!</button>
+            <button type="button" className="phone-create-btn" onClick={handleJoin}>
+              🚀 เข้าร่วมห้องเลย!
+            </button>
           </div>
         </div>
       </MobileSheet>
