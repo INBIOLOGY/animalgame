@@ -106,6 +106,7 @@ export default function GameScreen({
               centerIdx={centerIdx}
               categoryItem={categoryItem}
               activeAnimal={activeAnimal}
+              myHand={me?.hand || []}
               isMyTurn={isMyTurn}
               showDropHints={showDropHints}
               onSlotClick={onSlotClick}

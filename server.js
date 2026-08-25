@@ -137,7 +137,13 @@ function checkValidMove(card, categoryCard, slotIndex) {
   }
 
   // การ์ด Fit Free (Wildcard) ลงได้ทุกช่อง
-  if (card.actionType === 'wildcard' || card.id === 'special_fit_free') {
+  if (
+    card.actionType === 'wildcard' ||
+    card.id === 'special_fit_free' ||
+    card.id?.startsWith('special_fit_free') ||
+    card.cardInstanceId?.startsWith('special_fit_free') ||
+    card.isPlayableOnSlot
+  ) {
     return true;
   }
 

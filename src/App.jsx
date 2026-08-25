@@ -11,6 +11,7 @@ import TutorialModal from './components/TutorialModal';
 import SpecialCardShowcase from './components/SpecialCardShowcase';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
+import { isTraitCompatible } from './utils/traits';
 
 const SOCKET_SERVER = import.meta.env.VITE_SERVER_URL || '';
 const socket = io(SOCKET_SERVER, {
@@ -315,11 +316,32 @@ export default function App() {
   };
 
   const handleSlotClick = (centerIdx, slotIdx) => {
-    if (!selectedCardId) {
-      playSfx('select');
-      return showToastMsg('กรุณาแตะเลือกการ์ดในมือ หรือลากมาวางที่ช่อง');
+    if (!room) return;
+    const me = room.players.find((p) => p.id === socket.id);
+    if (!me || !me.hand || me.hand.length === 0) return;
+
+    const centerItem = room.centerCategories?.[centerIdx];
+    if (!centerItem || !centerItem.category) return;
+    if (centerItem.filledSlots[slotIdx] !== null) return;
+
+    // 1. If a card is already selected in hand, play that selected card
+    if (selectedCardId) {
+      executeMoveAction(centerIdx, slotIdx, selectedCardId);
+      return;
     }
-    executeMoveAction(centerIdx, slotIdx, selectedCardId);
+
+    // 2. If NO card was pre-selected: automatically check if any card in hand matches this slot!
+    const slotConfig = centerItem.category.slots[slotIdx];
+    const requiredTrait = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
+
+    const matchingCard = me.hand.find((card) => isTraitCompatible(card, requiredTrait));
+    if (matchingCard) {
+      const cardId = matchingCard.cardInstanceId || matchingCard.id;
+      executeMoveAction(centerIdx, slotIdx, cardId);
+    } else {
+      playSfx('discard');
+      showToastMsg('ไม่มีการ์ดในมือที่ตรงกับช่องคำถามนี้');
+    }
   };
 
   const handleDiscardSingleCard = (cardId) => {

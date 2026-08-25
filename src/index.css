@@ -1420,14 +1420,43 @@ body {
 }
 
 .real-slot-zone.droppable-highlight {
-  background: rgba(16, 185, 129, 0.22);
+  background: rgba(16, 185, 129, 0.28);
   border: 2px dashed #10B981;
   animation: pulseSlotDrop 1.2s infinite alternate ease-in-out;
+  z-index: 10;
 }
 
 @keyframes pulseSlotDrop {
-  0% { background: rgba(16, 185, 129, 0.15); border-color: #34D399; }
-  100% { background: rgba(16, 185, 129, 0.32); border-color: #10B981; }
+  0% { background: rgba(16, 185, 129, 0.18); border-color: #34D399; transform: scale(0.99); }
+  100% { background: rgba(16, 185, 129, 0.38); border-color: #10B981; transform: scale(1.01); }
+}
+
+/* Gentle hint when no card is selected, but player has a matching card in hand */
+.real-slot-zone.slot-ready-hint {
+  border: 1.5px dashed rgba(74, 156, 68, 0.7);
+  background: rgba(74, 156, 68, 0.08);
+  transition: all 0.2s ease;
+}
+
+.real-slot-zone.slot-ready-hint:hover {
+  background: rgba(74, 156, 68, 0.2);
+  border-color: #4A9C44;
+}
+
+.slot-ready-badge {
+  background: rgba(45, 106, 40, 0.9);
+  color: #FFFFFF;
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-thai);
+  font-size: 8.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  backdrop-filter: blur(4px);
 }
 
 .real-slot-zone.drag-over {
@@ -1440,13 +1469,20 @@ body {
   color: #FFFFFF;
   padding: 2px 7px;
   border-radius: var(--r-pill);
-  font-size: 9px;
+  font-family: var(--font-thai);
+  font-size: 9.5px;
   font-weight: 800;
   display: flex;
   align-items: center;
   gap: 3px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
   pointer-events: none;
+  animation: bounceHint 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes bounceHint {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1.05); }
 }
 
 /* 🃏 MINI ANIMAL CARD STACKED OVERLAY */

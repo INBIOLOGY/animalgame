@@ -8,6 +8,7 @@ export default function SlotCell({
   slotData,
   slotConfig,
   isCompatible,
+  hasMatchingInHand,
   isMyTurn,
   showDropHints = true,
   onSlotClick,
@@ -20,18 +21,16 @@ export default function SlotCell({
   const slotPosClass = `slot-pos-${position}`;
 
   if (slotData === null) {
-    const canDrop = isMyTurn && isCompatible;
-    const canShowHighlight = canDrop && showDropHints;
+    const canShowHighlight = isMyTurn && isCompatible && showDropHints;
+    const canShowReady = isMyTurn && !isCompatible && hasMatchingInHand && showDropHints;
 
     const handleDragOver = (e) => {
-      if (canDrop) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-      }
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
     };
 
     const handleDragEnter = (e) => {
-      if (canDrop) e.currentTarget.classList.add('drag-over');
+      e.currentTarget.classList.add('drag-over');
     };
 
     const handleDragLeave = (e) => {
@@ -50,7 +49,7 @@ export default function SlotCell({
     return (
       <div
         id={`slot-${centerIdx}-${slotIdx}`}
-        className={`real-slot-zone empty-slot ${slotPosClass} ${canShowHighlight ? 'droppable-highlight' : ''}`}
+        className={`real-slot-zone empty-slot ${slotPosClass} ${canShowHighlight ? 'droppable-highlight' : ''} ${canShowReady ? 'slot-ready-hint' : ''}`}
         data-center-idx={centerIdx}
         data-slot-idx={slotIdx}
         onClick={() => onSlotClick(centerIdx, slotIdx)}
@@ -64,6 +63,11 @@ export default function SlotCell({
           <div className="slot-place-hint">
             <UIIcon name="check" size={12} color="#ffffff" />
             <span>วางที่นี่</span>
+          </div>
+        )}
+        {canShowReady && (
+          <div className="slot-ready-badge">
+            <span>💡 มีการ์ด</span>
           </div>
         )}
       </div>

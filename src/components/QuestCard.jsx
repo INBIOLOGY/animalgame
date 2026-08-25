@@ -7,6 +7,7 @@ export default function QuestCard({
   centerIdx,
   categoryItem,
   activeAnimal,
+  myHand = [],
   isMyTurn,
   showDropHints = true,
   onSlotClick,
@@ -52,7 +53,8 @@ export default function QuestCard({
           {categoryItem.filledSlots.map((slotData, slotIdx) => {
             const slotConfig = cat.slots[slotIdx];
             const requiredTrait = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
-            const isCompatible = activeAnimal && isTraitCompatible(activeAnimal.traits, requiredTrait);
+            const isCompatible = activeAnimal && isTraitCompatible(activeAnimal, requiredTrait);
+            const hasMatchingInHand = !activeAnimal && isMyTurn && myHand.some((c) => isTraitCompatible(c, requiredTrait));
 
             return (
               <SlotCell
@@ -62,6 +64,7 @@ export default function QuestCard({
                 slotData={slotData}
                 slotConfig={slotConfig}
                 isCompatible={isCompatible}
+                hasMatchingInHand={hasMatchingInHand}
                 isMyTurn={isMyTurn}
                 showDropHints={showDropHints}
                 onSlotClick={onSlotClick}

@@ -258,10 +258,34 @@ export function getAnimalEmoji(animalId) {
 }
 
 // 🌿 Trait Compatibility Engine
-export function isTraitCompatible(animalTraits = [], requiredTrait) {
-  if (!requiredTrait || !animalTraits) return false;
+export function isTraitCompatible(animalTraitsOrCard = [], requiredTrait) {
+  if (!requiredTrait) return false;
 
-  if (animalTraits.includes('wildcard') || animalTraits.includes('fit_free')) {
+  let animalTraits = [];
+
+  // If a card object was passed directly
+  if (typeof animalTraitsOrCard === 'object' && animalTraitsOrCard !== null && !Array.isArray(animalTraitsOrCard)) {
+    const card = animalTraitsOrCard;
+    // Fit Free (Wildcard) can be placed in ANY slot
+    if (
+      card.actionType === 'wildcard' ||
+      card.id === 'special_fit_free' ||
+      card.id?.startsWith('special_fit_free') ||
+      card.cardInstanceId?.startsWith('special_fit_free') ||
+      card.isPlayableOnSlot
+    ) {
+      return true;
+    }
+    animalTraits = card.traits || [];
+  } else if (Array.isArray(animalTraitsOrCard)) {
+    animalTraits = animalTraitsOrCard;
+  }
+
+  if (
+    animalTraits.includes('wildcard') ||
+    animalTraits.includes('fit_free') ||
+    animalTraits.includes('special_fit_free')
+  ) {
     return true;
   }
 
