@@ -116,17 +116,17 @@ export default function HandDock({
                   )}
 
                   {/* Special Action Card Trigger Button */}
-                  {isSpecial && card.actionType !== 'wildcard' && isMyTurn && (
+                  {isSpecial && card.actionType !== 'wildcard' && (isMyTurn || card.actionType === 'shield') && (
                     <button
                       type="button"
-                      className="btn-use-special-floating"
+                      className={`btn-use-special-floating ${card.actionType === 'shield' ? 'btn-shield-special' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onPlaySpecialCard) onPlaySpecialCard(cardIdKey);
                       }}
-                      title="กดใช้ความสามารถการ์ดพิเศษใบนี้ทันที"
+                      title={card.actionType === 'shield' ? 'กดกางโล่ปูป้องกันการโจมตีได้ทันที!' : 'กดใช้ความสามารถการ์ดพิเศษใบนี้ทันที'}
                     >
-                      ✨ ใช้การ์ด
+                      {card.actionType === 'shield' ? '🛡️ กางโล่ปู' : '✨ ใช้การ์ด'}
                     </button>
                   )}
                 </div>

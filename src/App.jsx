@@ -279,8 +279,12 @@ export default function App() {
 
   const handlePlaySpecialCard = (cardId) => {
     if (!room) return;
+    const me = room.players.find((p) => p.id === socket.id);
+    const card = me?.hand?.find((c) => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
+    const isShield = card?.actionType === 'shield' || card?.id === 'special_crab_shield';
+
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
-    if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
+    if (room.roomMode !== 'time_attack' && !isShield && activePlayer?.id !== socket.id) {
       playSfx('discard');
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }

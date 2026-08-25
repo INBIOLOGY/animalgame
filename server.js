@@ -300,10 +300,14 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
   const player = room.players.find(p => p.id === playerId);
   if (!player || !player.hand) return { ok: false, error: 'ไม่พบผู้เล่น' };
 
-  if (room.roomMode !== 'time_attack') {
-    const activePlayer = room.players[room.currentTurnIndex];
-    if (!activePlayer || activePlayer.id !== playerId) {
-      return { ok: false, error: `ยังไม่ถึงตาของคุณ (ตาของ: ${activePlayer ? activePlayer.name : 'คนอื่น'})` };
+  // การ์ดโล่ปู (Crab Shield) สามารถกดใช้ได้ตลอดเวลา (Instant Reactive Defense)
+  if (room.roomMode !== 'time_attack' && cardId !== 'special_crab_shield') {
+    const cardObj = player.hand.find(c => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
+    if (cardObj && cardObj.actionType !== 'shield') {
+      const activePlayer = room.players[room.currentTurnIndex];
+      if (!activePlayer || activePlayer.id !== playerId) {
+        return { ok: false, error: `ยังไม่ถึงตาของคุณ (ตาของ: ${activePlayer ? activePlayer.name : 'คนอื่น'})` };
+      }
     }
   }
 
@@ -338,7 +342,7 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
       if (!room.shieldedPlayerIds.includes(player.id)) {
         room.shieldedPlayerIds.push(player.id);
       }
-      actionNotice.message = `🛡️ ${player.name} เปิดใช้งาน Crab Shield ป้องกันการโจมตี 1 ครั้ง!`;
+      actionNotice.message = `🛡️ ${player.name} กางโล่ Crab Shield ป้องกันการโจมตี 1 ครั้ง!`;
       break;
     }
 
@@ -356,6 +360,32 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
     }
 
     case 'skip': {
+      const dir = room.playDirection || 1;
+      const numPlayers = room.players.length;
+      const nextIdx = (room.currentTurnIndex + 1 * dir + numPlayers * 100) % numPlayers;
+      const nextPlayer = room.players[nextIdx];
+
+      const hasShieldInHand = nextPlayer?.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+      const hasActiveShield = nextPlayer && room.shieldedPlayerIds?.includes(nextPlayer.id);
+
+      if (nextPlayer && (hasActiveShield || hasShieldInHand)) {
+        if (hasActiveShield) {
+          room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== nextPlayer.id);
+        } else {
+          const sIdx = nextPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+          if (sIdx !== -1) {
+            nextPlayer.hand.splice(sIdx, 1);
+            if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
+            nextPlayer.hand.push(room.animalDeck.pop());
+          }
+        }
+        actionNotice.message = `🛡️ ${nextPlayer.name} มีการ์ด Crab Shield จึงป้องกันผลของ Skip จาก ${player.name} ได้สำเร็จ! (ไม่ถูกข้ามตา)`;
+        io.to(room.roomId).emit('special_card_played', actionNotice);
+        broadcastRoomState(room.roomId);
+        advanceTurn(room, 1);
+        return { ok: true, room };
+      }
+
       actionNotice.message = `⏭️ ${player.name} ใช้ Skip ข้ามตาผู้เล่นคนถัดไปทันที!`;
       io.to(room.roomId).emit('special_card_played', actionNotice);
       broadcastRoomState(room.roomId);
@@ -394,9 +424,21 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
       }
 
       if (target) {
-        if (room.shieldedPlayerIds.includes(target.id)) {
-          room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== target.id);
-          actionNotice.message = `🛡️ ${target.name} ใช้ Crab Shield บล็อก Drop It ของ ${player.name} ได้สำเร็จ!`;
+        const hasShieldInHand = target.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+        const hasActiveShield = room.shieldedPlayerIds?.includes(target.id);
+
+        if (hasActiveShield || hasShieldInHand) {
+          if (hasActiveShield) {
+            room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== target.id);
+          } else {
+            const sIdx = target.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+            if (sIdx !== -1) {
+              target.hand.splice(sIdx, 1);
+              if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
+              target.hand.push(room.animalDeck.pop());
+            }
+          }
+          actionNotice.message = `🛡️ ${target.name} ใช้ Crab Shield ป้องกันการ์ด Drop It ของ ${player.name} ได้สำเร็จ!`;
         } else if (target.hand && target.hand.length > 0) {
           const droppedCard = target.hand.shift();
           if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
@@ -415,7 +457,10 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
   io.to(room.roomId).emit('special_card_played', actionNotice);
 
   // การใช้ Shield, Double Play ไม่นับเป็นการจบเทิร์น สามารถวางการ์ดต่อได้
-  if (card.actionType === 'shield' || card.actionType === 'double_play') {
+  if (card.actionType === 'shield') {
+    broadcastRoomState(room.roomId);
+    return { ok: true, room };
+  } else if (card.actionType === 'double_play') {
     broadcastRoomState(room.roomId);
     if (player.isBot) {
       setTimeout(() => runBotTurn(room, player), 1000);
