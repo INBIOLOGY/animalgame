@@ -9,6 +9,7 @@ import VictoryModal from './components/VictoryModal';
 import EncyclopediaModal from './components/EncyclopediaModal';
 import TutorialModal from './components/TutorialModal';
 import SpecialCardShowcase from './components/SpecialCardShowcase';
+import DropItModal from './components/DropItModal';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
 import { isTraitCompatible } from './utils/traits';
@@ -277,6 +278,8 @@ export default function App() {
     setSelectedCardId((prev) => (prev === cardId ? null : cardId));
   };
 
+  const [dropItState, setDropItState] = useState({ isOpen: false, cardId: null });
+
   const handlePlaySpecialCard = (cardId) => {
     if (!room) return;
     const me = room.players.find((p) => p.id === socket.id);
@@ -289,6 +292,17 @@ export default function App() {
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
+    // If Drop It card is played, open the interactive Opponent Card Picker modal!
+    if (card?.actionType === 'drop_it' || card?.id === 'special_drop_it') {
+      const opponents = room.players.filter((p) => p.id !== socket.id);
+      if (opponents.length === 0) {
+        return showToastMsg('ไม่มีคู่ต่อสู้ในห้อง');
+      }
+      playSfx('pop');
+      setDropItState({ isOpen: true, cardId });
+      return;
+    }
+
     playSfx('sparkle');
     socket.emit('play_special_card', { cardId }, (res) => {
       if (res && res.ok) {
@@ -298,6 +312,24 @@ export default function App() {
         showToastMsg(res?.error || 'ไม่สามารถใช้การ์ดพิเศษใบนี้ได้');
       }
     });
+  };
+
+  const handleConfirmDropIt = (targetPlayerId, targetCardIndex) => {
+    if (!dropItState.cardId) return;
+    playSfx('sparkle');
+    socket.emit(
+      'play_special_card',
+      { cardId: dropItState.cardId, targetPlayerId, targetCardIndex },
+      (res) => {
+        if (res && res.ok) {
+          setSelectedCardId(null);
+          setDropItState({ isOpen: false, cardId: null });
+        } else {
+          playSfx('discard');
+          showToastMsg(res?.error || 'ไม่สามารถใช้การ์ดพิเศษใบนี้ได้');
+        }
+      }
+    );
   };
 
   const executeMoveAction = (centerIdx, slotIdx, cardId) => {
@@ -484,6 +516,16 @@ export default function App() {
         <SpecialCardShowcase
           specialEvent={activeSpecialEvent}
           onComplete={() => setActiveSpecialEvent(null)}
+        />
+      )}
+
+      {/* Interactive Drop It Opponent Hand Picker Modal */}
+      {dropItState.isOpen && (
+        <DropItModal
+          isOpen={dropItState.isOpen}
+          onClose={() => setDropItState({ isOpen: false, cardId: null })}
+          opponents={room?.players?.filter((p) => p.id !== socket.id) || []}
+          onConfirmDrop={handleConfirmDropIt}
         />
       )}
 

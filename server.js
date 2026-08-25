@@ -296,7 +296,7 @@ function runBotTurn(room, botPlayer) {
   advanceTurn(room);
 }
 
-function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
+function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targetCardIndex = null) {
   const player = room.players.find(p => p.id === playerId);
   if (!player || !player.hand) return { ok: false, error: 'ไม่พบผู้เล่น' };
 
@@ -440,7 +440,13 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null) {
           }
           actionNotice.message = `🛡️ ${target.name} ใช้ Crab Shield ป้องกันการ์ด Drop It ของ ${player.name} ได้สำเร็จ!`;
         } else if (target.hand && target.hand.length > 0) {
-          const droppedCard = target.hand.shift();
+          let dropIndex = 0;
+          if (typeof targetCardIndex === 'number' && targetCardIndex >= 0 && targetCardIndex < target.hand.length) {
+            dropIndex = targetCardIndex;
+          } else {
+            dropIndex = Math.floor(Math.random() * target.hand.length);
+          }
+          const droppedCard = target.hand.splice(dropIndex, 1)[0];
           if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
           target.hand.push(room.animalDeck.pop());
           actionNotice.message = `💥 ${player.name} บังคับให้ ${target.name} ทิ้งการ์ด "${droppedCard.name || droppedCard.title}" ลงกองทิ้ง!`;
@@ -842,7 +848,7 @@ io.on('connection', (socket) => {
   });
 
   // 5.1 เล่นการ์ดพิเศษ (Play Special Card Action)
-  socket.on('play_special_card', ({ cardId, targetPlayerId } = {}, ack) => {
+  socket.on('play_special_card', ({ cardId, targetPlayerId, targetCardIndex } = {}, ack) => {
     const roomId = socket.data.roomId;
     const room = rooms.get(roomId);
     if (!room || room.status !== 'playing') {
@@ -851,7 +857,7 @@ io.on('connection', (socket) => {
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
 
-    const res = executeSpecialCard(room, socket.id, cardId, targetPlayerId);
+    const res = executeSpecialCard(room, socket.id, cardId, targetPlayerId, targetCardIndex);
     if (!res.ok) {
       socket.emit('error_message', res.error);
     }
