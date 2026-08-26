@@ -22,14 +22,14 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
           >
             {/* Avatar with Leader Crown */}
             <div className="cute-chip-avatar-box">
-              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={26} />
+              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={32} />
               {isLeader && <span className="cute-crown-badge">👑</span>}
             </div>
 
             {/* Name & Status */}
             <div className="cute-chip-info">
               <div className="cute-chip-name">
-                {p.name}
+                <span>{p.name}</span>
                 {isMe && <span className="cute-me-pill">คุณ</span>}
               </div>
               <div className="cute-chip-score">
