@@ -55,53 +55,59 @@ export default function GameScreen({
     <section className="game-screen-wrap page-screen-anim">
       {/* ─── Header Bar ─── */}
       <div className="game-header-bar">
-        <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''}`}>
-          <span className="turn-msg-desktop">{turnMessageDesktop}</span>
-          <span className="turn-msg-mobile">{turnMessageMobile}</span>
-          {isDoublePlay && <span className="double-play-tag">⚔️ x2</span>}
-          {isShielded && <span className="shield-active-tag">🛡️ เกราะ</span>}
-        </div>
+        <div className="game-header-main-row">
+          <div className="game-header-left-group">
+            <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''}`}>
+              <span className="turn-msg-desktop">{turnMessageDesktop}</span>
+              <span className="turn-msg-mobile">{turnMessageMobile}</span>
+              {isDoublePlay && <span className="double-play-tag">⚔️ x2</span>}
+              {isShielded && <span className="shield-active-tag">🛡️ เกราะ</span>}
+            </div>
 
-        {isTimeAttack && (
-          <div className="timer-pill">
-            <UIIcon name="timer" size={14} color="#fff" />
-            <span>{timeAttackSeconds}s</span>
+            {isTimeAttack && (
+              <div className="timer-pill">
+                <UIIcon name="timer" size={14} color="#fff" />
+                <span>{timeAttackSeconds}s</span>
+              </div>
+            )}
+
+            <div className="turn-direction-indicator" title="ทิศทางการเล่น">
+              <span>{playDirText}</span>
+            </div>
           </div>
-        )}
 
-        <div className="turn-direction-indicator" title="ทิศทางการเล่น">
-          <span>{playDirText}</span>
+          <div className="game-header-actions">
+            <button
+              type="button"
+              className="cute-action-btn cute-btn-pass"
+              onClick={onPassTurn}
+              disabled={!isMyTurn && !isTimeAttack}
+              title="ทิ้งการ์ดเพื่อข้ามตาและจั่วใบใหม่"
+            >
+              <UIIcon name="recycle" size={12} color="#EA580C" />
+              <span className="pass-btn-desktop">{passLabel}</span>
+              <span className="pass-btn-mobile">{selectedAnimal ? 'ทิ้ง' : 'จั่วใหม่'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="cute-action-btn cute-btn-leave"
+              onClick={onLeaveRoom}
+              title="ออกจากห้อง"
+            >
+              <UIIcon name="exit" size={12} color="#DC2626" />
+              <span>ออก</span>
+            </button>
+          </div>
         </div>
 
-        <ScoreboardChips
-          players={room.players}
-          activeIndex={activeIndex}
-          isTimeAttack={isTimeAttack}
-          myId={myId}
-        />
-
-        <div className="game-header-actions">
-          <button
-            type="button"
-            className="cute-action-btn cute-btn-pass"
-            onClick={onPassTurn}
-            disabled={!isMyTurn && !isTimeAttack}
-            title="ทิ้งการ์ดเพื่อข้ามตาและจั่วใบใหม่"
-          >
-            <UIIcon name="recycle" size={12} color="#EA580C" />
-            <span className="pass-btn-desktop">{passLabel}</span>
-            <span className="pass-btn-mobile">{selectedAnimal ? 'ทิ้ง' : 'จั่วใหม่'}</span>
-          </button>
-
-          <button
-            type="button"
-            className="cute-action-btn cute-btn-leave"
-            onClick={onLeaveRoom}
-            title="ออกจากห้อง"
-          >
-            <UIIcon name="exit" size={12} color="#DC2626" />
-            <span>ออก</span>
-          </button>
+        <div className="game-header-score-row">
+          <ScoreboardChips
+            players={room.players}
+            activeIndex={activeIndex}
+            isTimeAttack={isTimeAttack}
+            myId={myId}
+          />
         </div>
       </div>
 

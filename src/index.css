@@ -1016,15 +1016,35 @@ body {
 
 .game-header-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.97);
   border: 2px solid var(--matcha-border);
   border-radius: var(--r-lg);
-  padding: 6px 14px;
-  gap: 10px;
+  padding: 6px 12px;
+  gap: 6px;
   flex-shrink: 0;
   box-shadow: 0 2px 12px rgba(45, 90, 35, 0.06);
+}
+
+.game-header-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.game-header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-header-score-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .turn-badge {
@@ -1503,25 +1523,30 @@ body {
 /* 🃏 MINI ANIMAL CARD STACKED OVERLAY */
 .stacked-mini-card {
   position: absolute;
-  inset: 2px;
-  width: calc(100% - 4px);
-  height: calc(100% - 4px);
-  max-width: 92%;
-  max-height: 92%;
+  inset: 0;
   margin: auto;
-  border-radius: 6px;
+  aspect-ratio: 1395 / 1949;
+  max-width: 68%;
+  max-height: 72%;
+  border-radius: 5px;
   border: 1.5px solid #FBBF24;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(251, 191, 36, 0.35);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(251, 191, 36, 0.35);
   overflow: hidden;
   background: #0F172A;
   transform: rotate(-1deg);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 6;
+}
+
+.quest-overlay-slots.layout-three_slots .slot-pos-right .stacked-mini-card {
+  max-height: 48%;
+  max-width: 78%;
 }
 
 .stacked-mini-card:hover {
   transform: rotate(0deg) scale(1.08);
   z-index: 20;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8), 0 0 0 2px #F59E0B;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8), 0 0 0 2px #F59E0B;
 }
 
 .stacked-mini-img {
@@ -1534,17 +1559,17 @@ body {
 /* Elegant Corner Seal Stamp — leaves 100% artwork visible */
 .stacked-corner-seal {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
+  top: 1.5px;
+  right: 1.5px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 7.5px;
+  font-size: 7px;
   font-weight: 900;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.85);
   z-index: 5;
   pointer-events: none;
@@ -3810,36 +3835,44 @@ body {
     position: relative;
   }
 
-  /* Spacious, fully legible Game Header Bar */
+  /* 2-Row Header: Top Row = Turn & Actions, Bottom Row = Player Scores (Zero text overlapping!) */
   .game-header-bar {
-    padding: 3px 8px;
-    gap: 6px;
-    flex-wrap: nowrap;
-    height: 40px;
-    min-height: 40px;
-    max-height: 40px;
-    align-items: center;
+    padding: 3px 6px;
+    gap: 3px;
+    height: auto !important;
+    min-height: 52px !important;
+    max-height: 56px !important;
     flex-shrink: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     border-radius: var(--r-md);
   }
 
-  .game-header-bar::-webkit-scrollbar {
-    display: none;
+  .game-header-main-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 24px;
+    gap: 4px;
+  }
+
+  .game-header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
   }
 
   .turn-badge {
-    font-size: 11.5px;
+    font-size: 10.5px;
     font-weight: 800;
-    padding: 0 9px;
-    height: 28px;
-    line-height: 28px;
+    padding: 0 8px;
+    height: 24px;
+    line-height: 24px;
     white-space: nowrap !important;
     flex-shrink: 0;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -3847,48 +3880,13 @@ body {
   }
 
   .turn-direction-indicator {
-    font-size: 9.5px;
-    padding: 0 6px;
-    height: 28px;
+    font-size: 9px;
+    padding: 0 5px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
     border-radius: var(--r-pill);
-  }
-
-  .cute-scoreboard-chips {
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    gap: 5px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    scrollbar-width: none;
-  }
-
-  .cute-scoreboard-chips::-webkit-scrollbar {
-    display: none;
-  }
-
-  .cute-player-chip {
-    padding: 2px 7px;
-    gap: 4px;
-    height: 26px;
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    border-radius: var(--r-sm);
-  }
-
-  .cute-chip-name {
-    font-size: 10px;
-    font-weight: 800;
-  }
-
-  .cute-chip-score {
-    font-size: 10px;
-    font-weight: 800;
   }
 
   .game-header-actions {
@@ -3899,9 +3897,9 @@ body {
   }
 
   .cute-action-btn {
-    font-size: 10.5px;
-    padding: 0 8px;
-    height: 28px;
+    font-size: 9.5px;
+    padding: 0 7px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -3913,6 +3911,53 @@ body {
   }
   .pass-btn-mobile {
     display: inline;
+  }
+
+  .game-header-score-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .game-header-score-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cute-scoreboard-chips {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .cute-scoreboard-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cute-player-chip {
+    padding: 1.5px 6px;
+    gap: 3px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: var(--r-xs);
+  }
+
+  .cute-chip-name {
+    font-size: 9.5px;
+    font-weight: 800;
+  }
+
+  .cute-chip-score {
+    font-size: 9.5px;
+    font-weight: 800;
   }
 
   /* Phone category grid: 2 rows × 3 cols, LARGE PROMINENT QUEST CARDS */
