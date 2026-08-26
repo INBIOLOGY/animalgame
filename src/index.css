@@ -3738,7 +3738,7 @@ body {
   }
 
   .app-screen {
-    padding: 3px 6px calc(65px + env(safe-area-inset-bottom, 16px)) 6px !important;
+    padding: 2px 6px calc(68px + env(safe-area-inset-bottom, 16px)) 6px !important;
     height: 100% !important;
     max-height: 100% !important;
     box-sizing: border-box;
@@ -3747,8 +3747,8 @@ body {
 
   .cute-topbar {
     padding: 0 8px;
-    height: 44px;
-    min-height: 44px;
+    height: 42px;
+    min-height: 42px;
     flex-shrink: 0;
   }
 
@@ -3784,9 +3784,9 @@ body {
     padding: 2px 6px;
     gap: 5px;
     flex-wrap: nowrap;
-    height: 34px;
-    min-height: 34px;
-    max-height: 34px;
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
     align-items: center;
     flex-shrink: 0;
     overflow-x: auto;
@@ -3798,10 +3798,10 @@ body {
   }
 
   .turn-badge {
-    font-size: 10.5px;
+    font-size: 10px;
     padding: 0 7px;
-    height: 24px;
-    line-height: 24px;
+    height: 22px;
+    line-height: 22px;
     white-space: nowrap !important;
     flex-shrink: 0;
     max-width: 125px;
@@ -3814,9 +3814,9 @@ body {
   }
 
   .turn-direction-indicator {
-    font-size: 9px;
+    font-size: 8.5px;
     padding: 0 5px;
-    height: 24px;
+    height: 22px;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
@@ -3827,7 +3827,7 @@ body {
     min-width: 0;
     overflow-x: auto;
     gap: 4px;
-    height: 26px;
+    height: 24px;
     display: flex;
     align-items: center;
     scrollbar-width: none;
@@ -3840,18 +3840,18 @@ body {
   .cute-player-chip {
     padding: 1px 5px;
     gap: 3px;
-    height: 22px;
+    height: 20px;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
   }
 
   .cute-chip-name {
-    font-size: 9.5px;
+    font-size: 9px;
   }
 
   .cute-chip-score {
-    font-size: 9.5px;
+    font-size: 9px;
   }
 
   .game-header-actions {
@@ -3862,9 +3862,9 @@ body {
   }
 
   .cute-action-btn {
-    font-size: 9.5px;
-    padding: 0 7px;
-    height: 24px;
+    font-size: 9px;
+    padding: 0 6px;
+    height: 22px;
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -3877,11 +3877,11 @@ body {
     display: inline;
   }
 
-  /* Phone category grid: 2 rows × 3 cols, enlarged quest cards for great readability */
+  /* Phone category grid: 2 rows × 3 cols, LARGE PROMINENT QUEST CARDS */
   .categories-board-area {
     flex: 1;
     min-height: 0;
-    padding: 2px 2px;
+    padding: 2px 1px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3892,29 +3892,39 @@ body {
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 5px;
+    gap: 6px;
     width: 100%;
     height: 100%;
-    max-height: min(240px, 34vh);
+    max-height: min(320px, 46vh);
     align-items: center;
     justify-content: center;
   }
 
   .vertical-quest-card {
     height: 100%;
-    max-height: 116px;
-    border-radius: 7px;
+    max-height: 155px;
+    border-radius: 8px;
     border-width: 2px;
     aspect-ratio: 1395 / 1949;
     margin: 0 auto;
   }
 
   .quest-pill-idx, .quest-pill-pts {
-    font-size: 7px;
-    padding: 1.5px 3px;
+    font-size: 8px;
+    padding: 1.5px 4px;
   }
 
-  /* Phone hand dock — ELEVATED HIGH WITH CLEAR SPACING */
+  .slot-ready-badge {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+
+  .slot-place-hint {
+    font-size: 10px;
+    padding: 2.5px 6px;
+  }
+
+  /* Phone hand dock — ELEVATED, SPACIOUS, LARGER HAND CARDS */
   .cute-hand-dock {
     padding: 4px 6px;
     flex-shrink: 0 !important;
@@ -3924,8 +3934,8 @@ body {
     margin-bottom: 0 !important;
     box-shadow: 0 6px 20px rgba(45, 90, 35, 0.22);
     background: rgba(255, 255, 255, 0.98);
-    height: 126px !important;
-    min-height: 126px !important;
+    height: 142px !important;
+    min-height: 142px !important;
     transform: none !important;
   }
 
@@ -3942,13 +3952,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 16px;
-    min-height: 16px;
+    height: 18px;
+    min-height: 18px;
     gap: 3px;
   }
 
   .cute-turn-guide {
-    font-size: 9.5px;
+    font-size: 10px;
     gap: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -3967,29 +3977,29 @@ body {
   }
 
   .cute-emote-pill-btn {
-    padding: 0 3px;
-    font-size: 9.5px;
-    line-height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 18px;
   }
 
   .cute-hand-cards-row {
-    height: 98px !important;
-    min-height: 98px !important;
-    max-height: 98px !important;
-    gap: 5px;
+    height: 114px !important;
+    min-height: 114px !important;
+    max-height: 114px !important;
+    gap: 6px;
     padding: 1px 0;
     align-items: center;
     flex-shrink: 0 !important;
   }
 
   .cute-hand-dock.waiting-turn .cute-hand-cards-row {
-    height: 98px !important;
-    min-height: 98px !important;
-    max-height: 98px !important;
+    height: 114px !important;
+    min-height: 114px !important;
+    max-height: 114px !important;
   }
 
   .hand-vertical-scroll-list {
-    gap: 5px;
+    gap: 6px;
     padding: 1px 2px;
     -webkit-overflow-scrolling: touch;
     height: 100%;
@@ -3997,62 +4007,62 @@ body {
   }
 
   .vertical-hand-card {
-    height: 94px !important;
-    min-height: 94px !important;
-    width: 67px !important;
-    min-width: 67px !important;
+    height: 110px !important;
+    min-height: 110px !important;
+    width: 78px !important;
+    min-width: 78px !important;
     aspect-ratio: 1395 / 1949;
-    border-radius: 6px;
+    border-radius: 7px;
     border-width: 1.5px;
     flex-shrink: 0 !important;
     transition: transform 0.18s cubic-bezier(0.2, 0.85, 0.35, 1.05), box-shadow 0.18s ease;
   }
 
   .vertical-hand-card.is-selected {
-    transform: translateY(-4px) scale(1.03) !important;
-    box-shadow: 0 0 0 2px #F59E0B, 0 6px 14px rgba(245, 158, 11, 0.4) !important;
+    transform: translateY(-5px) scale(1.03) !important;
+    box-shadow: 0 0 0 2px #F59E0B, 0 8px 16px rgba(245, 158, 11, 0.4) !important;
     border-width: 2px !important;
   }
 
   .vertical-discard-card {
-    height: 94px !important;
-    min-height: 94px !important;
-    width: 48px !important;
-    min-width: 48px !important;
+    height: 110px !important;
+    min-height: 110px !important;
+    width: 56px !important;
+    min-width: 56px !important;
     aspect-ratio: 1395 / 1949;
-    border-radius: 6px;
+    border-radius: 7px;
     padding: 2px;
     flex-shrink: 0 !important;
   }
 
   .cute-discard-icon-frame {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
 
   .cute-discard-main {
-    font-size: 7px;
+    font-size: 8px;
     font-weight: 800;
   }
 
   .cute-discard-sub {
-    font-size: 5.5px;
+    font-size: 6px;
   }
 
   .card-quick-discard-tag {
-    font-size: 6.5px;
-    padding: 1px 3px;
-    top: 2px;
-    right: 2px;
+    font-size: 7.5px;
+    padding: 1.5px 4px;
+    top: 3px;
+    right: 3px;
   }
 
   /* Special card use button — clearly visible on phone */
   .btn-use-special-floating {
-    font-size: 7.5px;
-    padding: 1px 3px;
-    bottom: 2px;
-    left: 2px;
-    right: 2px;
+    font-size: 8.5px;
+    padding: 2px 4px;
+    bottom: 3px;
+    left: 3px;
+    right: 3px;
     border-width: 1px;
   }
 
