@@ -219,6 +219,15 @@ export default function App() {
       setRoom(newRoom);
       setShowVictory(false);
       setSelectedCardId(null);
+
+      // Auto-restart for vs_bot and time_attack modes
+      if (newRoom.roomMode === 'vs_bot' || newRoom.roomMode === 'time_attack') {
+        setTimeout(() => {
+          socket.emit('start_game', (res) => {
+            if (res && !res.ok) console.warn('Auto-rematch start failed:', res.error);
+          });
+        }, 300);
+      }
     });
 
     return () => {
@@ -436,7 +445,7 @@ export default function App() {
     if (!room) return;
     const me = room.players.find((p) => p.id === socket.id);
     if (!me || !me.hand || me.hand.length === 0) return;
-    const cardToDiscard = selectedCardId || me.hand[0].id;
+    const cardToDiscard = selectedCardId || me.hand[0].cardInstanceId || me.hand[0].id;
     handleDiscardSingleCard(cardToDiscard);
   };
 

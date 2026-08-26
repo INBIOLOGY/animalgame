@@ -582,6 +582,12 @@ function removePlayerFromRoom(roomId, socketId) {
   const room = rooms.get(roomId);
   if (!room) return;
 
+  // Clean up any pending disconnect timer for this socket
+  if (disconnectTimers.has(socketId)) {
+    clearTimeout(disconnectTimers.get(socketId));
+    disconnectTimers.delete(socketId);
+  }
+
   const idx = room.players.findIndex((p) => p.id === socketId);
   if (idx === -1) return;
 
@@ -1001,7 +1007,7 @@ io.on('connection', (socket) => {
   socket.on('finish_game', () => {
     const roomId = socket.data.roomId;
     const room = rooms.get(roomId);
-    if (!room) return;
+    if (!room || room.status === 'ended') return;
 
     room.status = 'ended';
     io.to(roomId).emit('game_ended', room);
