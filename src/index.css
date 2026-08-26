@@ -3738,7 +3738,7 @@ body {
   }
 
   .app-screen {
-    padding: 2px 6px calc(72px + env(safe-area-inset-bottom, 16px)) 6px !important;
+    padding: 3px 6px calc(65px + env(safe-area-inset-bottom, 16px)) 6px !important;
     height: 100% !important;
     max-height: 100% !important;
     box-sizing: border-box;
@@ -3747,8 +3747,8 @@ body {
 
   .cute-topbar {
     padding: 0 8px;
-    height: 42px;
-    min-height: 42px;
+    height: 44px;
+    min-height: 44px;
     flex-shrink: 0;
   }
 
@@ -3781,12 +3781,12 @@ body {
   }
 
   .game-header-bar {
-    padding: 2px 5px;
-    gap: 4px;
+    padding: 2px 6px;
+    gap: 5px;
     flex-wrap: nowrap;
-    height: 28px;
-    min-height: 28px;
-    max-height: 28px;
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
     align-items: center;
     flex-shrink: 0;
     overflow-x: auto;
@@ -3798,25 +3798,25 @@ body {
   }
 
   .turn-badge {
-    font-size: 9px;
-    padding: 0 6px;
-    height: 20px;
-    line-height: 20px;
+    font-size: 10.5px;
+    padding: 0 7px;
+    height: 24px;
+    line-height: 24px;
     white-space: nowrap !important;
     flex-shrink: 0;
-    max-width: 110px;
+    max-width: 125px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
     border-radius: var(--r-pill);
   }
 
   .turn-direction-indicator {
-    font-size: 8px;
-    padding: 0 4px;
-    height: 20px;
+    font-size: 9px;
+    padding: 0 5px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
@@ -3826,8 +3826,8 @@ body {
     flex: 1;
     min-width: 0;
     overflow-x: auto;
-    gap: 3px;
-    height: 22px;
+    gap: 4px;
+    height: 26px;
     display: flex;
     align-items: center;
     scrollbar-width: none;
@@ -3838,36 +3838,36 @@ body {
   }
 
   .cute-player-chip {
-    padding: 1px 4px;
-    gap: 2px;
-    height: 19px;
+    padding: 1px 5px;
+    gap: 3px;
+    height: 22px;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
   }
 
   .cute-chip-name {
-    font-size: 8.5px;
+    font-size: 9.5px;
   }
 
   .cute-chip-score {
-    font-size: 8.5px;
+    font-size: 9.5px;
   }
 
   .game-header-actions {
-    gap: 2px;
+    gap: 3px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
   }
 
   .cute-action-btn {
-    font-size: 8.5px;
-    padding: 0 5px;
-    height: 20px;
+    font-size: 9.5px;
+    padding: 0 7px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
   }
 
   .pass-btn-desktop {
@@ -3877,11 +3877,11 @@ body {
     display: inline;
   }
 
-  /* Phone category grid: 2 rows × 3 cols, auto-adaptive height that fills the middle area */
+  /* Phone category grid: 2 rows × 3 cols, enlarged quest cards for great readability */
   .categories-board-area {
     flex: 1;
     min-height: 0;
-    padding: 2px;
+    padding: 2px 2px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3892,29 +3892,29 @@ body {
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 4px;
+    gap: 5px;
     width: 100%;
     height: 100%;
-    max-height: 210px;
+    max-height: min(240px, 34vh);
     align-items: center;
     justify-content: center;
   }
 
   .vertical-quest-card {
     height: 100%;
-    max-height: 100px;
-    border-radius: 6px;
-    border-width: 1.5px;
+    max-height: 116px;
+    border-radius: 7px;
+    border-width: 2px;
     aspect-ratio: 1395 / 1949;
     margin: 0 auto;
   }
 
   .quest-pill-idx, .quest-pill-pts {
-    font-size: 6px;
-    padding: 1px 2px;
+    font-size: 7px;
+    padding: 1.5px 3px;
   }
 
-  /* Phone hand dock — ELEVATED DIRECTLY ABOVE SAFARI TOOLBAR WITH ZERO SUNKEN SLIVERS */
+  /* Phone hand dock — ELEVATED HIGH WITH CLEAR SPACING */
   .cute-hand-dock {
     padding: 4px 6px;
     flex-shrink: 0 !important;
@@ -3924,8 +3924,8 @@ body {
     margin-bottom: 0 !important;
     box-shadow: 0 6px 20px rgba(45, 90, 35, 0.22);
     background: rgba(255, 255, 255, 0.98);
-    height: 128px !important;
-    min-height: 128px !important;
+    height: 126px !important;
+    min-height: 126px !important;
     transform: none !important;
   }
 
@@ -3948,7 +3948,7 @@ body {
   }
 
   .cute-turn-guide {
-    font-size: 9px;
+    font-size: 9.5px;
     gap: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -3973,9 +3973,9 @@ body {
   }
 
   .cute-hand-cards-row {
-    height: 100px !important;
-    min-height: 100px !important;
-    max-height: 100px !important;
+    height: 98px !important;
+    min-height: 98px !important;
+    max-height: 98px !important;
     gap: 5px;
     padding: 1px 0;
     align-items: center;
@@ -3983,9 +3983,9 @@ body {
   }
 
   .cute-hand-dock.waiting-turn .cute-hand-cards-row {
-    height: 100px !important;
-    min-height: 100px !important;
-    max-height: 100px !important;
+    height: 98px !important;
+    min-height: 98px !important;
+    max-height: 98px !important;
   }
 
   .hand-vertical-scroll-list {
@@ -3997,10 +3997,10 @@ body {
   }
 
   .vertical-hand-card {
-    height: 96px !important;
-    min-height: 96px !important;
-    width: 68px !important;
-    min-width: 68px !important;
+    height: 94px !important;
+    min-height: 94px !important;
+    width: 67px !important;
+    min-width: 67px !important;
     aspect-ratio: 1395 / 1949;
     border-radius: 6px;
     border-width: 1.5px;
@@ -4015,8 +4015,8 @@ body {
   }
 
   .vertical-discard-card {
-    height: 96px !important;
-    min-height: 96px !important;
+    height: 94px !important;
+    min-height: 94px !important;
     width: 48px !important;
     min-width: 48px !important;
     aspect-ratio: 1395 / 1949;
