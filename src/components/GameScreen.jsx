@@ -35,11 +35,17 @@ export default function GameScreen({
   const isDoublePlay = room.doublePlayPlayerId === myId;
   const playDirText = (room.playDirection || 1) === 1 ? '↻ ตามเข็ม' : '↺ ทวนเข็ม';
 
-  const turnMessage = isTimeAttack
-    ? '⏱️ โหมดจับเวลา: ลากหรือแตะการ์ดวางลงช่อง'
+  const turnMessageDesktop = isTimeAttack
+    ? '⏱️ โหมดจับเวลา: วางการ์ดลงช่อง'
     : isMyTurn
     ? '🌟 ถึงตาของคุณแล้ว: เลือกการ์ดแล้ววางลงช่อง'
     : `⏳ รอตาของ: ${activePlayer?.name || 'ผู้เล่นอื่น'}`;
+
+  const turnMessageMobile = isTimeAttack
+    ? '⏱️ จับเวลา'
+    : isMyTurn
+    ? '🌟 ถึงตาคุณแล้ว'
+    : `⏳ รอตา: ${activePlayer?.name || 'คนอื่น'}`;
 
   const passLabel = selectedAnimal
     ? `ทิ้ง "${selectedAnimal.name || selectedAnimal.title || 'การ์ดนี้'}"`
@@ -50,9 +56,10 @@ export default function GameScreen({
       {/* ─── Header Bar ─── */}
       <div className="game-header-bar">
         <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''}`}>
-          <span>{turnMessage}</span>
-          {isDoublePlay && <span className="double-play-tag">⚔️ เล่นได้ 2 ใบ!</span>}
-          {isShielded && <span className="shield-active-tag">🛡️ มีเกราะ</span>}
+          <span className="turn-msg-desktop">{turnMessageDesktop}</span>
+          <span className="turn-msg-mobile">{turnMessageMobile}</span>
+          {isDoublePlay && <span className="double-play-tag">⚔️ x2</span>}
+          {isShielded && <span className="shield-active-tag">🛡️ เกราะ</span>}
         </div>
 
         {isTimeAttack && (
@@ -81,8 +88,9 @@ export default function GameScreen({
             disabled={!isMyTurn && !isTimeAttack}
             title="ทิ้งการ์ดเพื่อข้ามตาและจั่วใบใหม่"
           >
-            <UIIcon name="recycle" size={14} color="#EA580C" />
-            <span>{passLabel}</span>
+            <UIIcon name="recycle" size={12} color="#EA580C" />
+            <span className="pass-btn-desktop">{passLabel}</span>
+            <span className="pass-btn-mobile">{selectedAnimal ? 'ทิ้ง' : 'จั่วใหม่'}</span>
           </button>
 
           <button
@@ -91,7 +99,7 @@ export default function GameScreen({
             onClick={onLeaveRoom}
             title="ออกจากห้อง"
           >
-            <UIIcon name="exit" size={14} color="#DC2626" />
+            <UIIcon name="exit" size={12} color="#DC2626" />
             <span>ออก</span>
           </button>
         </div>

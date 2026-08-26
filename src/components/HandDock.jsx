@@ -44,8 +44,8 @@ export default function HandDock({
           {isMyTurn ? (
             <>
               <span className="cute-turn-star">🌟</span>
-              <span className="cute-turn-bold">ถึงตาของคุณแล้ว!</span>
-              <span className="cute-turn-sub">(แตะเลือกการ์ด หรือลากไปวางในช่องคำถาม หรือกดใช้การ์ดพิเศษ)</span>
+              <span className="cute-turn-bold">ถึงตาคุณแล้ว!</span>
+              <span className="cute-turn-sub">(แตะเลือกการ์ด หรือลากไปวางในช่องคำถาม)</span>
             </>
           ) : (
             <>
@@ -74,7 +74,7 @@ export default function HandDock({
       <div className="cute-hand-cards-row">
         <div id="playerHandScroll" className="hand-vertical-scroll-list">
           {hand.length > 0 ? (
-            hand.map((card, idx) => {
+            hand.map((card) => {
               const cardIdKey = card.cardInstanceId || card.id;
               const isSelected = cardIdKey === selectedCardId;
               const isSpecial = card.cardType === 'special';
@@ -84,8 +84,7 @@ export default function HandDock({
                 <div
                   key={cardIdKey}
                   id={`handCard-${cardIdKey}`}
-                  className={`vertical-hand-card card-deal-anim ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
-                  style={{ animationDelay: `${idx * 0.07}s` }}
+                  className={`vertical-hand-card ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
                   draggable={true}
                   onDragStart={(e) => {
                     e.dataTransfer.setData('text/plain', cardIdKey);

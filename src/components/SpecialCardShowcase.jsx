@@ -1,36 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { AnimalAvatar } from '../assets/animalIllustrations';
 import { playSfx } from '../utils/audio';
 
 export default function SpecialCardShowcase({ specialEvent, onComplete }) {
   const [animStage, setAnimStage] = useState('spinIn'); // 'spinIn' -> 'showcase' -> 'flyToDiscard'
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  const currentEventId = specialEvent?.eventId || specialEvent?.cardInstanceId || specialEvent?.cardId || 'special';
 
   useEffect(() => {
     if (!specialEvent) return;
 
-    playSfx('sparkle');
     setAnimStage('spinIn');
 
     const t1 = setTimeout(() => {
       setAnimStage('showcase');
-      playSfx('snap');
-    }, 700);
+    }, 550);
 
     const t2 = setTimeout(() => {
       setAnimStage('flyToDiscard');
       playSfx('draw');
-    }, 2200);
+    }, 1800);
 
     const t3 = setTimeout(() => {
-      if (onComplete) onComplete();
-    }, 2900);
+      if (onCompleteRef.current) onCompleteRef.current();
+    }, 2400);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [specialEvent, onComplete]);
+  }, [currentEventId]);
 
   if (!specialEvent) return null;
 

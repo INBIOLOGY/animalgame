@@ -63,6 +63,7 @@
 
 html, body, #root {
   height: 100%;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
 }
@@ -434,8 +435,8 @@ body {
   display: flex;
   flex-direction: column;
   padding: 10px 16px;
-  height: calc(100vh - 56px);
-  max-height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
   position: relative;
   z-index: 1;
   overflow: hidden;
@@ -1167,6 +1168,20 @@ body {
   user-select: none;
 }
 
+.pass-btn-desktop {
+  display: inline;
+}
+.pass-btn-mobile {
+  display: none;
+}
+
+.turn-msg-desktop {
+  display: inline;
+}
+.turn-msg-mobile {
+  display: none;
+}
+
 .cute-action-btn.cute-btn-pass {
   background: #FFF7ED;
   border-color: #FED7AA;
@@ -1488,24 +1503,25 @@ body {
 /* 🃏 MINI ANIMAL CARD STACKED OVERLAY */
 .stacked-mini-card {
   position: absolute;
-  inset: 3px;
-  aspect-ratio: 1395 / 1949;
-  max-width: 88%;
-  max-height: 88%;
+  inset: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  max-width: 92%;
+  max-height: 92%;
   margin: auto;
   border-radius: 6px;
-  border: 1.5px solid #FCD34D;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid #FBBF24;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(251, 191, 36, 0.35);
   overflow: hidden;
-  background: #000;
-  transform: rotate(-1.5deg);
+  background: #0F172A;
+  transform: rotate(-1deg);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stacked-mini-card:hover {
-  transform: rotate(0deg) scale(1.06);
-  z-index: 15;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.7);
+  transform: rotate(0deg) scale(1.08);
+  z-index: 20;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8), 0 0 0 2px #F59E0B;
 }
 
 .stacked-mini-img {
@@ -1515,22 +1531,44 @@ body {
   display: block;
 }
 
-.stacked-card-badge {
+/* Elegant Corner Seal Stamp — leaves 100% artwork visible */
+.stacked-corner-seal {
   position: absolute;
-  bottom: 2px;
-  left: 2px;
+  top: 2px;
   right: 2px;
-  text-align: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7.5px;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  z-index: 5;
+  pointer-events: none;
 }
 
-.stacked-owner-tag {
-  display: inline-block;
-  font-size: 7.5px;
-  font-weight: 800;
-  color: white;
-  padding: 1px 4px;
-  border-radius: var(--r-pill);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+.stacked-corner-seal.seal-player {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+}
+
+.stacked-corner-seal.seal-bot {
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  color: #FFFFFF;
+}
+
+.stacked-card-glass-edge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, #F59E0B, #10B981);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .vertical-quest-card.conquered-state {
@@ -1570,13 +1608,13 @@ body {
   gap: 5px;
   box-shadow: 0 6px 22px rgba(45, 90, 35, 0.12);
   flex-shrink: 0;
-  transition: all 0.35s var(--ease-bounce);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   transform: translateZ(0);
 }
 
 .cute-hand-dock.my-turn-active {
-  min-height: 210px;
+  min-height: 200px;
   border-color: var(--forest-primary);
   box-shadow: 0 8px 28px rgba(45, 90, 35, 0.18), 0 0 0 2px var(--forest-primary);
 }
@@ -1628,20 +1666,22 @@ body {
   padding: 2px 7px;
   font-size: 12px;
   cursor: pointer;
-  transition: transform 0.15s var(--ease-bounce);
+  transition: transform 0.15s ease;
 }
 
-.cute-emote-pill-btn:hover {
-  transform: scale(1.25);
-  background: #FFFFFF;
+@media (hover: hover) and (pointer: fine) {
+  .cute-emote-pill-btn:hover {
+    transform: scale(1.25);
+    background: #FFFFFF;
+  }
 }
 
 .cute-hand-cards-row {
   display: flex;
   gap: 12px;
   align-items: center;
-  height: 165px;
-  transition: height 0.35s var(--ease-bounce);
+  height: 155px;
+  padding: 4px 0;
 }
 
 .cute-hand-dock.waiting-turn .cute-hand-cards-row {
@@ -1671,22 +1711,24 @@ body {
   cursor: pointer;
   flex-shrink: 0;
   background: #0F172A;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 0.85, 0.35, 1.05), box-shadow 0.2s ease, border-color 0.2s ease;
   user-select: none;
 }
 
-.vertical-hand-card:hover {
-  transform: translateY(-8px) scale(1.06);
-  border-color: #38BDF8;
-  box-shadow: 0 10px 24px rgba(56, 189, 248, 0.3);
-  z-index: 10;
+@media (hover: hover) and (pointer: fine) {
+  .vertical-hand-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    border-color: #38BDF8;
+    box-shadow: 0 10px 24px rgba(56, 189, 248, 0.3);
+    z-index: 10;
+  }
 }
 
 .vertical-hand-card.is-selected {
   border-color: #F59E0B !important;
   border-width: 2.5px !important;
-  transform: translateY(-12px) scale(1.1) !important;
-  box-shadow: 0 0 0 3px #F59E0B, 0 14px 32px rgba(245, 158, 11, 0.4) !important;
+  transform: translateY(-10px) scale(1.08) !important;
+  box-shadow: 0 0 0 3px #F59E0B, 0 12px 28px rgba(245, 158, 11, 0.45) !important;
   z-index: 20;
 }
 
@@ -3688,14 +3730,26 @@ body {
 }
 
 @media (max-width: 600px) {
+  .turn-msg-desktop {
+    display: none !important;
+  }
+  .turn-msg-mobile {
+    display: inline !important;
+  }
+
   .app-screen {
-    padding: 4px 6px;
-    height: calc(100vh - 48px);
+    padding: 2px 6px calc(72px + env(safe-area-inset-bottom, 16px)) 6px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .cute-topbar {
     padding: 0 8px;
-    height: 48px;
+    height: 42px;
+    min-height: 42px;
+    flex-shrink: 0;
   }
 
   /* Phone always uses hamburger menu */
@@ -3717,120 +3771,289 @@ body {
   /* ─── Game screen on phone ─── */
   .game-screen-wrap {
     gap: 4px;
-    height: 100%;
-    max-height: 100%;
+    height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start !important;
+    position: relative;
   }
 
   .game-header-bar {
-    padding: 3px 6px;
+    padding: 2px 5px;
     gap: 4px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    align-items: center;
     flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .game-header-bar::-webkit-scrollbar {
+    display: none;
   }
 
   .turn-badge {
-    font-size: 10px;
-    padding: 2px 7px;
-    white-space: normal;
-    flex: 1;
+    font-size: 9px;
+    padding: 0 6px;
+    height: 20px;
+    line-height: 20px;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border-radius: var(--r-pill);
   }
 
-  /* Phone category grid: 2 rows × 3 cols, cards have explicit height */
+  .turn-direction-indicator {
+    font-size: 8px;
+    padding: 0 4px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .cute-scoreboard-chips {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    gap: 3px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    scrollbar-width: none;
+  }
+
+  .cute-scoreboard-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cute-player-chip {
+    padding: 1px 4px;
+    gap: 2px;
+    height: 19px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .cute-chip-name {
+    font-size: 8.5px;
+  }
+
+  .cute-chip-score {
+    font-size: 8.5px;
+  }
+
+  .game-header-actions {
+    gap: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .cute-action-btn {
+    font-size: 8.5px;
+    padding: 0 5px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .pass-btn-desktop {
+    display: none;
+  }
+  .pass-btn-mobile {
+    display: inline;
+  }
+
+  /* Phone category grid: 2 rows × 3 cols, auto-adaptive height that fills the middle area */
   .categories-board-area {
     flex: 1;
     min-height: 0;
-    padding: 0 2px;
+    padding: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    width: 100%;
   }
 
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 5px;
+    gap: 4px;
     width: 100%;
     height: 100%;
-    max-height: 250px;
+    max-height: 210px;
+    align-items: center;
+    justify-content: center;
   }
 
   .vertical-quest-card {
     height: 100%;
-    max-height: 125px;
+    max-height: 100px;
     border-radius: 6px;
     border-width: 1.5px;
-    aspect-ratio: auto;
+    aspect-ratio: 1395 / 1949;
+    margin: 0 auto;
   }
 
   .quest-pill-idx, .quest-pill-pts {
-    font-size: 7px;
-    padding: 1px 3px;
+    font-size: 6px;
+    padding: 1px 2px;
   }
 
-  /* Phone hand dock — spacious and visible, no longer sunk/clipped */
+  /* Phone hand dock — ELEVATED DIRECTLY ABOVE SAFARI TOOLBAR WITH ZERO SUNKEN SLIVERS */
   .cute-hand-dock {
-    padding: 4px 8px;
-    flex-shrink: 0;
-    gap: 3px;
+    padding: 4px 6px;
+    flex-shrink: 0 !important;
+    gap: 2px;
+    border-radius: var(--r-lg);
+    border-width: 2px;
+    margin-bottom: 0 !important;
+    box-shadow: 0 6px 20px rgba(45, 90, 35, 0.22);
+    background: rgba(255, 255, 255, 0.98);
+    height: 128px !important;
+    min-height: 128px !important;
+    transform: none !important;
   }
 
   .cute-hand-dock.my-turn-active {
-    min-height: 160px;
-    height: 160px;
+    border-color: var(--forest-primary);
+    box-shadow: 0 6px 22px rgba(45, 90, 35, 0.25), 0 0 0 1.5px var(--forest-primary);
   }
 
   .cute-hand-dock.waiting-turn {
-    min-height: 145px;
-    height: 145px;
-    opacity: 1;
+    opacity: 0.98;
+  }
+
+  .cute-hand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 16px;
+    min-height: 16px;
+    gap: 3px;
+  }
+
+  .cute-turn-guide {
+    font-size: 9px;
+    gap: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cute-turn-sub {
+    display: none;
+  }
+
+  .cute-emotes-bar {
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .cute-emote-pill-btn {
+    padding: 0 3px;
+    font-size: 9.5px;
+    line-height: 16px;
   }
 
   .cute-hand-cards-row {
-    height: 125px !important;
-    gap: 8px;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    gap: 5px;
+    padding: 1px 0;
+    align-items: center;
+    flex-shrink: 0 !important;
   }
 
   .cute-hand-dock.waiting-turn .cute-hand-cards-row {
-    height: 110px !important;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+  }
+
+  .hand-vertical-scroll-list {
+    gap: 5px;
+    padding: 1px 2px;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    align-items: center;
   }
 
   .vertical-hand-card {
-    height: 100%;
+    height: 96px !important;
+    min-height: 96px !important;
+    width: 68px !important;
+    min-width: 68px !important;
     aspect-ratio: 1395 / 1949;
-    border-radius: 7px;
+    border-radius: 6px;
     border-width: 1.5px;
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
+    transition: transform 0.18s cubic-bezier(0.2, 0.85, 0.35, 1.05), box-shadow 0.18s ease;
+  }
+
+  .vertical-hand-card.is-selected {
+    transform: translateY(-4px) scale(1.03) !important;
+    box-shadow: 0 0 0 2px #F59E0B, 0 6px 14px rgba(245, 158, 11, 0.4) !important;
+    border-width: 2px !important;
   }
 
   .vertical-discard-card {
-    height: 100%;
+    height: 96px !important;
+    min-height: 96px !important;
+    width: 48px !important;
+    min-width: 48px !important;
     aspect-ratio: 1395 / 1949;
-    border-radius: 7px;
-    padding: 3px;
-    min-width: 55px;
-    flex-shrink: 0;
+    border-radius: 6px;
+    padding: 2px;
+    flex-shrink: 0 !important;
   }
 
   .cute-discard-icon-frame {
-    width: 22px;
-    height: 22px;
+    width: 16px;
+    height: 16px;
   }
 
   .cute-discard-main {
-    font-size: 8.5px;
+    font-size: 7px;
+    font-weight: 800;
+  }
+
+  .cute-discard-sub {
+    font-size: 5.5px;
+  }
+
+  .card-quick-discard-tag {
+    font-size: 6.5px;
+    padding: 1px 3px;
+    top: 2px;
+    right: 2px;
   }
 
   /* Special card use button — clearly visible on phone */
   .btn-use-special-floating {
-    font-size: 9px;
-    padding: 3px 5px;
-    bottom: 4px;
-    left: 4px;
-    right: 4px;
+    font-size: 7.5px;
+    padding: 1px 3px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    border-width: 1px;
   }
 
   .btn-use-special-floating.btn-shield-special {
@@ -3902,7 +4125,7 @@ body {
   padding: 6px 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(245, 158, 11, 0.4);
   margin-bottom: 24px;
-  animation: specialActorSlideDown 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: specialActorSlideDown 0.45s cubic-bezier(0.2, 0.85, 0.35, 1) forwards;
 }
 
 .special-actor-name {
@@ -3938,32 +4161,28 @@ body {
   flex-direction: column;
   align-items: center;
   transform-style: preserve-3d;
-  transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.5s ease;
 }
 
 /* Stage: 3D Spin In Entrance */
 .special-card-stage-box.stage-spinIn {
-  animation: specialCard3DSpinIn 0.75s cubic-bezier(0.2, 0.85, 0.35, 1.15) forwards;
+  animation: specialCard3DSpinIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Stage: Showcase Center Hover & Glow */
 .special-card-stage-box.stage-showcase {
-  animation: specialCardShowcaseHover 1.4s ease-in-out infinite alternate;
+  animation: specialCardShowcaseHover 2s ease-in-out infinite alternate;
 }
 
 /* Stage: Fly & Float towards Bottom-Right Discard Pile */
 .special-card-stage-box.stage-flyToDiscard {
-  animation: specialCardFlyToDiscard 0.7s cubic-bezier(0.55, 0.05, 0.2, 1) forwards;
+  animation: specialCardFlyToDiscard 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes specialCard3DSpinIn {
   0% {
     opacity: 0;
-    transform: scale(0.1) rotateY(720deg) rotateZ(30deg) translateY(120px);
-  }
-  65% {
-    opacity: 1;
-    transform: scale(1.1) rotateY(20deg) rotateZ(-5deg) translateY(-10px);
+    transform: scale(0.3) rotateY(360deg) rotateZ(15deg) translateY(60px);
   }
   100% {
     opacity: 1;
@@ -3976,7 +4195,7 @@ body {
     transform: scale(1) translateY(0) rotateZ(0deg);
   }
   100% {
-    transform: scale(1.04) translateY(-12px) rotateZ(1deg);
+    transform: scale(1.03) translateY(-8px) rotateZ(0.5deg);
   }
 }
 
@@ -3985,13 +4204,9 @@ body {
     opacity: 1;
     transform: scale(1) translateY(0) rotate(0deg);
   }
-  40% {
-    opacity: 0.95;
-    transform: scale(0.7) translate(15vw, 15vh) rotate(15deg);
-  }
   100% {
     opacity: 0;
-    transform: scale(0.08) translate(40vw, 42vh) rotate(45deg);
+    transform: scale(0.08) translate(38vw, 40vh) rotate(35deg);
   }
 }
 

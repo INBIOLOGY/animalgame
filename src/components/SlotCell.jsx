@@ -74,7 +74,7 @@ export default function SlotCell({
     );
   }
 
-  // Placed Answer Card (การ์ดคำตอบที่วางทับบนการ์ดคำถามจริงๆ)
+  // Placed Answer Card (การ์ดคำตอบที่วางทับบนการ์ดคำถาม - แสดงรูปสัตว์เต็มใบ 100% ไม่โดนชื่อบัง)
   const animalCard = slotData.animalCard;
   const isBot = slotData.isBot;
   const cardImg = animalCard?.image || animalCard?.origImage || '/cards/animals/animal_01.png';
@@ -83,9 +83,10 @@ export default function SlotCell({
     <div
       id={`slot-${centerIdx}-${slotIdx}`}
       className={`real-slot-zone filled-slot ${slotPosClass}`}
-      title={`${animalCard?.name || 'การ์ด'} (วางโดย ${slotData.playerName})`}
+      title={`${animalCard?.name || 'การ์ด'} (วางโดย: ${slotData.playerName})`}
     >
       <div className="stacked-mini-card animate-slam-down">
+        {/* รูปการ์ดสัตว์เต็มใบ ชัดเจน 100% ไม่ถูกบัง */}
         <img
           src={cardImg}
           alt={animalCard?.name || 'Placed Card'}
@@ -95,11 +96,17 @@ export default function SlotCell({
             e.target.src = '/cards/specials/special_fit_free.png';
           }}
         />
-        <div className="stacked-card-badge">
-          <span className="stacked-owner-tag" style={{ background: isBot ? '#4F46E5' : '#10B981' }}>
-            {isBot ? '🤖' : '👤'} {slotData.playerName}
-          </span>
+
+        {/* ตราประทับมุมการ์ดขนาดกะทัดรัด บอกว่าใครเป็นคนวาง โดยไม่บังรูปสัตว์ */}
+        <div
+          className={`stacked-corner-seal ${isBot ? 'seal-bot' : 'seal-player'}`}
+          title={`วางโดย: ${slotData.playerName}`}
+        >
+          <span className="seal-icon">{isBot ? '🤖' : '✓'}</span>
         </div>
+
+        {/* ขอบทองเรืองแสงด้านล่าง */}
+        <div className="stacked-card-glass-edge" />
       </div>
     </div>
   );

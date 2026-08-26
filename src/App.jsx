@@ -36,6 +36,9 @@ export default function App() {
 
   const toastTimerRef = useRef(null);
   const timeAttackTimerRef = useRef(null);
+  const actionLockRef = useRef(false);
+  const specialQueueRef = useRef([]);
+  const isShowcaseActiveRef = useRef(false);
 
   const showToastMsg = (msg, type = 'error') => {
     setToast({ text: msg, type, visible: true });
@@ -113,18 +116,28 @@ export default function App() {
     });
 
     socket.on('special_card_played', (info) => {
+      const uniqueInfo = {
+        ...info,
+        eventId: `special_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+      };
       playSfx('sparkle');
-      setActiveSpecialEvent(info);
       try {
         confetti({
-          particleCount: 45,
-          spread: 70,
+          particleCount: 35,
+          spread: 60,
           origin: { y: 0.6 },
           colors: ['#F59E0B', '#EF4444', '#8B5CF6', '#10B981']
         });
       } catch (e) {}
 
       showToastMsg(info.message || `${info.actorName} ใช้การ์ดพิเศษ "${info.cardTitle}"`, 'success');
+
+      if (!isShowcaseActiveRef.current) {
+        isShowcaseActiveRef.current = true;
+        setActiveSpecialEvent(uniqueInfo);
+      } else {
+        specialQueueRef.current.push(uniqueInfo);
+      }
     });
 
     socket.on('category_completed', (info) => {
@@ -268,6 +281,16 @@ export default function App() {
     });
   };
 
+  const processNextSpecialEvent = () => {
+    if (specialQueueRef.current.length === 0) {
+      isShowcaseActiveRef.current = false;
+      setActiveSpecialEvent(null);
+      return;
+    }
+    const nextEvent = specialQueueRef.current.shift();
+    setActiveSpecialEvent(nextEvent);
+  };
+
   const handleSendEmote = (emote) => {
     playSfx('sparkle');
     socket.emit('send_emote', { emote });
@@ -281,7 +304,7 @@ export default function App() {
   const [dropItState, setDropItState] = useState({ isOpen: false, cardId: null });
 
   const handlePlaySpecialCard = (cardId) => {
-    if (!room) return;
+    if (!room || actionLockRef.current) return;
     const me = room.players.find((p) => p.id === socket.id);
     const card = me?.hand?.find((c) => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
     const isShield = card?.actionType === 'shield' || card?.id === 'special_crab_shield';
@@ -303,8 +326,9 @@ export default function App() {
       return;
     }
 
-    playSfx('sparkle');
+    actionLockRef.current = true;
     socket.emit('play_special_card', { cardId }, (res) => {
+      setTimeout(() => { actionLockRef.current = false; }, 350);
       if (res && res.ok) {
         setSelectedCardId(null);
       } else {
@@ -315,12 +339,13 @@ export default function App() {
   };
 
   const handleConfirmDropIt = (targetPlayerId, targetCardIndex) => {
-    if (!dropItState.cardId) return;
-    playSfx('sparkle');
+    if (!dropItState.cardId || actionLockRef.current) return;
+    actionLockRef.current = true;
     socket.emit(
       'play_special_card',
       { cardId: dropItState.cardId, targetPlayerId, targetCardIndex },
       (res) => {
+        setTimeout(() => { actionLockRef.current = false; }, 350);
         if (res && res.ok) {
           setSelectedCardId(null);
           setDropItState({ isOpen: false, cardId: null });
@@ -333,14 +358,16 @@ export default function App() {
   };
 
   const executeMoveAction = (centerIdx, slotIdx, cardId) => {
-    if (!room) return;
+    if (!room || actionLockRef.current) return;
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
     if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
       playSfx('discard');
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
+    actionLockRef.current = true;
     socket.emit('play_card', { centerIdx, slotIdx, animalCardId: cardId }, (res) => {
+      setTimeout(() => { actionLockRef.current = false; }, 350);
       if (res && res.ok) {
         playSfx('snap');
         setSelectedCardId(null);
@@ -352,7 +379,7 @@ export default function App() {
   };
 
   const handleSlotClick = (centerIdx, slotIdx) => {
-    if (!room) return;
+    if (!room || actionLockRef.current) return;
     const me = room.players.find((p) => p.id === socket.id);
     if (!me || !me.hand || me.hand.length === 0) return;
 
@@ -381,19 +408,21 @@ export default function App() {
   };
 
   const handleDiscardSingleCard = (cardId) => {
-    if (!room) return;
+    if (!room || actionLockRef.current) return;
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
     if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
       playSfx('discard');
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
+    actionLockRef.current = true;
     const cardEl = document.getElementById(`handCard-${cardId}`);
     if (cardEl) cardEl.classList.add('burn-discard-anim');
 
     playSfx('discard');
 
     socket.emit('discard_card', { animalCardId: cardId }, (res) => {
+      setTimeout(() => { actionLockRef.current = false; }, 350);
       if (res && res.ok) {
         setSelectedCardId(null);
       } else {
@@ -515,7 +544,7 @@ export default function App() {
       {activeSpecialEvent && (
         <SpecialCardShowcase
           specialEvent={activeSpecialEvent}
-          onComplete={() => setActiveSpecialEvent(null)}
+          onComplete={processNextSpecialEvent}
         />
       )}
 

@@ -203,15 +203,7 @@ function runBotTurn(room, botPlayer) {
 
   const difficulty = room.botDifficulty || 'medium';
 
-  // 1. ตรวจสอบการ์ดพิเศษบนมือบอท (ยกเว้น wildcard Fit Free ที่จะนำไปวางลงช่อง)
-  const specialCard = botPlayer.hand?.find(c => c.cardType === 'special' && c.actionType !== 'wildcard');
-  if (specialCard && Math.random() < 0.6) {
-    const cardRef = specialCard.cardInstanceId || specialCard.id;
-    executeSpecialCard(room, botPlayer.id, cardRef);
-    return;
-  }
-
-  // 2. ค้นหาท่าที่เป็นไปได้
+  // 1. ตรวจสอบว่าบอทมีท่าลงการ์ดคำตอบทั่วไปหรือไม่
   let possibleMoves = [];
 
   if (botPlayer.hand && botPlayer.hand.length > 0) {
@@ -277,7 +269,15 @@ function runBotTurn(room, botPlayer) {
     }
   }
 
-  // หากไม่มีท่าที่ลงได้ ให้บอททิ้งการ์ด 1 ใบ แล้วจั่วใหม่
+  // 2. ถ้าไม่มีช่องที่วางได้ ตรวจสอบว่ามีการ์ดพิเศษที่จะช่วยแก้สถานการณ์หรือไม่
+  const specialCard = botPlayer.hand?.find(c => c.cardType === 'special' && c.actionType !== 'wildcard');
+  if (specialCard && Math.random() < 0.4) {
+    const cardRef = specialCard.cardInstanceId || specialCard.id;
+    executeSpecialCard(room, botPlayer.id, cardRef);
+    return;
+  }
+
+  // 3. หากไม่มีท่าที่ลงได้ ให้บอททิ้งการ์ด 1 ใบ แล้วจั่วใหม่
   if (botPlayer.hand && botPlayer.hand.length > 0) {
     const discardedCard = botPlayer.hand.shift();
     if (room.animalDeck.length === 0) {
@@ -790,22 +790,31 @@ io.on('connection', (socket) => {
       room.players = shuffle(room.players);
     }
 
-    // แจกการ์ด 4 ใบเริ่มต้นโดยกระจายความหลากหลายของไฟลัม
+    // แจกการ์ด 4 ใบเริ่มต้น: เน้นการ์ดสัตว์ (การ์ดพิเศษเริ่มต้นไม่เกิน 1 ใบ)
     room.players.forEach((p) => {
       p.score = 0;
       p.wonCount = 0;
       p.hand = [];
       const phylaInHand = new Set();
+      let specialCount = 0;
       let attempts = 0;
       while (p.hand.length < 4 && room.animalDeck.length > 0 && attempts < 100) {
         attempts++;
-        const candidateIdx = room.animalDeck.findIndex(c => !phylaInHand.has(c.phylum || c.id));
+        const candidateIdx = room.animalDeck.findIndex(c => {
+          if (c.cardType === 'special') {
+            return specialCount === 0;
+          }
+          return !phylaInHand.has(c.phylum);
+        });
         if (candidateIdx !== -1) {
           const card = room.animalDeck.splice(candidateIdx, 1)[0];
           p.hand.push(card);
+          if (card.cardType === 'special') specialCount++;
           if (card.phylum) phylaInHand.add(card.phylum);
         } else {
-          p.hand.push(room.animalDeck.pop());
+          const card = room.animalDeck.pop();
+          p.hand.push(card);
+          if (card.cardType === 'special') specialCount++;
         }
       }
     });
