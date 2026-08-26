@@ -3835,13 +3835,15 @@ body {
     position: relative;
   }
 
-  /* Spacious, luxurious 2-Tier Header expanded downwards (Zero text overlapping!) */
+  /* Spacious, luxurious 2-Tier Header expanded downwards into open space */
   .game-header-bar {
-    padding: 8px 10px;
-    gap: 6px;
+    margin-top: 6px !important;
+    margin-bottom: 8px !important;
+    padding: 8px 12px;
+    gap: 7px;
     height: auto !important;
-    min-height: 100px !important;
-    max-height: 108px !important;
+    min-height: 104px !important;
+    max-height: 112px !important;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -3849,7 +3851,7 @@ body {
     background: rgba(255, 255, 255, 0.98);
     border: 2px solid var(--matcha-border);
     border-radius: var(--r-xl);
-    box-shadow: 0 4px 18px rgba(45, 90, 35, 0.14);
+    box-shadow: 0 6px 20px rgba(45, 90, 35, 0.15);
   }
 
   .game-header-main-row {
