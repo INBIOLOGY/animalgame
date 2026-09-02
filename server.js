@@ -11,12 +11,23 @@ app.use(compression()); // ⚡ Ultra-fast Gzip / Deflate compression for all HTT
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN
-      ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
-      : ['http://localhost:3000', 'http://localhost:5173', 'https://animalgame-five.vercel.app'],
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 30000,
+  pingInterval: 10000,
+});
+
+// ⚡ Fast Healthcheck & Server Wakeup endpoint
+app.get('/api/health', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.json({ status: 'ok', timestamp: Date.now(), activeRooms: rooms.size });
+});
+app.get('/healthz', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.send('OK');
 });
 
 const PORT = process.env.PORT || 3000;

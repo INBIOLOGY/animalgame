@@ -25,8 +25,8 @@ export default function QuestCard({
   }
 
   const cat = categoryItem.category;
-  const layout = cat.layout || (cat.slots.length === 3 ? 'three_slots' : 'two_slots');
-  const questionImg = cat.image || `/cards/questions/q_${String(centerIdx + 1).padStart(2, '0')}.png`;
+  const layout = cat.layout || (cat.slots?.length === 3 ? 'three_slots' : 'two_slots');
+  const questionImg = cat.image || (cat.id ? `/cards/questions/${cat.id}.png` : `/cards/questions/q_01.png`);
 
   return (
     <div id={`catCard-${centerIdx}`} className={`vertical-quest-card layout-${layout}`}>
@@ -36,17 +36,24 @@ export default function QuestCard({
         <span className="quest-pill-pts">+{cat.points || 20}★</span>
       </div>
 
-      {/* Real Full-Sized Question Card Artwork (1395x1949 Portrait) */}
+      {/* Real Full-Sized Question Card Artwork */}
       <div className="quest-card-art-wrap">
         <img
           src={questionImg}
           alt={cat.title || 'Question Card'}
           className="quest-card-full-img"
+          loading="eager"
+          decoding="async"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.style.opacity = '0.3';
+            e.target.style.display = 'none';
           }}
         />
+
+        {/* Fallback Question Header (always present underneath in case of network lag) */}
+        <div className="quest-card-fallback-header">
+          <span className="quest-card-fallback-title">{cat.title || 'คำถามชีววิทยา'}</span>
+        </div>
 
         {/* Overlay Interactive Drop Slots */}
         <div className={`quest-overlay-slots layout-${layout}`}>

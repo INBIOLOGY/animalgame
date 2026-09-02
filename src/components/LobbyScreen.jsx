@@ -50,6 +50,31 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
               <div className="cute-room-mode-tag">
                 {modeLabels[room.roomMode] || room.roomMode}
               </div>
+              <div className="cute-room-status-indicator" style={{
+                marginTop: '8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: canStart ? '#2D6A28' : '#B45309',
+                background: canStart ? '#EAF5E3' : '#FEF3C7',
+                padding: '4px 10px',
+                borderRadius: '999px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <span style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: canStart ? '#2D6A28' : '#F59E0B',
+                  display: 'inline-block'
+                }} />
+                {canStart
+                  ? '✨ สมาชิกพร้อมแล้ว กดเริ่มเกมได้เลย'
+                  : room.roomMode === 'multiplayer'
+                  ? '⏳ รอผู้เล่นเข้าร่วม (ต้องการอย่างน้อย 2 คน)...'
+                  : '⏳ รอผู้เล่นเข้าร่วม...'}
+              </div>
             </div>
 
             <button type="button" className="cute-btn-copy-code" onClick={onCopyCode}>

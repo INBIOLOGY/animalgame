@@ -163,13 +163,23 @@ export default function EncyclopediaModal({ onClose }) {
                     </span>
                   </div>
                   <div className="cute-detail-subname">{selectedAnimal.englishName}</div>
+                  {selectedAnimal.sciName && (
+                    <div className="cute-detail-sciname">
+                      <em>🔬 {selectedAnimal.sciName}</em>
+                    </div>
+                  )}
                   <div className="dex-taxonomy-pills">
                     <span className="taxonomy-pill phylum-pill">
                       🧬 ไฟลัม: {selectedAnimal.phylum} ({PHYLA_MAP[selectedAnimal.phylum] || selectedAnimal.phylum})
                     </span>
                     {selectedAnimal.className && (
                       <span className="taxonomy-pill class-pill">
-                        🏷️ คลาส: {selectedAnimal.className}
+                        🏷️ ชั้น: {selectedAnimal.className}
+                      </span>
+                    )}
+                    {selectedAnimal.dietType && (
+                      <span className="taxonomy-pill diet-pill">
+                        🍽️ {selectedAnimal.dietType}
                       </span>
                     )}
                   </div>

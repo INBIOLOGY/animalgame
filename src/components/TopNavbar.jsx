@@ -130,13 +130,18 @@ export default function TopNavbar({
   return (
     <header className="cute-topbar">
       <div className="cute-brand-logo" onClick={() => window.location.reload()} title="รีเฟรชหน้าเว็บ">
-        <GameLogoMark size={32} />
+        <img
+          src="/images/pcshspl_logo.png"
+          alt="PCSHSPL Logo"
+          className="cute-brand-emblem"
+        />
         <div className="brand-title-wrap">
           <div className="brand-title-row">
             <span className="cute-brand-name">สัตว์น่ารู้</span>
             <span className="cute-brand-tag">TCG</span>
+            <span className="cute-brand-by-tag">By PCSHSPL</span>
           </div>
-          <span className="cute-brand-sub">ANIMAL CARD GAME</span>
+          <span className="cute-brand-sub">ANIMAL CARD GAME · PCSHSPL</span>
         </div>
       </div>
 

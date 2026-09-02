@@ -31,8 +31,8 @@ const MODES = [
   {
     key: 'multiplayer',
     iconName: 'users',
-    title: 'เล่นกับเพื่อน (2-10 คน)',
-    desc: 'สร้างห้องเล่นออนไลน์ ชวนเพื่อนๆ มาร่วมโต๊ะการ์ดสุดน่ารัก',
+    title: '🤝🏻 เล่นกับเพื่อน',
+    desc: 'สร้างห้องได้รหัส 6 หลัก → ส่งให้เพื่อน → รองรับ 2–10 คน',
     tag: 'หลายคน',
     pillBg: '#EAF5E3',
     pillColor: '#2D6A28',
@@ -40,8 +40,8 @@ const MODES = [
   {
     key: 'vs_bot',
     iconName: 'bot',
-    title: 'เล่นกับบอท AI',
-    desc: 'ฝึกซ้อมคนเดียวกับบอทสุดฉลาด 3 ระดับความยาก',
+    title: '🤖 เล่นกับบอท AI',
+    desc: 'เล่นคนเดียว ฝึกซ้อมได้ 3 ระดับ: ง่าย / ปานกลาง / ยาก',
     tag: 'เล่นเดี่ยว',
     pillBg: '#FEF3C7',
     pillColor: '#92400E',
@@ -49,8 +49,8 @@ const MODES = [
   {
     key: 'time_attack',
     iconName: 'timer',
-    title: 'สปีดรันจับเวลา',
-    desc: 'ท้าทายความเร็ว จัดหมวดหมู่สัตว์ให้เร็วที่สุดก่อนหมดเวลา',
+    title: '⏱️ สปีดรัน จับเวลา',
+    desc: 'จับเวลา แข่งจัดหมวดหมู่สัตว์ให้ถูกต้องเร็วที่สุด',
     tag: 'จับเวลา',
     pillBg: '#FFE4E6',
     pillColor: '#BE123C',
@@ -125,8 +125,8 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
         {mode === 'multiplayer' && (
           <div className="cute-param-row">
             <div className="cute-param-label-group">
-              <span className="cute-param-title">จำนวนผู้เล่นสูงสุด:</span>
-              <span className="cute-param-sub">รองรับ 2 - 10 คน</span>
+              <span className="cute-param-title">จำนวนผู้เล่น:</span>
+              <span className="cute-param-sub">รองรับ 2–10 คน</span>
             </div>
             <div className="cute-stepper-box">
               <button type="button" className="cute-step-btn" onClick={() => { playSfx('pop'); setMaxPlayers(p => Math.max(2, p - 1)); }} disabled={maxPlayers <= 2}>-</button>
@@ -273,20 +273,64 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
           DESKTOP layout (>600px) — classic 2-column
           ════════════════════════════════════════════════ */}
       <div className="cute-lobby-card desktop-lobby-card">
-        {/* ─── LEFT: Avatar Picker ─── */}
+
+        {/* ─── TOP BANNER: Game Description Hero ─── */}
+        <div className="game-top-banner">
+          <div className="game-banner-left">
+            <span className="game-banner-title">🐾 สัตว์น่ารู้ TCG <span className="cute-brand-by-tag">By PCSHSPL</span></span>
+            <span className="game-banner-sep">|</span>
+            <span className="game-banner-subtitle">เกมการ์ดเรียนรู้สัตว์ 18 ชนิด แข่งจัดหมวดหมู่ เรียนรู้วิทยาศาสตร์ไปพร้อมกับเล่นกับเพื่อน</span>
+          </div>
+          <button
+            type="button"
+            className="cute-tutorial-pill-btn"
+            onClick={() => { playSfx('pop'); if (onOpenTutorial) onOpenTutorial(); }}
+            title="เปิดคู่มือวิธีเล่น"
+          >
+            🎓 วิธีเล่น (5 ขั้นตอน)
+          </button>
+        </div>
+
+        {/* ─── LEFT: Player Info & Avatar Picker ─── */}
         <div className="cute-lobby-column left-column">
-          <div className="cute-column-header">
-            <span className="cute-column-title">🐾 สัตว์ประจำตัวของคุณ</span>
+          {/* 1. Name Input */}
+          <div className="cute-name-input-group">
+            <label className="cute-input-label">👤 ชื่อผู้เล่นของคุณ:</label>
+            <div className="cute-input-box">
+              <div className="cute-input-avatar"><AnimalAvatar id={curAnimalData.id} size={22} /></div>
+              <input
+                id="player-name-input"
+                className={`cute-text-input${nameError ? ' input-error' : ''}`}
+                type="text"
+                placeholder="พิมพ์ชื่อของคุณตรงนี้..."
+                maxLength={16}
+                value={playerName}
+                onChange={(e) => { setPlayerName(e.target.value); if (nameError) setNameError(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
+                aria-label="ชื่อผู้เล่น"
+              />
+            </div>
+            {nameError && <div className="cute-error-text">{nameError}</div>}
+          </div>
+
+          {/* 2. Selected Mascot Card Preview */}
+          <div className="cute-column-header" style={{ marginTop: 2 }}>
+            <span className="cute-column-title">🐾 สัตว์ประจำตัวที่เลือก</span>
             <span className="cute-badge-tag">NO. {curAvatarMeta.num}</span>
           </div>
 
-          <div className={`cute-mascot-card ${mascotBounce ? 'card-bounce' : ''}`} onClick={() => handleSelectAvatar(selectedAvatarId)}>
-            <div className="cute-mascot-avatar-wrap"><AnimalAvatar id={curAnimalData.id} size={64} /></div>
+          <div className={`cute-mascot-card ${mascotBounce ? 'card-bounce' : ''}`} onClick={() => handleSelectAvatar(selectedAvatarId)} title="แตะเพื่อเลือก">
+            <div className="cute-mascot-avatar-wrap"><AnimalAvatar id={curAnimalData.id} size={58} /></div>
             <div className="cute-mascot-info">
               <div className="cute-mascot-name-line">
                 <h2 className="cute-mascot-name">{curAnimalData.name}</h2>
                 <span className="cute-mascot-eng">({curAnimalData.englishName})</span>
               </div>
+              {curAnimalData.sciName && (
+                <div style={{ fontSize: 11, fontStyle: 'italic', color: '#2D6A28', fontWeight: 600, marginBottom: 2 }}>
+                  🔬 {curAnimalData.sciName}
+                </div>
+              )}
               <div className="cute-mascot-habitat">📍 {curAnimalData.habitat}</div>
               <div className="cute-traits-list">
                 {distinctTraits.map((tLabel, idx) => {
@@ -302,48 +346,21 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
             </div>
           </div>
 
-          {/* Name Input */}
-          <div className="cute-name-input-group">
-            <label className="cute-input-label">ชื่อผู้เล่น:</label>
-            <div className="cute-input-box">
-              <div className="cute-input-avatar"><AnimalAvatar id={curAnimalData.id} size={22} /></div>
-              <input
-                className={`cute-text-input${nameError ? ' input-error' : ''}`}
-                type="text" placeholder="พิมพ์ชื่อของคุณตรงนี้..." maxLength={16}
-                value={playerName}
-                onChange={(e) => { setPlayerName(e.target.value); if (nameError) setNameError(''); }}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
-              />
-            </div>
-            {nameError && <div className="cute-error-text">{nameError}</div>}
-          </div>
-
-          {/* Avatar Grid */}
+          {/* 3. Avatar Grid (18 Animals) */}
           <div className="cute-avatar-picker-section">
             <div className="cute-picker-header"><span className="cute-picker-label">เลือกสัตว์ประจำตัว (18 ชนิด):</span></div>
             <div className="cute-avatar-grid">
               {ANIMAL_AVATARS.map((av) => {
                 const isSelected = selectedAvatarId === av.id;
                 return (
-                  <button key={av.id} type="button" className={`cute-avatar-btn ${isSelected ? 'active-avatar' : ''}`} onClick={() => handleSelectAvatar(av.id)} title={av.name}>
-                    <AnimalAvatar id={av.id} size={28} />
+                  <button key={av.id} type="button" className={`cute-avatar-btn ${isSelected ? 'active-avatar' : ''}`} onClick={() => handleSelectAvatar(av.id)} title={av.name} aria-label={av.name}>
+                    <AnimalAvatar id={av.id} size={24} />
+                    <span className="cute-avatar-name">{av.name}</span>
                     {isSelected && <span className="cute-active-dot" />}
                   </button>
                 );
               })}
             </div>
-          </div>
-
-          {/* Mobile Join Panel (inside left column when on 'join' tab) */}
-          <div className="mobile-join-panel">
-            <div className="mobile-join-header"><span className="mobile-join-title">🔑 กรอกรหัสห้อง 6 หลักเพื่อเข้าร่วม</span></div>
-            <div className="cute-join-inputs">
-              <input className={`cute-code-input${codeError ? ' input-error' : ''}`} type="text" placeholder="รหัส 6 หลัก (เช่น 123456)" maxLength={6}
-                value={roomCode} onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
-                onKeyDown={(e) => e.key === 'Enter' && handleJoin()} />
-              <button type="button" className="cute-btn-join" onClick={handleJoin}>🚀 เข้าร่วม</button>
-            </div>
-            {codeError && <div className="cute-error-text">{codeError}</div>}
           </div>
         </div>
 
@@ -351,7 +368,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
         <div className="cute-lobby-column right-column">
           <div className="cute-column-header">
             <span className="cute-column-title">🎮 เลือกโหมดการเล่น</span>
-            <button type="button" className="cute-tutorial-pill-btn" onClick={() => { playSfx('pop'); if (onOpenTutorial) onOpenTutorial(); }} title="เปิดโหมดสอนเล่น">🎓 วิธีเล่น</button>
+            <span className="cute-badge-tag">3 MODES</span>
           </div>
 
           <div className="cute-modes-list">
@@ -379,8 +396,8 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
             {mode === 'multiplayer' && (
               <div className="cute-param-row">
                 <div className="cute-param-label-group">
-                  <span className="cute-param-title">จำนวนผู้เล่นสูงสุด:</span>
-                  <span className="cute-param-sub">รองรับ 2 - 10 คน</span>
+                  <span className="cute-param-title">จำนวนผู้เล่น:</span>
+                  <span className="cute-param-sub">รองรับ 2–10 คน</span>
                 </div>
                 <div className="cute-stepper-box">
                   <button type="button" className="cute-step-btn" onClick={() => { playSfx('pop'); setMaxPlayers(p => Math.max(2, p - 1)); }} disabled={maxPlayers <= 2}>-</button>
@@ -424,14 +441,26 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
           </button>
 
           <div className="cute-join-section desktop-join-section">
-            <div className="cute-join-divider"><span>หรือใส่รหัสห้องเพื่อเข้าร่วม</span></div>
+            <div className="cute-join-divider"><span>มีรหัสห้องแล้ว? กรอกเพื่อเข้าร่วมเลย</span></div>
             <div className="cute-join-inputs">
-              <input className={`cute-code-input${codeError ? ' input-error' : ''}`} type="text" placeholder="รหัสห้อง 6 หลัก..." maxLength={6}
-                value={roomCode} onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
-                onKeyDown={(e) => e.key === 'Enter' && handleJoin()} />
+              <input
+                id="room-code-input"
+                className={`cute-code-input${codeError ? ' input-error' : ''}`}
+                type="text"
+                placeholder="รหัส 6 หลัก เช่น A1B2C3"
+                maxLength={6}
+                value={roomCode}
+                onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); if (codeError) setCodeError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                aria-label="กรอกรหัสห้อง 6 หลัก"
+              />
               <button type="button" className="cute-btn-join" onClick={handleJoin}>เข้าร่วม</button>
             </div>
             {codeError && <div className="cute-error-text">{codeError}</div>}
+          </div>
+
+          <div className="cute-lobby-footnote">
+            <span>🏫 พัฒนาโดย โรงเรียนวิทยาศาสตร์จุฬาภรณราชวิทยาลัย พิษณุโลก (PCSHSPL) · แหล่งอ้างอิง: IUCN Red List · ITIS · Wikipedia</span>
           </div>
         </div>
       </div>
@@ -446,8 +475,9 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
           {/* Top Bar: Title + Tutorial button */}
           <div className="phone-top-row">
             <div className="phone-top-title">
-              <span className="phone-top-emoji">🐾</span>
-              <span>เข้าสู่ห้องเล่น</span>
+              <img src="/images/pcshspl_logo.png" alt="PCSHSPL" style={{ height: '24px', width: 'auto' }} />
+              <span>สัตว์น่ารู้ TCG</span>
+              <span className="cute-brand-by-tag">By PCSHSPL</span>
             </div>
             <button
               type="button"

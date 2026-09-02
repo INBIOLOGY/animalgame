@@ -87,7 +87,7 @@ export const TRAIT_MAP = {
   nerve_ring: 'มีวงแหวนประสาท (Nerve Ring)',
 
   // Chordata
-  notochord: 'พบ Notochord ช่วงใดช่วงหนึ่ง',
+  notochord: 'มีโครงสร้างสันหลังอ่อน (Notochord) ในระยะหนึ่งของวงจรชีวิต',
   dorsal_nerve_cord: 'ท่อประสาทกลวงด้านหลัง',
   gill_slits: 'มีช่องเหงือก (Gill Slits)',
   post_anal_tail: 'มี Notochord & Post-anal Tail',
@@ -320,24 +320,150 @@ export function isTraitCompatible(animalTraitsOrCard = [], requiredTrait) {
 
 export const ALL_ANIMALS_DATA = [
   // 🦁 18 Selectable Avatars with Full Biological Profiles
-  { id: 'lion', name: 'สิงโต', englishName: 'Lion (Panthera leo)', phylum: 'Chordata', rarity: 'legendary', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ทุ่งหญ้าสะวันนา', desc: 'สัตว์เลี้ยงลูกด้วยนมกินเนื้อ เจ้าป่าผู้ทรงพลัง ล่าเหยื่อเป็นฝูง' },
-  { id: 'tiger', name: 'เสือโคร่ง', englishName: 'Tiger (Panthera tigris)', phylum: 'Chordata', rarity: 'legendary', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่าทึบและป่าเบญจพรรณ', desc: 'สัตว์ตระกูลแมวที่ใหญ่ที่สุด มีลวดลายพรางตัวและว่ายน้ำเก่ง' },
-  { id: 'cheetah', name: 'ชีตาห์', englishName: 'Cheetah (Acinonyx jubatus)', phylum: 'Chordata', rarity: 'epic', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ทุ่งหญ้าโล่ง', desc: 'สัตว์บกที่วิ่งเร็วที่สุดในโลกด้วยความเร็วกว่า 100 กม./ชม.' },
-  { id: 'elephant', name: 'ช้าง', englishName: 'Elephant (Elephas maximus)', phylum: 'Chordata', rarity: 'epic', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่าเขตร้อนและทุ่งหญ้า', desc: 'สัตว์บกเลี้ยงลูกด้วยนมขนาดใหญ่ที่สุด มีงวงอเนกประสงค์และความจำดีเลิศ' },
-  { id: 'eagle', name: 'นกอินทรี', englishName: 'Eagle (Aquila)', phylum: 'Chordata', rarity: 'epic', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ภูเขาสูงและท้องฟ้า', desc: 'นกล่าเหยื่อสายตาคมกริบ กรงเล็บแข็งแรง โฉบจับเหยื่อได้อย่างแม่นยำ' },
-  { id: 'owl', name: 'นกฮูก', englishName: 'Owl (Strigiformes)', phylum: 'Chordata', rarity: 'rare', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่าไม้และโพรงไม้', desc: 'นกล่าเหยื่อกลางคืน บินได้เงียบกริบ หมุนคอได้รอบทิศเกือบ 270 องศา' },
-  { id: 'penguin', name: 'เพนกวิน', englishName: 'Penguin (Spheniscidae)', phylum: 'Chordata', rarity: 'rare', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ขั้วโลกใต้และชายฝั่งหนาวเย็น', desc: 'นกน้ำที่ไม่บิน แต่ว่ายน้ำดำน้ำจับปลาได้อย่างคล่องแคล่วว่องไว' },
-  { id: 'shark', name: 'ฉลาม', englishName: 'Shark (Selachimorpha)', phylum: 'Chordata', rarity: 'epic', traits: ['phylum_chordata', 'notochord', 'gill_slits', 'vertebrate_closed_blood'], habitat: 'มหาสมุทรทั่วโลก', desc: 'ปลากระดูกอ่อนนักล่าแห่งท้องทะเล มีฟันคมกริบและสัมผัสกระแสไฟฟ้า' },
-  { id: 'dolphin', name: 'โลมา', englishName: 'Dolphin (Delphinidae)', phylum: 'Chordata', rarity: 'epic', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ทะเลอบอุ่นและชายฝั่ง', desc: 'สัตว์เลี้ยงลูกด้วยนมในน้ำ ฉลาด แสนรู้ ใช้คลื่นเสียงโซนาร์สื่อสาร' },
-  { id: 'frog', name: 'กบ', englishName: 'Frog (Anura)', phylum: 'Chordata', rarity: 'common', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'แหล่งน้ำจืดและป่าชื้น', desc: 'สัตว์สะเทินน้ำสะเทินบก หายใจด้วยปอดและผิวหนัง กระโดดไกล' },
-  { id: 'turtle', name: 'เต่าบก', englishName: 'Turtle (Testudines)', phylum: 'Chordata', rarity: 'rare', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่าโปร่งและทะเลทราย', desc: 'สัตว์เลื้อยคลานโบราณ มีกระดองแข็งปกป้องร่างกาย อายุยืนยาว' },
-  { id: 'octopus', name: 'หมึกยักษ์', englishName: 'Octopus (Octopoda)', phylum: 'Mollusca', rarity: 'epic', traits: ['phylum_mollusca', 'mantle_cavity', 'mantle', 'radula', 'siphon', 'visceral_mass'], habitat: 'โขดหินใต้ทะเลลึก', desc: 'สัตว์ไม่มีกระดูกสันหลังสุดฉลาด มี 8 หนวด พ่นหมึกพรางตัวและเปลี่ยนสีได้' },
-  { id: 'butterfly', name: 'ผีเสื้อ', englishName: 'Butterfly (Lepidoptera)', phylum: 'Arthropoda', rarity: 'common', traits: ['phylum_arthropoda', 'jointed_appendages', 'exoskeleton_chitin', 'head_thorax_abdomen', 'open_circulatory_molting', 'triploblastic_jointed'], habitat: 'ทุ่งดอกไม้และป่าไม้', desc: 'แมลงปีกสวยงาม มีการเปลี่ยนแปลงรูปร่างครบขั้น ช่วยผสมเกสรพืช' },
-  { id: 'kangaroo', name: 'จิงโจ้', englishName: 'Kangaroo (Macropodidae)', phylum: 'Chordata', rarity: 'rare', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ทุ่งหญ้าออสเตรเลีย', desc: 'สัตว์มีกระเป๋าหน้าท้อง กระโดดด้วยขาหลังอันทรงพลังและใช้หางทรงตัว' },
-  { id: 'koala', name: 'โคอาลา', englishName: 'Koala (Phascolarctos cinereus)', phylum: 'Chordata', rarity: 'rare', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่ายูคาลิปตัส', desc: 'สัตว์มีกระเป๋าหน้าท้องที่น่ารัก กินใบยูคาลิปตัสเป็นอาหารหลักและนอนหลับเกือบทั้งวัน' },
-  { id: 'wolf', name: 'หมาป่า', englishName: 'Wolf (Canis lupus)', phylum: 'Chordata', rarity: 'rare', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่าสนและทุ่งทุนดรา', desc: 'สัตว์กินเนื้อสังคมสูง ล่าเหยื่อเป็นฝูงและสื่อสารด้วยการหอน' },
-  { id: 'chimp', name: 'ชิมแปนซี', englishName: 'Chimpanzee (Pan troglodytes)', phylum: 'Chordata', rarity: 'epic', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'ป่าดิบชื้นแอฟริกา', desc: 'ไพรเมตที่มีดีเอ็นเอใกล้เคียงมนุษย์ที่สุด ฉลาด รู้จักใช้เครื่องมือ' },
-  { id: 'polar_bear', name: 'หมีขั้วโลก', englishName: 'Polar Bear (Ursus maritimus)', phylum: 'Chordata', rarity: 'legendary', traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'], habitat: 'แผ่นน้ำแข็งอาร์กติก', desc: 'สัตว์กินเนื้อบนบกขนาดใหญ่ที่สุด ขนสีขาวช่วยพรางตัวและกันความหนาวเย็นจัด' },
+  {
+    id: 'lion', name: 'สิงโต', englishName: 'Lion', sciName: 'Panthera leo',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'legendary',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ทุ่งหญ้าสะวันนา แอฟริกา', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์เลี้ยงลูกด้วยนมชั้น Mammalia กินเนื้อ เจ้าป่าผู้ทรงพลัง อาศัยอยู่รวมกันเป็นฝูง (Pride)',
+    funFact: 'เพศเมียเป็นผู้ล่าหลักของฝูง ขณะที่เพศผู้มีหน้าที่ปกป้องอาณาเขต'
+  },
+  {
+    id: 'tiger', name: 'เสือโคร่ง', englishName: 'Tiger', sciName: 'Panthera tigris',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'legendary',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่าทึบและป่าเบญจพรรณ เอเชีย', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์ตระกูลแมวที่ใหญ่ที่สุด มีลวดลายพรางตัวเป็นเอกลักษณ์ เป็นสัตว์เดี่ยว',
+    funFact: 'ว่ายน้ำได้เก่งมาก ต่างจากแมวชนิดอื่น ชอบแช่น้ำเพื่อคลายร้อน'
+  },
+  {
+    id: 'cheetah', name: 'ชีตาห์', englishName: 'Cheetah', sciName: 'Acinonyx jubatus',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'epic',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ทุ่งหญ้าโล่ง แอฟริกาและเอเชียตะวันตก', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์บกที่วิ่งเร็วที่สุดในโลก มีกรงเล็บที่ไม่หดได้ ต่างจากแมวชนิดอื่น',
+    funFact: 'วิ่งเร็วสุดถึง 120 กม./ชม. เร่งความเร็วจาก 0 ถึง 100 กม./ชม. ได้ภายใน 3 วินาที'
+  },
+  {
+    id: 'elephant', name: 'ช้าง', englishName: 'Elephant', sciName: 'Elephas maximus',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'epic',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่าเขตร้อนและทุ่งหญ้า เอเชียและแอฟริกา', dietType: 'สัตว์กินพืช',
+    desc: 'สัตว์บกเลี้ยงลูกด้วยนมขนาดใหญ่ที่สุด มีงวงอเนกประสงค์และความจำดีเลิศ',
+    funFact: 'งวงของช้างมีกล้ามเนื้อมากกว่า 100,000 มัด และสามารถยกน้ำหนักได้มากกว่า 300 กิโลกรัม'
+  },
+  {
+    id: 'eagle', name: 'นกอินทรี', englishName: 'Eagle', sciName: 'Aquila chrysaetos',
+    phylum: 'Chordata', className: 'Aves', rarity: 'epic',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ภูเขาสูง ป่าทึบ และทุ่งกว้าง', dietType: 'สัตว์กินเนื้อ',
+    desc: 'นกล่าเหยื่อสายตาคมกริบ กรงเล็บแข็งแรง โฉบจับเหยื่อได้อย่างแม่นยำ',
+    funFact: 'มองเห็นได้ไกลและคมชัดกว่ามนุษย์ถึง 4–5 เท่า สามารถมองเห็นเหยื่อจากระยะกว่า 3 กิโลเมตร'
+  },
+  {
+    id: 'owl', name: 'นกฮูก', englishName: 'Owl', sciName: 'Strix sp.',
+    phylum: 'Chordata', className: 'Aves', rarity: 'rare',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่าไม้ทั่วโลก และโพรงไม้', dietType: 'สัตว์กินเนื้อ',
+    desc: 'นกล่าเหยื่อกลางคืน บินได้เงียบกริบ หมุนคอได้รอบทิศเกือบ 270 องศา',
+    funFact: 'บินเงียบกริบได้เพราะขอบขนปีกมีลักษณะพิเศษที่ดูดซับเสียง ทำให้เหยื่อไม่รู้ตัว'
+  },
+  {
+    id: 'penguin', name: 'เพนกวิน', englishName: 'Penguin', sciName: 'Spheniscus sp.',
+    phylum: 'Chordata', className: 'Aves', rarity: 'rare',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ขั้วโลกใต้และชายฝั่งหนาวเย็น', dietType: 'สัตว์กินปลา',
+    desc: 'นกน้ำที่ไม่บิน แต่ว่ายน้ำดำน้ำจับปลาได้อย่างคล่องแคล่วว่องไว',
+    funFact: 'แม้บินไม่ได้ แต่ว่ายน้ำได้เร็วกว่า 36 กม./ชม. และดำน้ำได้ลึกกว่า 500 เมตร'
+  },
+  {
+    id: 'shark', name: 'ฉลาม', englishName: 'Shark', sciName: 'Carcharodon sp.',
+    phylum: 'Chordata', className: 'Chondrichthyes (ปลากระดูกอ่อน)', rarity: 'epic',
+    traits: ['phylum_chordata', 'notochord', 'gill_slits', 'vertebrate_closed_blood'],
+    habitat: 'มหาสมุทรทั่วโลก', dietType: 'สัตว์กินเนื้อ',
+    desc: 'ปลากระดูกอ่อนนักล่าแห่งท้องทะเล มีฟันคมหลายแถว และประสาทสัมผัสกระแสไฟฟ้า',
+    funFact: 'มีอวัยวะพิเศษที่เรียกว่า Ampullae of Lorenzini ที่ตรวจจับกระแสไฟฟ้าจากสัตว์เหยื่อได้'
+  },
+  {
+    id: 'dolphin', name: 'โลมา', englishName: 'Dolphin', sciName: 'Delphinus sp.',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'epic',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ทะเลอบอุ่นและชายฝั่ง', dietType: 'สัตว์กินปลา',
+    desc: 'สัตว์เลี้ยงลูกด้วยนมในน้ำ ฉลาด แสนรู้ ใช้คลื่นเสียงโซนาร์สื่อสารและล่าเหยื่อ',
+    funFact: 'ใช้คลื่นเสียงความถี่สูง (Echolocation / โซนาร์) ล่าเหยื่อในน้ำขุ่นและสื่อสารกันในฝูง'
+  },
+  {
+    id: 'frog', name: 'กบ', englishName: 'Frog', sciName: 'Rana sp.',
+    phylum: 'Chordata', className: 'Amphibia (สัตว์ครึ่งบกครึ่งน้ำ)', rarity: 'common',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'แหล่งน้ำจืดและป่าชื้น', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์สะเทินน้ำสะเทินบก (Amphibia) มีการเปลี่ยนแปลงรูปร่าง ลูกอ๊อดอยู่ในน้ำ ตัวเต็มวัยอยู่บก',
+    funFact: 'หายใจด้วยผิวหนังได้ถึง 50% ทำให้ผิวหนังต้องชุ่มชื้นตลอดเวลา'
+  },
+  {
+    id: 'turtle', name: 'เต่าบก', englishName: 'Tortoise', sciName: 'Geochelone sp.',
+    phylum: 'Chordata', className: 'Reptilia (สัตว์เลื้อยคลาน)', rarity: 'rare',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่าโปร่งและทะเลทราย', dietType: 'สัตว์กินพืช',
+    desc: 'สัตว์เลื้อยคลานโบราณ มีกระดองแข็งปกป้องร่างกาย อายุยืนยาวหลายร้อยปี',
+    funFact: 'กระดองของเต่าเชื่อมกับกระดูกสันหลังและกระดูกซี่โครง ถอดออกไม่ได้ เป็นส่วนหนึ่งของร่างกาย'
+  },
+  {
+    id: 'octopus', name: 'หมึกยักษ์', englishName: 'Octopus', sciName: 'Octopus vulgaris',
+    phylum: 'Mollusca', className: 'Cephalopoda (หมวดหนวดเท้า)', rarity: 'epic',
+    traits: ['phylum_mollusca', 'mantle_cavity', 'mantle', 'radula', 'siphon', 'visceral_mass'],
+    habitat: 'โขดหินใต้ทะเลลึก', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์ไม่มีกระดูกสันหลัง (Mollusca) ฉลาดสูง มี 8 หนวด พ่นหมึกพรางตัวและเปลี่ยนสีได้',
+    funFact: 'มีเลือดสีน้ำเงิน (Hemocyanin) และมีสมองถึง 9 ก้อน — 1 ก้อนกลาง และ 8 ก้อนในแต่ละหนวด'
+  },
+  {
+    id: 'butterfly', name: 'ผีเสื้อ', englishName: 'Butterfly', sciName: 'Lepidoptera sp.',
+    phylum: 'Arthropoda', className: 'Insecta (แมลง)', rarity: 'common',
+    traits: ['phylum_arthropoda', 'jointed_appendages', 'exoskeleton_chitin', 'head_thorax_abdomen', 'open_circulatory_molting', 'triploblastic_jointed'],
+    habitat: 'ทุ่งดอกไม้และป่าไม้ทั่วโลก', dietType: 'สัตว์กินน้ำหวาน',
+    desc: 'แมลง (Insecta) ปีกสวยงาม มีการเปลี่ยนแปลงรูปร่างครบขั้น (ไข่ → หนอน → ดักแด้ → ผีเสื้อ)',
+    funFact: 'รับรสอาหารด้วยขา มีตาประกอบ (Compound Eye) ที่ประกอบด้วยเลนส์มากกว่า 6,000 ดวง'
+  },
+  {
+    id: 'kangaroo', name: 'จิงโจ้', englishName: 'Kangaroo', sciName: 'Macropus sp.',
+    phylum: 'Chordata', className: 'Mammalia (Marsupial)', rarity: 'rare',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ทุ่งหญ้าและพุ่มไม้ออสเตรเลีย', dietType: 'สัตว์กินพืช',
+    desc: 'สัตว์มีกระเป๋าหน้าท้อง (Marsupial) กระโดดด้วยขาหลังอันทรงพลัง ใช้หางทรงตัว',
+    funFact: 'ลูกจิงโจ้เมื่อแรกเกิดมีขนาดเล็กเท่าเมล็ดถั่วลิสง ต้องคลานเข้าถุงแม่เพื่อพัฒนาต่อ'
+  },
+  {
+    id: 'koala', name: 'โคอาลา', englishName: 'Koala', sciName: 'Phascolarctos cinereus',
+    phylum: 'Chordata', className: 'Mammalia (Marsupial)', rarity: 'rare',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่ายูคาลิปตัส ออสเตรเลีย', dietType: 'สัตว์กินพืช',
+    desc: 'สัตว์มีกระเป๋าหน้าท้องที่น่ารัก กินใบยูคาลิปตัสเป็นอาหารหลัก ซึ่งมีพิษต่อสัตว์ชนิดอื่น',
+    funFact: 'นอนหลับวันละ 18–22 ชั่วโมง เพื่อประหยัดพลังงานจากใบยูคาลิปตัสที่มีคุณค่าทางอาหารต่ำ'
+  },
+  {
+    id: 'wolf', name: 'หมาป่า', englishName: 'Wolf', sciName: 'Canis lupus',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'rare',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่าสนและทุ่งทุนดรา ซีกโลกเหนือ', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์กินเนื้อสังคมสูง อยู่รวมกันเป็นฝูง (Pack) ล่าเหยื่อร่วมกันอย่างเป็นระบบ',
+    funFact: 'สื่อสารด้วยการหอนที่ได้ยินได้ไกลกว่า 10 กิโลเมตร ใช้ส่งสัญญาณรวมฝูง'
+  },
+  {
+    id: 'chimp', name: 'ชิมแปนซี', englishName: 'Chimpanzee', sciName: 'Pan troglodytes',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'epic',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'ป่าดิบชื้นแอฟริกา', dietType: 'สัตว์กินทุกอย่าง',
+    desc: 'ไพรเมตที่มีดีเอ็นเอใกล้เคียงมนุษย์ที่สุด ฉลาด รู้จักใช้เครื่องมือและสอนทักษะให้กัน',
+    funFact: 'มีโครงสร้าง DNA ตรงกับมนุษย์ถึง 98.7% จึงถือเป็นสัตว์ที่ใกล้ชิดกับมนุษย์มากที่สุด'
+  },
+  {
+    id: 'polar_bear', name: 'หมีขั้วโลก', englishName: 'Polar Bear', sciName: 'Ursus maritimus',
+    phylum: 'Chordata', className: 'Mammalia', rarity: 'legendary',
+    traits: ['phylum_chordata', 'notochord', 'dorsal_nerve_cord', 'vertebrate_closed_blood'],
+    habitat: 'แผ่นน้ำแข็งอาร์กติกและมหาสมุทรอาร์กติก', dietType: 'สัตว์กินเนื้อ',
+    desc: 'สัตว์กินเนื้อบนบกขนาดใหญ่ที่สุดในโลก ขนสีขาวช่วยพรางตัวบนน้ำแข็ง',
+    funFact: 'ว่ายน้ำได้ต่อเนื่องหลายร้อยกิโลเมตรในมหาสมุทรน้ำแข็ง ขาหน้าแบนเหมือนพาย'
+  },
 
   // 🧽 Core Phylum Specimens (TCG Cards)
   { id: 'sponge_bath', name: 'ฟองน้ำถูตัว', englishName: 'Bath Sponge', phylum: 'Porifera', rarity: 'common', traits: ['phylum_porifera', 'no_tissue', 'asymmetry', 'spongin_spicule', 'choanocyte', 'spongocoel_osculum', 'no_nervous_digestive'], habitat: 'แนวปะการังน้ำตื้น', desc: 'โครงร่างค้ำจุนเป็นเส้นใยโปรตีนสปอนจิน (Spongin) นุ่มยืดหยุ่น' },

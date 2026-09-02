@@ -17,6 +17,11 @@ import { isTraitCompatible } from './utils/traits';
 const SOCKET_SERVER = import.meta.env.VITE_SERVER_URL || '';
 const socket = io(SOCKET_SERVER, {
   transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: 30,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 4000,
+  timeout: 25000,
 });
 
 export default function App() {
@@ -33,6 +38,34 @@ export default function App() {
   const [showDropHints, setShowDropHints] = useState(() => {
     return localStorage.getItem('animalgame_drop_hints') !== 'false';
   });
+
+  // ⚡ Auto-wake up backend server & Preload all 28 question cards into browser memory
+  useEffect(() => {
+    // 1. Wake up server on cloud hosts (e.g. Render/Glitch/Railway)
+    const healthUrl = SOCKET_SERVER ? `${SOCKET_SERVER.replace(/\/$/, '')}/api/health` : '/api/health';
+    fetch(healthUrl).catch(() => {});
+
+    // 2. Background Preload all 28 Question Cards for instant 0ms gameplay
+    const preloadList = [];
+    for (let i = 1; i <= 28; i++) {
+      preloadList.push(`/cards/questions/q_${String(i).padStart(2, '0')}.png`);
+    }
+    preloadList.push(
+      '/cards/specials/special_fit_free.png',
+      '/cards/specials/special_crab_shield.png',
+      '/cards/specials/special_play_double.png',
+      '/cards/specials/special_reverse.png',
+      '/cards/specials/special_skip.png',
+      '/cards/specials/special_shuffle.png',
+      '/cards/specials/special_drop_it.png',
+      '/images/pcshspl_logo.png'
+    );
+
+    preloadList.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
 
   const toastTimerRef = useRef(null);
   const timeAttackTimerRef = useRef(null);
