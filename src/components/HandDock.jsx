@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { UIIcon } from '../assets/natureIcons';
 
 const CUTE_EMOTES = ['🎉', '💖', '🐾', '🦁', '✨', '👏'];
@@ -11,8 +11,117 @@ export default function HandDock({
   onPlaySpecialCard,
   onDiscardSingle,
   onDiscardSelectedOrFirst,
+  onDropCardOnSlot,
   onSendEmote,
 }) {
+  const [dragInfo, setDragInfo] = useState({
+    pointerId: null,
+    targetEl: null,
+    cardId: null,
+    cardImg: '',
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    isDragging: false,
+    hasMoved: false,
+  });
+
+  const dragRef = useRef(dragInfo);
+  dragRef.current = dragInfo;
+
+  const handlePointerDown = (e, card) => {
+    if (e.target.closest('button')) return;
+
+    const cardIdKey = card.cardInstanceId || card.id;
+    const cardImg = card.image || card.origImage || '/cards/animals/animal_01.png';
+
+    setDragInfo({
+      pointerId: e.pointerId,
+      targetEl: e.currentTarget,
+      cardId: cardIdKey,
+      cardImg,
+      startX: e.clientX,
+      startY: e.clientY,
+      currentX: e.clientX,
+      currentY: e.clientY,
+      isDragging: false,
+      hasMoved: false,
+    });
+  };
+
+  const handlePointerMove = (e) => {
+    const cur = dragRef.current;
+    if (!cur.pointerId || cur.pointerId !== e.pointerId) return;
+
+    const dist = Math.hypot(e.clientX - cur.startX, e.clientY - cur.startY);
+    if (dist > 8 && !cur.isDragging) {
+      try {
+        cur.targetEl.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      setDragInfo((prev) => ({
+        ...prev,
+        isDragging: true,
+        hasMoved: true,
+        currentX: e.clientX,
+        currentY: e.clientY,
+      }));
+    } else if (cur.isDragging) {
+      setDragInfo((prev) => ({
+        ...prev,
+        currentX: e.clientX,
+        currentY: e.clientY,
+      }));
+    }
+  };
+
+  const handlePointerUp = (e) => {
+    const cur = dragRef.current;
+    if (!cur.pointerId || cur.pointerId !== e.pointerId) return;
+
+    if (cur.isDragging) {
+      const dropX = e.clientX;
+      const dropY = e.clientY;
+
+      const elUnder = document.elementFromPoint(dropX, dropY);
+      const slotEl = elUnder?.closest('.real-slot-zone');
+      const discardEl = elUnder?.closest('#discardZone');
+
+      if (slotEl) {
+        const centerIdx = parseInt(slotEl.getAttribute('data-center-idx'), 10);
+        const slotIdx = parseInt(slotEl.getAttribute('data-slot-idx'), 10);
+        if (!isNaN(centerIdx) && !isNaN(slotIdx) && onDropCardOnSlot) {
+          onDropCardOnSlot(centerIdx, slotIdx, cur.cardId);
+        }
+      } else if (discardEl && onDiscardSingle) {
+        onDiscardSingle(cur.cardId);
+      }
+    } else if (!cur.hasMoved) {
+      onSelectCard(cur.cardId);
+    }
+
+    try {
+      cur.targetEl.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    setDragInfo({
+      pointerId: null,
+      targetEl: null,
+      cardId: null,
+      cardImg: '',
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0,
+      isDragging: false,
+      hasMoved: false,
+    });
+  };
+
+  const handlePointerCancel = (e) => {
+    handlePointerUp(e);
+  };
+
   const handleDiscardDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -30,9 +139,9 @@ export default function HandDock({
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over');
     const cardId = e.dataTransfer.getData('text/plain');
-    if (cardId) {
+    if (cardId && onDiscardSingle) {
       onDiscardSingle(cardId);
-    } else if (selectedCardId) {
+    } else if (selectedCardId && onDiscardSingle) {
       onDiscardSingle(selectedCardId);
     }
   };
@@ -85,12 +194,16 @@ export default function HandDock({
                   key={cardIdKey}
                   id={`handCard-${cardIdKey}`}
                   className={`vertical-hand-card ${isSpecial ? 'special-foil' : ''} ${isSelected ? 'is-selected' : ''}`}
+                  style={{ touchAction: 'none' }}
                   draggable={true}
+                  onPointerDown={(e) => handlePointerDown(e, card)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerCancel}
                   onDragStart={(e) => {
                     e.dataTransfer.setData('text/plain', cardIdKey);
                     onSelectCard(cardIdKey);
                   }}
-                  onClick={() => onSelectCard(cardIdKey)}
                 >
                   <img
                     src={cardImg}
@@ -157,6 +270,19 @@ export default function HandDock({
           <span className="cute-discard-sub">(จั่วใหม่)</span>
         </div>
       </div>
+
+      {/* Floating Pointer Drag Ghost Card */}
+      {dragInfo.isDragging && (
+        <div
+          className="drag-ghost-card"
+          style={{
+            transform: `translate3d(${dragInfo.currentX - 42}px, ${dragInfo.currentY - 60}px, 0)`,
+          }}
+        >
+          <img src={dragInfo.cardImg} alt="Dragging Ghost" />
+        </div>
+      )}
     </div>
   );
 }
+

@@ -133,7 +133,7 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
                 );
               })}
 
-              {Array.from({ length: Math.max(0, room.maxPlayers - room.players.length) }).map((_, i) => (
+              {Array.from({ length: Math.min(4, Math.max(0, room.maxPlayers - room.players.length)) }).map((_, i) => (
                 <div key={`empty-${i}`} className="cute-player-slot empty">
                   <span className="cute-empty-text">+ รอผู้เล่นเข้าร่วม...</span>
                 </div>

@@ -9,6 +9,7 @@ import VictoryModal from './components/VictoryModal';
 import EncyclopediaModal from './components/EncyclopediaModal';
 import TutorialModal from './components/TutorialModal';
 import SpecialCardShowcase from './components/SpecialCardShowcase';
+import TargetPlayerModal from './components/TargetPlayerModal';
 import DropItModal from './components/DropItModal';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
@@ -18,15 +19,24 @@ const SOCKET_SERVER = import.meta.env.VITE_SERVER_URL || '';
 const socket = io(SOCKET_SERVER, {
   transports: ['websocket', 'polling'],
   reconnection: true,
-  reconnectionAttempts: 30,
+  reconnectionAttempts: 40,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 4000,
-  timeout: 25000,
+  timeout: 30000,
 });
 
 export default function App() {
+  const [playerId] = useState(() => {
+    let pid = localStorage.getItem('animalgame_player_id');
+    if (!pid) {
+      pid = 'usr_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
+      localStorage.setItem('animalgame_player_id', pid);
+    }
+    return pid;
+  });
+
   const [isOnline, setIsOnline] = useState(socket.connected);
-  const [myId, setMyId] = useState(socket.id);
+  const [myId, setMyId] = useState(playerId);
   const [room, setRoom] = useState(null);
   const [toast, setToast] = useState({ text: '', type: 'error', visible: false });
   const [selectedCardId, setSelectedCardId] = useState(null);
@@ -35,9 +45,11 @@ export default function App() {
   const [showDex, setShowDex] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [activeSpecialEvent, setActiveSpecialEvent] = useState(null);
-  const [showDropHints, setShowDropHints] = useState(() => {
-    return localStorage.getItem('animalgame_drop_hints') !== 'false';
-  });
+  const [targetModalState, setTargetModalState] = useState({ isOpen: false, card: null, cardId: null });
+
+  const getActionId = () => `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  const roomRef = useRef(room);
+  roomRef.current = room;
 
   // ⚡ Auto-wake up backend server & Preload all 28 question cards into browser memory
   useEffect(() => {
@@ -81,21 +93,19 @@ export default function App() {
     }, 3200);
   };
 
-  const handleToggleDropHints = () => {
-    const nextState = !showDropHints;
-    setShowDropHints(nextState);
-    localStorage.setItem('animalgame_drop_hints', nextState ? 'true' : 'false');
-    if (nextState) {
-      showToastMsg('💡 เปิดตัวช่วยบอกช่องวางการ์ดแล้ว', 'info');
-    } else {
-      showToastMsg('🔒 ปิดตัวช่วยแล้ว (โหมดท้าทายความรู้ชีววิทยา!)', 'info');
-    }
-  };
-
   useEffect(() => {
     socket.on('connect', () => {
       setIsOnline(true);
-      setMyId(socket.id);
+      setMyId(playerId);
+
+      const activeRoomId = roomRef.current?.roomId;
+      if (activeRoomId) {
+        socket.emit('reconnect_player', { roomId: activeRoomId, playerId }, (res) => {
+          if (res && res.ok && res.room) {
+            setRoom(res.room);
+          }
+        });
+      }
     });
 
     socket.on('disconnect', () => {
@@ -123,7 +133,12 @@ export default function App() {
     });
 
     socket.on('room_updated', (newRoom) => {
-      setRoom(newRoom);
+      setRoom((prev) => {
+        if (prev?.stateVersion && newRoom?.stateVersion && newRoom.stateVersion < prev.stateVersion) {
+          return prev; // Ignore stale state!
+        }
+        return newRoom;
+      });
     });
 
     socket.on('game_started', (newRoom) => {
@@ -282,13 +297,13 @@ export default function App() {
 
   // Socket Actions
   const handleCreateRoom = (playerName, avatarId, roomMode, timeLimitSec, maxPlayers = 8, botDifficulty = 'medium') => {
-    socket.emit('create_room', { playerName, avatarId, roomMode, timeLimitSec, maxPlayers, botDifficulty }, (res) => {
+    socket.emit('create_room', { playerName, avatarId, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId: playerId }, (res) => {
       if (res && !res.ok) showToastMsg(res.error || 'สร้างห้องไม่สำเร็จ');
     });
   };
 
   const handleJoinRoom = (playerName, avatarId, roomId) => {
-    socket.emit('join_room', { playerName, avatarId, roomId }, (res) => {
+    socket.emit('join_room', { playerName, avatarId, roomId, clientPlayerId: playerId }, (res) => {
       if (res && !res.ok) showToastMsg(res.error || 'เข้าร่วมห้องไม่สำเร็จ');
     });
   };
@@ -343,33 +358,31 @@ export default function App() {
     setSelectedCardId((prev) => (prev === cardId ? null : cardId));
   };
 
-  const [dropItState, setDropItState] = useState({ isOpen: false, cardId: null });
-
   const handlePlaySpecialCard = (cardId) => {
     if (!room || actionLockRef.current) return;
-    const me = room.players.find((p) => p.id === socket.id);
+    const me = room.players.find((p) => p.id === playerId || p.socketId === socket.id);
     const card = me?.hand?.find((c) => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
     const isShield = card?.actionType === 'shield' || card?.id === 'special_crab_shield';
 
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
-    if (room.roomMode !== 'time_attack' && !isShield && activePlayer?.id !== socket.id) {
+    if (room.roomMode !== 'time_attack' && !isShield && activePlayer?.id !== me?.id) {
       playSfx('discard');
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
-    // If Drop It card is played, open the interactive Opponent Card Picker modal!
-    if (card?.actionType === 'drop_it' || card?.id === 'special_drop_it') {
-      const opponents = room.players.filter((p) => p.id !== socket.id);
-      if (opponents.length === 0) {
-        return showToastMsg('ไม่มีคู่ต่อสู้ในห้อง');
+    // Targeted Special Card Popup Flow (Drop It, Skip, or any card with requiresTarget/targetType === 'player')
+    if (card?.requiresTarget || card?.targetType === 'player' || card?.actionType === 'drop_it' || card?.actionType === 'skip') {
+      const eligibleTargets = room.players.filter((p) => p.id !== me?.id);
+      if (eligibleTargets.length === 0) {
+        return showToastMsg('ไม่มีคู่ต่อสู้ในห้องให้เลือก');
       }
       playSfx('pop');
-      setDropItState({ isOpen: true, cardId });
+      setTargetModalState({ isOpen: true, card, cardId });
       return;
     }
 
     actionLockRef.current = true;
-    socket.emit('play_special_card', { cardId }, (res) => {
+    socket.emit('play_special_card', { cardId, actionId: getActionId() }, (res) => {
       setTimeout(() => { actionLockRef.current = false; }, 350);
       if (res && res.ok) {
         setSelectedCardId(null);
@@ -380,17 +393,17 @@ export default function App() {
     });
   };
 
-  const handleConfirmDropIt = (targetPlayerId, targetCardIndex) => {
-    if (!dropItState.cardId || actionLockRef.current) return;
+  const handleConfirmTargetPlayer = (targetPlayerId) => {
+    if (!targetModalState.cardId || actionLockRef.current) return;
     actionLockRef.current = true;
     socket.emit(
       'play_special_card',
-      { cardId: dropItState.cardId, targetPlayerId, targetCardIndex },
+      { cardId: targetModalState.cardId, targetPlayerId, actionId: getActionId() },
       (res) => {
         setTimeout(() => { actionLockRef.current = false; }, 350);
         if (res && res.ok) {
           setSelectedCardId(null);
-          setDropItState({ isOpen: false, cardId: null });
+          setTargetModalState({ isOpen: false, card: null, cardId: null });
         } else {
           playSfx('discard');
           showToastMsg(res?.error || 'ไม่สามารถใช้การ์ดพิเศษใบนี้ได้');
@@ -401,14 +414,15 @@ export default function App() {
 
   const executeMoveAction = (centerIdx, slotIdx, cardId) => {
     if (!room || actionLockRef.current) return;
+    const me = room.players.find((p) => p.id === playerId || p.socketId === socket.id);
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
-    if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
+    if (room.roomMode !== 'time_attack' && activePlayer?.id !== me?.id) {
       playSfx('discard');
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
     actionLockRef.current = true;
-    socket.emit('play_card', { centerIdx, slotIdx, animalCardId: cardId }, (res) => {
+    socket.emit('play_card', { centerIdx, slotIdx, animalCardId: cardId, actionId: getActionId() }, (res) => {
       setTimeout(() => { actionLockRef.current = false; }, 350);
       if (res && res.ok) {
         playSfx('snap');
@@ -422,7 +436,7 @@ export default function App() {
 
   const handleSlotClick = (centerIdx, slotIdx) => {
     if (!room || actionLockRef.current) return;
-    const me = room.players.find((p) => p.id === socket.id);
+    const me = room.players.find((p) => p.id === playerId || p.socketId === socket.id);
     if (!me || !me.hand || me.hand.length === 0) return;
 
     const centerItem = room.centerCategories?.[centerIdx];
@@ -451,8 +465,9 @@ export default function App() {
 
   const handleDiscardSingleCard = (cardId) => {
     if (!room || actionLockRef.current) return;
+    const me = room.players.find((p) => p.id === playerId || p.socketId === socket.id);
     const activePlayer = room.players[room.currentTurnIndex ?? 0];
-    if (room.roomMode !== 'time_attack' && activePlayer?.id !== socket.id) {
+    if (room.roomMode !== 'time_attack' && activePlayer?.id !== me?.id) {
       playSfx('discard');
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
@@ -463,7 +478,7 @@ export default function App() {
 
     playSfx('discard');
 
-    socket.emit('discard_card', { animalCardId: cardId }, (res) => {
+    socket.emit('discard_card', { animalCardId: cardId, actionId: getActionId() }, (res) => {
       setTimeout(() => { actionLockRef.current = false; }, 350);
       if (res && res.ok) {
         setSelectedCardId(null);
@@ -476,7 +491,7 @@ export default function App() {
 
   const handleDiscardSelectedOrFirst = () => {
     if (!room) return;
-    const me = room.players.find((p) => p.id === socket.id);
+    const me = room.players.find((p) => p.id === playerId || p.socketId === socket.id);
     if (!me || !me.hand || me.hand.length === 0) return;
     const cardToDiscard = selectedCardId || me.hand[0].cardInstanceId || me.hand[0].id;
     handleDiscardSingleCard(cardToDiscard);
@@ -492,8 +507,6 @@ export default function App() {
         showDeckCounter={room && room.status === 'playing'}
         deckCount={deckRemaining}
         totalDeck={room?.totalCategories || 12}
-        showDropHints={showDropHints}
-        onToggleDropHints={handleToggleDropHints}
         onOpenDex={() => setShowDex(true)}
         onOpenTutorial={() => setShowTutorial(true)}
       />
@@ -504,6 +517,8 @@ export default function App() {
         className={`game-toast game-toast-${toast.type} ${toast.visible ? 'game-toast-show' : ''}`}
         role="status"
         aria-live="polite"
+        onClick={() => setToast((prev) => ({ ...prev, visible: false }))}
+        title="แตะเพื่อปิดการแจ้งเตือน"
       >
         <span className="game-toast-icon">
           {toast.type === 'error' && '⚠️'}
@@ -511,6 +526,18 @@ export default function App() {
           {toast.type === 'success' && '✨'}
         </span>
         <span className="game-toast-text">{toast.text}</span>
+        <button
+          type="button"
+          className="game-toast-close-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            setToast((prev) => ({ ...prev, visible: false }));
+          }}
+          title="ปิดการแจ้งเตือน"
+          aria-label="ปิดการแจ้งเตือน"
+        >
+          ✕
+        </button>
       </div>
 
       <main className="app-screen">
@@ -525,7 +552,7 @@ export default function App() {
         {room && room.status === 'waiting' && (
           <LobbyScreen
             room={room}
-            myId={socket.id}
+            myId={playerId}
             onAddBot={handleAddBot}
             onStartGame={handleStartGame}
             onLeaveRoom={handleLeaveRoom}
@@ -537,10 +564,9 @@ export default function App() {
         {room && room.status === 'playing' && (
           <GameScreen
             room={room}
-            myId={socket.id}
+            myId={playerId}
             selectedCardId={selectedCardId}
             timeAttackSeconds={timeAttackSeconds}
-            showDropHints={showDropHints}
             onSelectCard={handleSelectCard}
             onPlaySpecialCard={handlePlaySpecialCard}
             onSlotClick={handleSlotClick}
@@ -558,7 +584,7 @@ export default function App() {
       {showVictory && (
         <VictoryModal
           room={room}
-          myId={socket.id}
+          myId={playerId}
           onRematch={() => {
             playSfx('fanfare');
             socket.emit('rematch');
@@ -590,13 +616,16 @@ export default function App() {
         />
       )}
 
-      {/* Interactive Drop It Opponent Hand Picker Modal */}
-      {dropItState.isOpen && (
-        <DropItModal
-          isOpen={dropItState.isOpen}
-          onClose={() => setDropItState({ isOpen: false, cardId: null })}
-          opponents={room?.players?.filter((p) => p.id !== socket.id) || []}
-          onConfirmDrop={handleConfirmDropIt}
+      {/* Interactive Targeted Special Card Picker Modal */}
+      {targetModalState.isOpen && (
+        <TargetPlayerModal
+          isOpen={targetModalState.isOpen}
+          onClose={() => setTargetModalState({ isOpen: false, card: null, cardId: null })}
+          card={targetModalState.card}
+          players={room?.players || []}
+          shieldedPlayerIds={room?.shieldedPlayerIds || []}
+          myId={playerId}
+          onConfirmTarget={handleConfirmTargetPlayer}
         />
       )}
 

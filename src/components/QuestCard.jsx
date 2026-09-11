@@ -6,10 +6,6 @@ import { isTraitCompatible } from '../utils/traits';
 export default function QuestCard({
   centerIdx,
   categoryItem,
-  activeAnimal,
-  myHand = [],
-  isMyTurn,
-  showDropHints = true,
   onSlotClick,
   onDropCard,
 }) {
@@ -59,9 +55,6 @@ export default function QuestCard({
         <div className={`quest-overlay-slots layout-${layout}`}>
           {categoryItem.filledSlots.map((slotData, slotIdx) => {
             const slotConfig = cat.slots[slotIdx];
-            const requiredTrait = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
-            const isCompatible = activeAnimal && isTraitCompatible(activeAnimal, requiredTrait);
-            const hasMatchingInHand = !activeAnimal && isMyTurn && myHand.some((c) => isTraitCompatible(c, requiredTrait));
 
             return (
               <SlotCell
@@ -70,10 +63,6 @@ export default function QuestCard({
                 slotIdx={slotIdx}
                 slotData={slotData}
                 slotConfig={slotConfig}
-                isCompatible={isCompatible}
-                hasMatchingInHand={hasMatchingInHand}
-                isMyTurn={isMyTurn}
-                showDropHints={showDropHints}
                 onSlotClick={onSlotClick}
                 onDropCard={onDropCard}
               />

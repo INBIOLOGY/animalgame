@@ -125,20 +125,43 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
         {mode === 'multiplayer' && (
           <div className="cute-param-row">
             <div className="cute-param-label-group">
-              <span className="cute-param-title">จำนวนผู้เล่น:</span>
-              <span className="cute-param-sub">รองรับ 2–10 คน</span>
+              <span className="cute-param-title">👥 จำนวนผู้เล่นในห้อง:</span>
+              <span className="cute-param-sub">รองรับ 2–10 คน (เฉพาะโหมดเล่นกับเพื่อน)</span>
             </div>
             <div className="cute-stepper-box">
-              <button type="button" className="cute-step-btn" onClick={() => { playSfx('pop'); setMaxPlayers(p => Math.max(2, p - 1)); }} disabled={maxPlayers <= 2}>-</button>
-              <span className="cute-step-val"><strong>{maxPlayers}</strong> <small>คน</small></span>
-              <button type="button" className="cute-step-btn" onClick={() => { playSfx('pop'); setMaxPlayers(p => Math.min(10, p + 1)); }} disabled={maxPlayers >= 10}>+</button>
+              <button
+                id="btn-decrease-players-mobile"
+                type="button"
+                className="cute-step-btn"
+                onClick={() => { playSfx('pop'); setMaxPlayers((p) => Math.max(2, p - 1)); }}
+                disabled={maxPlayers <= 2}
+                title="ลดจำนวนผู้เล่น"
+                aria-label={`ลดจำนวนผู้เล่น (ปัจจุบัน ${maxPlayers} คน)`}
+              >
+                −
+              </button>
+              <span className="cute-step-val" key={`p-val-${maxPlayers}`}>
+                <strong>{maxPlayers}</strong> <small>คน</small>
+              </span>
+              <button
+                id="btn-increase-players-mobile"
+                type="button"
+                className="cute-step-btn"
+                onClick={() => { playSfx('pop'); setMaxPlayers((p) => Math.min(24, p + 1)); }}
+                disabled={maxPlayers >= 24}
+                title="เพิ่มจำนวนผู้เล่น"
+                aria-label={`เพิ่มจำนวนผู้เล่น (ปัจจุบัน ${maxPlayers} คน)`}
+              >
+                +
+              </button>
             </div>
           </div>
         )}
         {mode === 'vs_bot' && (
-          <div className="cute-param-row">
+          <div className="cute-param-row cute-param-col">
             <div className="cute-param-label-group">
               <span className="cute-param-title">ระดับความยาก AI:</span>
+              <span className="cute-param-sub">👤 1 ผู้เล่น VS 🤖 1 บอท AI (เล่นคนเดียว)</span>
             </div>
             <div className="cute-diff-strip">
               {[{ key: 'easy', label: 'ง่าย', icon: '🟢' }, { key: 'medium', label: 'กลาง', icon: '🟡' }, { key: 'hard', label: 'ยาก', icon: '🔴' }].map(d => (
@@ -150,9 +173,10 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
           </div>
         )}
         {mode === 'time_attack' && (
-          <div className="cute-param-row">
+          <div className="cute-param-row cute-param-col">
             <div className="cute-param-label-group">
               <span className="cute-param-title">เวลาที่กำหนด:</span>
+              <span className="cute-param-sub">⏱️ เล่นคนเดียว แข่งทำคะแนนก่อนหมดเวลา</span>
             </div>
             <div className="cute-time-strip">
               {TIME_OPTIONS.map(t => (
@@ -396,21 +420,43 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
             {mode === 'multiplayer' && (
               <div className="cute-param-row">
                 <div className="cute-param-label-group">
-                  <span className="cute-param-title">จำนวนผู้เล่น:</span>
-                  <span className="cute-param-sub">รองรับ 2–10 คน</span>
+                  <span className="cute-param-title">👥 จำนวนผู้เล่นในห้อง:</span>
+                  <span className="cute-param-sub">รองรับ 2–10 คน (เฉพาะโหมดเล่นกับเพื่อน)</span>
                 </div>
                 <div className="cute-stepper-box">
-                  <button type="button" className="cute-step-btn" onClick={() => { playSfx('pop'); setMaxPlayers(p => Math.max(2, p - 1)); }} disabled={maxPlayers <= 2}>-</button>
-                  <span className="cute-step-val"><strong>{maxPlayers}</strong> <small>คน</small></span>
-                  <button type="button" className="cute-step-btn" onClick={() => { playSfx('pop'); setMaxPlayers(p => Math.min(10, p + 1)); }} disabled={maxPlayers >= 10}>+</button>
+                  <button
+                    id="btn-decrease-players"
+                    type="button"
+                    className="cute-step-btn"
+                    onClick={() => { playSfx('pop'); setMaxPlayers((p) => Math.max(2, p - 1)); }}
+                    disabled={maxPlayers <= 2}
+                    title="ลดจำนวนผู้เล่น"
+                    aria-label={`ลดจำนวนผู้เล่น (ปัจจุบัน ${maxPlayers} คน)`}
+                  >
+                    −
+                  </button>
+                  <span className="cute-step-val" key={`desk-pval-${maxPlayers}`}>
+                    <strong>{maxPlayers}</strong> <small>คน</small>
+                  </span>
+                  <button
+                    id="btn-increase-players"
+                    type="button"
+                    className="cute-step-btn"
+                    onClick={() => { playSfx('pop'); setMaxPlayers((p) => Math.min(24, p + 1)); }}
+                    disabled={maxPlayers >= 24}
+                    title="เพิ่มจำนวนผู้เล่น"
+                    aria-label={`เพิ่มจำนวนผู้เล่น (ปัจจุบัน ${maxPlayers} คน)`}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             )}
             {mode === 'vs_bot' && (
-              <div className="cute-param-row">
+              <div className="cute-param-row cute-param-col">
                 <div className="cute-param-label-group">
                   <span className="cute-param-title">ระดับความยาก AI:</span>
-                  <span className="cute-param-sub">ปรับความเก่งของบอท</span>
+                  <span className="cute-param-sub">👤 1 ผู้เล่น VS 🤖 1 บอท AI (เล่นคนเดียว)</span>
                 </div>
                 <div className="cute-diff-strip">
                   {[{ key: 'easy', label: 'ง่าย', icon: '🟢' }, { key: 'medium', label: 'ปานกลาง', icon: '🟡' }, { key: 'hard', label: 'ยาก', icon: '🔴' }].map(d => (
@@ -422,10 +468,10 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
               </div>
             )}
             {mode === 'time_attack' && (
-              <div className="cute-param-row">
+              <div className="cute-param-row cute-param-col">
                 <div className="cute-param-label-group">
                   <span className="cute-param-title">เวลาที่กำหนด:</span>
-                  <span className="cute-param-sub">ทำคะแนนก่อนหมดเวลา</span>
+                  <span className="cute-param-sub">⏱️ เล่นคนเดียว แข่งทำคะแนนก่อนหมดเวลา</span>
                 </div>
                 <div className="cute-time-strip">
                   {TIME_OPTIONS.map(t => (

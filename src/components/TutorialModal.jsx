@@ -8,6 +8,11 @@ const TUTORIAL_STEPS = [
     badge: 'ขั้นตอนที่ 1 / 6',
     title: '🎴 รู้จักกระดานและการ์ดคำถาม',
     desc: 'บนกระดานจะมี "การ์ดคำถาม" แนวตั้ง 6 ใบ แต่ละใบจะมี 2 หรือ 3 ช่องสี (เหลืองบน, ชมพูล่าง) ซึ่งระบุคุณสมบัติทางชีววิทยาที่สัตว์ต้องมี เช่น "มีเนื้อเยื่อแท้จริง", "อสมมาตร", "มีท่อประสาทกลวง"',
+    keyPoints: [
+      { icon: '📋', text: 'บนกระดานมี <strong>การ์ดคำถาม 6 ใบ</strong>' },
+      { icon: '🎨', text: 'แต่ละใบมีช่องสีระบุ <strong>คุณสมบัติทางชีววิทยา</strong>' },
+      { icon: '🎯', text: 'เป้าหมายคือหา <strong>สัตว์ที่มีคุณสมบัติตรงกัน</strong> มาวาง' },
+    ],
     demoType: 'board_intro',
     demoImg: '/cards/questions/q_01.png',
   },
@@ -16,6 +21,11 @@ const TUTORIAL_STEPS = [
     badge: 'ขั้นตอนที่ 2 / 6',
     title: '🐾 การ์ดสัตว์ในมือและไฟลัมทั้ง 9',
     desc: 'ในมือของคุณจะมีการ์ดสัตว์ 4 ใบ สัตว์แต่ละชนิดจะสังกัด 1 ใน 9 ไฟลัม (Porifera, Cnidaria, Mollusca ฯลฯ) และมีคุณสมบัติเฉพาะตัว ให้อ่านคุณสมบัติของสัตว์เพื่อหาว่าตรงกับคำถามช่องไหนบนกระดาน',
+    keyPoints: [
+      { icon: '🃏', text: 'ผู้เล่นแต่ละคนถือ <strong>การ์ดสัตว์ในมือ 4 ใบ</strong>' },
+      { icon: '🧬', text: 'ครอบคลุม <strong>9 ไฟลัม</strong> (สัตว์ไม่มีกระดูกสันหลัง & มีกระดูกสันหลัง)' },
+      { icon: '🔍', text: 'แตะดูการ์ดเพื่ออ่าน <strong>ลักษณะชีววิทยา</strong> ของสัตว์ตัวนั้น' },
+    ],
     demoType: 'hand_intro',
     demoImg: '/cards/animals/animal_01.png',
   },
@@ -24,6 +34,11 @@ const TUTORIAL_STEPS = [
     badge: 'ขั้นตอนที่ 3 / 6',
     title: '✨ วิธีการวางการ์ดลงช่อง (Match & Fit)',
     desc: 'เมื่อถึงตาของคุณ ให้แตะเลือกการ์ดในมือ 1 ใบ จากนั้นแตะช่องคำถามบนกระดานที่มีคุณสมบัติตรงกัน (หรือเปิด "💡 ตัวช่วย" เพื่อให้ระบบเรืองแสงสีเขียวบอกช่องที่วางได้) การ์ดคำตอบจะบินไปวางทับช่องนั้นทันที!',
+    keyPoints: [
+      { icon: '👆', text: '<strong>แตะเลือกการ์ดสัตว์</strong> ในมือ 1 ใบ' },
+      { icon: '💡', text: 'เปิด <strong>"ตัวช่วย"</strong> ด้านบนเพื่อให้ระบบไฮไลต์ช่องที่ลงได้' },
+      { icon: '🎯', text: '<strong>แตะช่องบนกระดาน</strong> การ์ดจะลงไปวางคู่กับคำถามทันที' },
+    ],
     demoType: 'card_match_anim',
   },
   {
@@ -31,6 +46,11 @@ const TUTORIAL_STEPS = [
     badge: 'ขั้นตอนที่ 4 / 6',
     title: '⚡ การใช้การ์ดพิเศษทั้ง 7 ชนิด',
     desc: 'ในกองการ์ดจะมีการ์ดพิเศษปนอยู่ด้วย เช่น "Fit Free" (วางตรงไหนก็ได้), "Crab Shield" (กางเกราะป้องกัน), "Play Double" (วาง 2 ใบในตาเดียว), "Reverse" (สลับทิศทาง), "Skip" (ข้ามตา), "Shuffle" (สลับไพ่ทุกคน), "Drop It" (บังคับทิ้งการ์ด)',
+    keyPoints: [
+      { icon: '🛡️', text: '<strong>เกราะ & วางฟรี</strong>: Crab Shield (กันแกล้ง), Fit Free (ลงได้ทุกช่อง)' },
+      { icon: '⏩', text: '<strong>เปลี่ยนจังหวะ</strong>: Skip (ข้ามตาเพื่อน), Double (ลง 2 ใบติด)' },
+      { icon: '🌪️', text: '<strong>ป่วนกระดาน</strong>: Reverse (ย้อนทิศ), Drop It (บังคับทิ้งไพ่)' },
+    ],
     demoType: 'specials_grid',
   },
   {
@@ -38,6 +58,11 @@ const TUTORIAL_STEPS = [
     badge: 'ขั้นตอนที่ 5 / 6',
     title: '🔄 การทิ้งการ์ดเพื่อจั่วใหม่ (Discard)',
     desc: 'หากไม่มีการ์ดที่สามารถวางบนกระดานได้ ให้แตะปุ่ม "ข้ามตา / จั่วใหม่" หรือลากการ์ดไปยังกล่อง "ทิ้งการ์ด" ด้านขวาล่าง ระบบจะทิ้งการ์ดใบนั้นและจั่วใบใหม่จากกองขึ้นมือทันที แล้วสลับตาให้ผู้เล่นคนถัดไป',
+    keyPoints: [
+      { icon: '🚫', text: 'หากในมือ <strong>ไม่มีใบไหนวางลงช่องได้เลย</strong>' },
+      { icon: '🗑️', text: 'แตะปุ่ม <strong>"ข้ามตา / จั่วใหม่"</strong> หรือลากลงกล่องทิ้ง' },
+      { icon: '🎴', text: 'ระบบจะ <strong>จั่วการ์ดใหม่ขึ้นมือ 1 ใบ</strong> แล้วสลับตา' },
+    ],
     demoType: 'discard_demo',
   },
   {
@@ -45,12 +70,26 @@ const TUTORIAL_STEPS = [
     badge: 'ขั้นตอนที่ 6 / 6',
     title: '🏆 การพิชิตหมวดและการชนะเกม',
     desc: 'เมื่อผู้เล่นวางการ์ดครบทุกช่องในการ์ดคำถามใบใด ผู้ที่วางใบสุดท้ายจะได้รับแต้มของหมวดนั้น (เช่น +20 หรือ +30 แต้ม) และการ์ดคำถามใบใหม่จะถูกเปิดขึ้นมา เมื่อการ์ดคำถามหมดกอง ผู้ที่มีคะแนนสูงสุดจะเป็นผู้ชนะ!',
+    keyPoints: [
+      { icon: '🏁', text: '<strong>วางครบทุกช่อง</strong> ในการ์ดคำถาม = พิชิตหมวดสำเร็จ!' },
+      { icon: '⭐', text: 'คนวางใบสุดท้ายจะได้รับ <strong>+20 หรือ +30 แต้ม</strong>' },
+      { icon: '👑', text: 'เมื่อการ์ดคำถามหมด <strong>ผู้ที่มีแต้มสูงสุดจะชนะเกม!</strong>' },
+    ],
     demoType: 'victory_demo',
   },
 ];
 
 export default function TutorialModal({ onClose, onStartPlaying }) {
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
+
+  // Keyboard shortcut: Escape to close modal
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const cur = TUTORIAL_STEPS[currentStepIdx];
   const isFirst = currentStepIdx === 0;
@@ -233,6 +272,22 @@ export default function TutorialModal({ onClose, onStartPlaying }) {
         {/* Text Description Box */}
         <div className="tutorial-info-box">
           <h3 className="tutorial-step-headline">{cur.title}</h3>
+
+          {/* Kid-friendly summary key points */}
+          {cur.keyPoints && (
+            <div className="tutorial-key-points">
+              {cur.keyPoints.map((kp, idx) => (
+                <div key={idx} className="tutorial-key-pill">
+                  <span className="tutorial-key-icon">{kp.icon}</span>
+                  <span
+                    className="tutorial-key-text"
+                    dangerouslySetInnerHTML={{ __html: kp.text }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
           <p className="tutorial-step-desc">{cur.desc}</p>
         </div>
 

@@ -9,7 +9,9 @@
     "rarity": "legendary",
     "copiesInDeck": 4,
     "description": "การ์ดสารพัดนึก สามารถนำไปวางลงในช่องคำถามใดก็ได้บนกระดานทันที",
-    "isPlayableOnSlot": true
+    "isPlayableOnSlot": true,
+    "requiresTarget": false,
+    "targetType": "slot"
   },
   {
     "id": "special_crab_shield",
@@ -21,7 +23,9 @@
     "rarity": "epic",
     "copiesInDeck": 3,
     "description": "สร้างเกราะป้องกันผลของการ์ดพิเศษ (เช่น Drop It, Skip) จากผู้เล่นอื่นได้ 1 ครั้ง",
-    "isPlayableOnSlot": false
+    "isPlayableOnSlot": false,
+    "requiresTarget": false,
+    "targetType": "self"
   },
   {
     "id": "special_play_double",
@@ -33,7 +37,9 @@
     "rarity": "epic",
     "copiesInDeck": 3,
     "description": "กดใช้ก่อนวางการ์ด เพื่อให้วางการ์ดลงกระดานได้ 2 ใบในเทิร์นเดียวกัน",
-    "isPlayableOnSlot": false
+    "isPlayableOnSlot": false,
+    "requiresTarget": false,
+    "targetType": "self"
   },
   {
     "id": "special_reverse",
@@ -45,19 +51,23 @@
     "rarity": "rare",
     "copiesInDeck": 3,
     "description": "สลับทิศทางการเดินเทิร์นของผู้เล่นทุกคนทันที",
-    "isPlayableOnSlot": false
+    "isPlayableOnSlot": false,
+    "requiresTarget": false,
+    "targetType": "none"
   },
   {
     "id": "special_skip",
     "title": "Skip",
-    "name": "Skip (ข้ามตาคนต่อไป)",
+    "name": "Skip (ข้ามตาผู้เล่น)",
     "image": "/cards/specials/special_skip.png",
     "actionType": "skip",
     "cardType": "special",
     "rarity": "rare",
     "copiesInDeck": 3,
-    "description": "สั่งข้ามเทิร์นของผู้เล่นคนถัดไปทันที",
-    "isPlayableOnSlot": false
+    "description": "เลือกสั่งข้ามเทิร์นของผู้เล่นเป้าหมายทันที",
+    "isPlayableOnSlot": false,
+    "requiresTarget": true,
+    "targetType": "player"
   },
   {
     "id": "special_shuffle",
@@ -69,7 +79,9 @@
     "rarity": "epic",
     "copiesInDeck": 3,
     "description": "นำการ์ดบนมือของผู้เล่นทุกคนเข้ากอง สับใหม่ แล้วแจกเท่าเดิมให้ทุกคน",
-    "isPlayableOnSlot": false
+    "isPlayableOnSlot": false,
+    "requiresTarget": false,
+    "targetType": "none"
   },
   {
     "id": "special_drop_it",
@@ -80,7 +92,9 @@
     "cardType": "special",
     "rarity": "rare",
     "copiesInDeck": 3,
-    "description": "บังคับให้คู่ต่อสู้ทิ้งการ์ด 1 ใบบนมือลงกองทิ้งทันที",
-    "isPlayableOnSlot": false
+    "description": "เลือกคู่ต่อสู้เพื่อบังคับให้ทิ้งการ์ด 1 ใบบนมือลงกองทิ้งทันที",
+    "isPlayableOnSlot": false,
+    "requiresTarget": true,
+    "targetType": "player"
   }
 ]

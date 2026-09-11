@@ -7,8 +7,6 @@ export default function TopNavbar({
   showDeckCounter,
   deckCount,
   totalDeck = 12,
-  showDropHints = true,
-  onToggleDropHints,
   onOpenDex,
   onOpenTutorial,
 }) {
@@ -62,20 +60,6 @@ export default function TopNavbar({
         title="ดูวิธีเล่นและโหมดสอนเล่น"
       >
         <span>🎓 วิธีเล่น</span>
-      </button>
-
-      {/* Drop Hint Toggle */}
-      <button
-        type="button"
-        className={`cute-nav-btn ${showDropHints ? 'hint-on' : 'hint-off'}`}
-        onClick={() => {
-          if (sfxActive) playSfx('select');
-          onToggleDropHints();
-          setMenuOpen(false);
-        }}
-        title={showDropHints ? 'ตัวช่วยบอกช่องวาง: เปิดอยู่' : 'ตัวช่วยบอกช่องวาง: ปิดอยู่'}
-      >
-        <span>{showDropHints ? '💡 ตัวช่วย: เปิด' : '🔒 ตัวช่วย: ปิด'}</span>
       </button>
 
       {/* Dex Encyclopedia */}

@@ -16,8 +16,8 @@ const io = new Server(server, {
     credentials: true,
   },
   transports: ['websocket', 'polling'],
-  pingTimeout: 30000,
-  pingInterval: 10000,
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // ⚡ Fast Healthcheck & Server Wakeup endpoint
@@ -31,10 +31,10 @@ app.get('/healthz', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-const MAX_PLAYERS = 10;
+const MAX_PLAYERS = 24;
 const MIN_NAME_LEN = 1;
 const MAX_NAME_LEN = 16;
-const RECONNECT_GRACE_MS = 15000;
+const RECONNECT_GRACE_MS = 25000;
 
 // ให้ความสำคัญกับไฟล์ build ของ React (dist) ก่อน พร้อมตั้งค่า Cache-Control เพื่อความเร็วสูงสุด
 if (fs.existsSync(path.join(__dirname, 'dist'))) {
@@ -96,28 +96,33 @@ function shuffle(array) {
   return arr;
 }
 
-function buildGameDeck() {
+function buildGameDeck(numPlayers = 4) {
   const deck = [];
-  // เพิ่มการ์ดสัตว์ทั้งหมด (56 ชนิด) พร้อม cardInstanceId เฉพาะใบ
-  ALL_ANIMALS.forEach(animal => {
-    deck.push({
-      ...animal,
-      cardInstanceId: `${animal.id}_${Math.random().toString(36).substr(2, 7)}`,
-      cardType: 'animal'
-    });
-  });
+  // For larger rooms (e.g. up to 24 players), scale the card sets so cards never deplete
+  const setsCount = numPlayers > 16 ? 3 : numPlayers > 8 ? 2 : 1;
 
-  // เพิ่มการ์ดพิเศษตามจำนวน copies
-  ALL_SPECIALS.forEach(special => {
-    const count = special.copiesInDeck || 2;
-    for (let i = 0; i < count; i++) {
+  for (let s = 0; s < setsCount; s++) {
+    // เพิ่มการ์ดสัตว์ทั้งหมด (56 ชนิด) พร้อม cardInstanceId เฉพาะใบ
+    ALL_ANIMALS.forEach(animal => {
       deck.push({
-        ...special,
-        cardInstanceId: `${special.id}_${i}_${Math.random().toString(36).substr(2, 7)}`,
-        cardType: 'special'
+        ...animal,
+        cardInstanceId: `${animal.id}_${s}_${Math.random().toString(36).substr(2, 7)}`,
+        cardType: 'animal'
       });
-    }
-  });
+    });
+
+    // เพิ่มการ์ดพิเศษตามจำนวน copies
+    ALL_SPECIALS.forEach(special => {
+      const count = special.copiesInDeck || 2;
+      for (let i = 0; i < count; i++) {
+        deck.push({
+          ...special,
+          cardInstanceId: `${special.id}_${s}_${i}_${Math.random().toString(36).substr(2, 7)}`,
+          cardType: 'special'
+        });
+      }
+    });
+  }
 
   // 3-pass Fisher-Yates shuffle เพื่อการกระจายไพ่ที่สมบูรณ์แบบ
   let shuffled = deck;
@@ -129,16 +134,59 @@ function buildGameDeck() {
 
 function findRoomBySocket(socketId) {
   for (const [roomId, room] of rooms.entries()) {
-    const player = room.players.find((p) => p.id === socketId);
+    const player = room.players.find((p) => p.socketId === socketId || p.id === socketId);
     if (player) return { roomId, room, player };
   }
   return null;
 }
 
+function checkAndRegisterAction(room, actionId) {
+  if (!room || !actionId) return true;
+  if (!room.processedActionIds) {
+    room.processedActionIds = new Set();
+  }
+  if (room.processedActionIds.has(actionId)) {
+    return false; // Duplicate execution prevented!
+  }
+  room.processedActionIds.add(actionId);
+  if (room.processedActionIds.size > 400) {
+    const it = room.processedActionIds.values();
+    room.processedActionIds.delete(it.next().value);
+  }
+  return true;
+}
+
+function serializeRoomForPlayer(room, targetIdentifier) {
+  if (!room) return null;
+  return {
+    ...room,
+    players: room.players.map((p) => {
+      if (p.id === targetIdentifier || p.socketId === targetIdentifier) {
+        return p;
+      }
+      const { hand, ...rest } = p;
+      return {
+        ...rest,
+        handLength: hand ? hand.length : 0,
+      };
+    })
+  };
+}
+
 function broadcastRoomState(roomId) {
   const room = rooms.get(roomId);
-  if (room) {
-    io.to(roomId).emit('room_updated', room);
+  if (!room) return;
+  room.stateVersion = (room.stateVersion || 0) + 1;
+  const socketsInRoom = io.sockets.adapter.rooms.get(roomId);
+  if (socketsInRoom) {
+    for (const socketId of socketsInRoom) {
+      const clientSocket = io.sockets.sockets.get(socketId);
+      if (clientSocket) {
+        const player = room.players.find(p => p.socketId === socketId || p.id === socketId);
+        const targetId = player ? player.id : socketId;
+        clientSocket.emit('room_updated', serializeRoomForPlayer(room, targetId));
+      }
+    }
   }
 }
 
@@ -308,7 +356,7 @@ function runBotTurn(room, botPlayer) {
 }
 
 function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targetCardIndex = null) {
-  const player = room.players.find(p => p.id === playerId);
+  const player = room.players.find(p => p.id === playerId || p.socketId === playerId);
   if (!player || !player.hand) return { ok: false, error: 'ไม่พบผู้เล่น' };
 
   // การ์ดโล่ปู (Crab Shield) สามารถกดใช้ได้ตลอดเวลา (Instant Reactive Defense)
@@ -316,7 +364,7 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
     const cardObj = player.hand.find(c => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
     if (cardObj && cardObj.actionType !== 'shield') {
       const activePlayer = room.players[room.currentTurnIndex];
-      if (!activePlayer || activePlayer.id !== playerId) {
+      if (!activePlayer || (activePlayer.id !== player.id && activePlayer.socketId !== player.socketId)) {
         return { ok: false, error: `ยังไม่ถึงตาของคุณ (ตาของ: ${activePlayer ? activePlayer.name : 'คนอื่น'})` };
       }
     }
@@ -326,7 +374,29 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
   if (cardIdx === -1) return { ok: false, error: 'ไม่มีการ์ดใบนี้ในมือ' };
   const card = player.hand[cardIdx];
 
-  // นำการ์ดออกจากมือ และจั่วใบใหม่ทันที
+  // Target Validation using card metadata
+  let targetPlayer = null;
+  const isTargetedCard = card.requiresTarget || card.targetType === 'player' || card.actionType === 'skip' || card.actionType === 'drop_it';
+  if (isTargetedCard) {
+    if (targetPlayerId) {
+      targetPlayer = room.players.find(p => p.id === targetPlayerId || p.socketId === targetPlayerId);
+      if (!targetPlayer) {
+        return { ok: false, error: 'ผู้เล่นเป้าหมายไม่อยู่ในห้องแล้ว' };
+      }
+    } else {
+      const otherPlayers = room.players.filter(p => p.id !== player.id && p.socketId !== player.socketId);
+      if (otherPlayers.length === 0) {
+        return { ok: false, error: 'ไม่มีคู่ต่อสู้ในห้องให้เลือก' };
+      }
+      targetPlayer = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+    }
+
+    if ((targetPlayer.id === player.id || targetPlayer.socketId === player.socketId) && room.players.length > 1) {
+      return { ok: false, error: 'ไม่สามารถเลือกตัวเองเป็นเป้าหมายได้' };
+    }
+  }
+
+  // Once all validations succeed, splice card and draw new card
   player.hand.splice(cardIdx, 1);
   if (room.animalDeck.length === 0) {
     room.animalDeck = buildGameDeck();
@@ -371,37 +441,32 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
     }
 
     case 'skip': {
-      const dir = room.playDirection || 1;
-      const numPlayers = room.players.length;
-      const nextIdx = (room.currentTurnIndex + 1 * dir + numPlayers * 100) % numPlayers;
-      const nextPlayer = room.players[nextIdx];
+      const hasShieldInHand = targetPlayer.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+      const hasActiveShield = room.shieldedPlayerIds?.includes(targetPlayer.id);
 
-      const hasShieldInHand = nextPlayer?.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
-      const hasActiveShield = nextPlayer && room.shieldedPlayerIds?.includes(nextPlayer.id);
-
-      if (nextPlayer && (hasActiveShield || hasShieldInHand)) {
+      if (hasActiveShield || hasShieldInHand) {
         if (hasActiveShield) {
-          room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== nextPlayer.id);
+          room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== targetPlayer.id);
         } else {
-          const sIdx = nextPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+          const sIdx = targetPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
           if (sIdx !== -1) {
-            nextPlayer.hand.splice(sIdx, 1);
+            targetPlayer.hand.splice(sIdx, 1);
             if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-            nextPlayer.hand.push(room.animalDeck.pop());
+            targetPlayer.hand.push(room.animalDeck.pop());
           }
         }
-        actionNotice.message = `🛡️ ${nextPlayer.name} มีการ์ด Crab Shield จึงป้องกันผลของ Skip จาก ${player.name} ได้สำเร็จ! (ไม่ถูกข้ามตา)`;
+        actionNotice.message = `🛡️ ${targetPlayer.name} มีการ์ด Crab Shield จึงป้องกันผลของ Skip จาก ${player.name} ได้สำเร็จ! (ไม่ถูกข้ามตา)`;
         io.to(room.roomId).emit('special_card_played', actionNotice);
         broadcastRoomState(room.roomId);
         advanceTurn(room, 1);
-        return { ok: true, room };
+        return { ok: true, room: serializeRoomForPlayer(room, player.id) };
       }
 
-      actionNotice.message = `⏭️ ${player.name} ใช้ Skip ข้ามตาผู้เล่นคนถัดไปทันที!`;
+      actionNotice.message = `⏭️ ${player.name} สั่งข้ามตาของผู้เล่น "${targetPlayer.name}" ทันที!`;
       io.to(room.roomId).emit('special_card_played', actionNotice);
       broadcastRoomState(room.roomId);
       advanceTurn(room, 2);
-      return { ok: true, room };
+      return { ok: true, room: serializeRoomForPlayer(room, player.id) };
     }
 
     case 'shuffle': {
@@ -425,43 +490,32 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
     }
 
     case 'drop_it': {
-      let target = null;
-      if (targetPlayerId) {
-        target = room.players.find(p => p.id === targetPlayerId);
-      }
-      if (!target) {
-        const otherPlayers = room.players.filter(p => p.id !== player.id);
-        target = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
-      }
+      const hasShieldInHand = targetPlayer.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+      const hasActiveShield = room.shieldedPlayerIds?.includes(targetPlayer.id);
 
-      if (target) {
-        const hasShieldInHand = target.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
-        const hasActiveShield = room.shieldedPlayerIds?.includes(target.id);
-
-        if (hasActiveShield || hasShieldInHand) {
-          if (hasActiveShield) {
-            room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== target.id);
-          } else {
-            const sIdx = target.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
-            if (sIdx !== -1) {
-              target.hand.splice(sIdx, 1);
-              if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-              target.hand.push(room.animalDeck.pop());
-            }
+      if (hasActiveShield || hasShieldInHand) {
+        if (hasActiveShield) {
+          room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== targetPlayer.id);
+        } else {
+          const sIdx = targetPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+          if (sIdx !== -1) {
+            targetPlayer.hand.splice(sIdx, 1);
+            if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
+            targetPlayer.hand.push(room.animalDeck.pop());
           }
-          actionNotice.message = `🛡️ ${target.name} ใช้ Crab Shield ป้องกันการ์ด Drop It ของ ${player.name} ได้สำเร็จ!`;
-        } else if (target.hand && target.hand.length > 0) {
-          let dropIndex = 0;
-          if (typeof targetCardIndex === 'number' && targetCardIndex >= 0 && targetCardIndex < target.hand.length) {
-            dropIndex = targetCardIndex;
-          } else {
-            dropIndex = Math.floor(Math.random() * target.hand.length);
-          }
-          const droppedCard = target.hand.splice(dropIndex, 1)[0];
-          if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-          target.hand.push(room.animalDeck.pop());
-          actionNotice.message = `💥 ${player.name} บังคับให้ ${target.name} ทิ้งการ์ด "${droppedCard.name || droppedCard.title}" ลงกองทิ้ง!`;
         }
+        actionNotice.message = `🛡️ ${targetPlayer.name} ใช้ Crab Shield ป้องกันการ์ด Drop It ของ ${player.name} ได้สำเร็จ!`;
+      } else if (targetPlayer.hand && targetPlayer.hand.length > 0) {
+        let dropIndex = 0;
+        if (typeof targetCardIndex === 'number' && targetCardIndex >= 0 && targetCardIndex < targetPlayer.hand.length) {
+          dropIndex = targetCardIndex;
+        } else {
+          dropIndex = Math.floor(Math.random() * targetPlayer.hand.length);
+        }
+        const droppedCard = targetPlayer.hand.splice(dropIndex, 1)[0];
+        if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
+        targetPlayer.hand.push(room.animalDeck.pop());
+        actionNotice.message = `💥 ${player.name} บังคับให้ ${targetPlayer.name} ทิ้งการ์ด "${droppedCard.name || droppedCard.title || 'การ์ด'}" ลงกองทิ้ง!`;
       }
       break;
     }
@@ -476,26 +530,26 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
   // การใช้ Shield, Double Play ไม่นับเป็นการจบเทิร์น สามารถวางการ์ดต่อได้
   if (card.actionType === 'shield') {
     broadcastRoomState(room.roomId);
-    return { ok: true, room };
+    return { ok: true, room: serializeRoomForPlayer(room, player.id) };
   } else if (card.actionType === 'double_play') {
     broadcastRoomState(room.roomId);
     if (player.isBot) {
       setTimeout(() => runBotTurn(room, player), 1000);
     }
+    return { ok: true, room: serializeRoomForPlayer(room, player.id) };
   } else {
     advanceTurn(room, 1);
+    return { ok: true, room: serializeRoomForPlayer(room, player.id) };
   }
-
-  return { ok: true, room };
 }
 
 function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
-  const player = room.players.find((p) => p.id === playerId);
+  const player = room.players.find((p) => p.id === playerId || p.socketId === playerId);
   if (!player || !player.hand) return { ok: false, error: 'ไม่พบผู้เล่น' };
 
   if (room.roomMode !== 'time_attack') {
     const activePlayer = room.players[room.currentTurnIndex];
-    if (!activePlayer || activePlayer.id !== playerId) {
+    if (!activePlayer || (activePlayer.id !== player.id && activePlayer.socketId !== player.socketId)) {
       return { ok: false, error: `ยังไม่ถึงตาของคุณ (ตาของ: ${activePlayer ? activePlayer.name : 'คนอื่น'})` };
     }
   }
@@ -599,9 +653,10 @@ function removePlayerFromRoom(roomId, socketId) {
     disconnectTimers.delete(socketId);
   }
 
-  const idx = room.players.findIndex((p) => p.id === socketId);
+  const idx = room.players.findIndex((p) => p.socketId === socketId || p.id === socketId);
   if (idx === -1) return;
 
+  const playerRemoved = room.players[idx];
   room.players.splice(idx, 1);
 
   if (room.players.length === 0 || room.players.every((p) => p.isBot)) {
@@ -609,7 +664,7 @@ function removePlayerFromRoom(roomId, socketId) {
     return;
   }
 
-  if (room.hostId === socketId && room.players.length > 0) {
+  if ((room.hostId === socketId || (playerRemoved && room.hostId === playerRemoved.id)) && room.players.length > 0) {
     const nextHuman = room.players.find((p) => !p.isBot) || room.players[0];
     room.hostId = nextHuman.id;
     nextHuman.isHost = true;
@@ -624,7 +679,7 @@ function removePlayerFromRoom(roomId, socketId) {
 
 io.on('connection', (socket) => {
   // 1. สร้างห้อง
-  socket.on('create_room', ({ playerName, avatarId, roomMode, timeLimitSec, maxPlayers, botDifficulty } = {}, ack) => {
+  socket.on('create_room', ({ playerName, avatarId, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId } = {}, ack) => {
     const cleanName = sanitizeName(playerName);
     if (!cleanName) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นที่ถูกต้อง (1-16 ตัวอักษร)';
@@ -636,8 +691,12 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     socket.data.roomId = roomId;
 
+    const playerId = clientPlayerId || socket.id;
+    socket.data.playerId = playerId;
+
     const hostPlayer = {
-      id: socket.id,
+      id: playerId,
+      socketId: socket.id,
       name: cleanName,
       avatarId: avatarId || 'sponge_bath',
       isHost: true,
@@ -650,7 +709,7 @@ io.on('connection', (socket) => {
 
     const room = {
       roomId,
-      hostId: socket.id,
+      hostId: playerId,
       roomMode: roomMode || 'multiplayer',
       timeLimitSec: timeLimitSec || 60,
       maxPlayers: Math.min(Math.max(maxPlayers || 6, 2), MAX_PLAYERS),
@@ -660,6 +719,8 @@ io.on('connection', (socket) => {
       categoryDeck: [],
       centerCategories: [],
       status: 'waiting',
+      stateVersion: 1,
+      processedActionIds: new Set(),
       currentTurnIndex: 0,
       playDirection: 1,
       shieldedPlayerIds: [],
@@ -672,6 +733,7 @@ io.on('connection', (socket) => {
       const botAvatars = ['sponge_glass', 'sea_anemone', 'brain_coral'];
       room.players.push({
         id: `bot-${Date.now()}`,
+        socketId: null,
         name: botNames[0],
         avatarId: botAvatars[0],
         isHost: false,
@@ -684,12 +746,12 @@ io.on('connection', (socket) => {
     }
 
     rooms.set(roomId, room);
-    socket.emit('room_created', room);
-    if (typeof ack === 'function') ack({ ok: true, room });
+    socket.emit('room_created', serializeRoomForPlayer(room, playerId));
+    if (typeof ack === 'function') ack({ ok: true, room: serializeRoomForPlayer(room, playerId), playerId });
   });
 
-  // 2. เข้าร่วมห้อง
-  socket.on('join_room', ({ playerName, avatarId, roomId } = {}, ack) => {
+  // 2. เข้าร่วมห้อง หรือ Reconnect กลับเข้าห้องเดิม
+  socket.on('join_room', ({ playerName, avatarId, roomId, clientPlayerId } = {}, ack) => {
     const cleanName = sanitizeName(playerName);
     if (!cleanName) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นที่ถูกต้อง (1-16 ตัวอักษร)';
@@ -702,6 +764,34 @@ io.on('connection', (socket) => {
       const msg = 'ไม่พบห้องรหัสนี้ กรุณาตรวจสอบรหัสห้องอีกครั้ง';
       socket.emit('error_message', msg);
       return typeof ack === 'function' && ack({ ok: false, error: msg });
+    }
+
+    const playerId = clientPlayerId || socket.id;
+
+    // Check if player is reconnecting
+    const existingPlayer = room.players.find(p => p.id === playerId || (!p.connected && p.name === cleanName));
+    if (existingPlayer) {
+      socket.join(roomId);
+      socket.data.roomId = roomId;
+      socket.data.playerId = existingPlayer.id;
+      existingPlayer.socketId = socket.id;
+      existingPlayer.connected = true;
+
+      if (disconnectTimers.has(existingPlayer.id)) {
+        clearTimeout(disconnectTimers.get(existingPlayer.id));
+        disconnectTimers.delete(existingPlayer.id);
+      }
+      if (disconnectTimers.has(socket.id)) {
+        clearTimeout(disconnectTimers.get(socket.id));
+        disconnectTimers.delete(socket.id);
+      }
+
+      broadcastRoomState(roomId);
+      return typeof ack === 'function' && ack({
+        ok: true,
+        room: serializeRoomForPlayer(room, existingPlayer.id),
+        playerId: existingPlayer.id
+      });
     }
 
     if (room.status !== 'waiting') {
@@ -718,9 +808,11 @@ io.on('connection', (socket) => {
 
     socket.join(roomId);
     socket.data.roomId = roomId;
+    socket.data.playerId = playerId;
 
     const newPlayer = {
-      id: socket.id,
+      id: playerId,
+      socketId: socket.id,
       name: cleanName,
       avatarId: avatarId || 'sponge_bath',
       isHost: false,
@@ -733,7 +825,43 @@ io.on('connection', (socket) => {
 
     room.players.push(newPlayer);
     broadcastRoomState(roomId);
-    if (typeof ack === 'function') ack({ ok: true, room });
+    if (typeof ack === 'function') ack({
+      ok: true,
+      room: serializeRoomForPlayer(room, playerId),
+      playerId
+    });
+  });
+
+  // 2.1 Reconnect Request
+  socket.on('reconnect_player', ({ roomId, playerId } = {}, ack) => {
+    const room = rooms.get(roomId);
+    if (!room) {
+      return typeof ack === 'function' && ack({ ok: false, error: 'ไม่พบห้อง' });
+    }
+    const player = room.players.find(p => p.id === playerId);
+    if (!player) {
+      return typeof ack === 'function' && ack({ ok: false, error: 'ไม่พบผู้เล่น' });
+    }
+
+    socket.join(roomId);
+    socket.data.roomId = roomId;
+    socket.data.playerId = playerId;
+    player.socketId = socket.id;
+    player.connected = true;
+
+    if (disconnectTimers.has(playerId)) {
+      clearTimeout(disconnectTimers.get(playerId));
+      disconnectTimers.delete(playerId);
+    }
+    if (disconnectTimers.has(socket.id)) {
+      clearTimeout(disconnectTimers.get(socket.id));
+      disconnectTimers.delete(socket.id);
+    }
+
+    broadcastRoomState(roomId);
+    if (typeof ack === 'function') {
+      ack({ ok: true, room: serializeRoomForPlayer(room, player.id), playerId: player.id });
+    }
   });
 
   // 3. เพิ่มบอท
@@ -775,7 +903,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomId);
     if (!room) return;
 
-    const requester = room.players.find((p) => p.id === socket.id);
+    const requester = room.players.find((p) => p.socketId === socket.id || p.id === socket.id);
     if (!requester || !requester.isHost) {
       const msg = 'มีแค่ Host เท่านั้นที่เริ่มเกมได้';
       socket.emit('error_message', msg);
@@ -787,7 +915,7 @@ io.on('connection', (socket) => {
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
 
-    room.animalDeck = buildGameDeck();
+    room.animalDeck = buildGameDeck(room.players.length);
     const selectedCats = shuffle(ALL_CATEGORIES).slice(0, 12);
     room.totalCategories = selectedCats.length;
     room.categoryDeck = selectedCats;
@@ -815,7 +943,10 @@ io.on('connection', (socket) => {
       const phylaInHand = new Set();
       let specialCount = 0;
       let attempts = 0;
-      while (p.hand.length < 4 && room.animalDeck.length > 0 && attempts < 100) {
+      while (p.hand.length < 4 && attempts < 100) {
+        if (room.animalDeck.length === 0) {
+          room.animalDeck = buildGameDeck(room.players.length);
+        }
         attempts++;
         const candidateIdx = room.animalDeck.findIndex(c => {
           if (c.cardType === 'special') {
@@ -843,7 +974,17 @@ io.on('connection', (socket) => {
     room.doublePlayPlayerId = null;
     room.startTime = Date.now();
 
-    io.to(roomId).emit('game_started', room);
+    const socketsInRoom = io.sockets.adapter.rooms.get(roomId);
+    if (socketsInRoom) {
+      for (const sId of socketsInRoom) {
+        const clientSocket = io.sockets.sockets.get(sId);
+        if (clientSocket) {
+          const player = room.players.find(p => p.socketId === sId || p.id === sId);
+          const targetId = player ? player.id : sId;
+          clientSocket.emit('game_started', serializeRoomForPlayer(room, targetId));
+        }
+      }
+    }
     broadcastRoomState(roomId);
 
     const firstPlayer = room.players[0];
@@ -853,17 +994,22 @@ io.on('connection', (socket) => {
       setTimeout(() => runBotTurn(room, firstPlayer), delay);
     }
 
-    if (typeof ack === 'function') ack({ ok: true, room });
+    const requesterPlayer = room.players.find(p => p.socketId === socket.id || p.id === socket.id);
+    if (typeof ack === 'function') ack({ ok: true, room: serializeRoomForPlayer(room, requesterPlayer ? requesterPlayer.id : socket.id) });
   });
 
   // 5. วางการ์ดลงช่อง (Play Card)
-  socket.on('play_card', ({ centerIdx, slotIdx, animalCardId } = {}, ack) => {
+  socket.on('play_card', ({ centerIdx, slotIdx, animalCardId, actionId } = {}, ack) => {
     const roomId = socket.data.roomId;
     const room = rooms.get(roomId);
     if (!room || room.status !== 'playing') {
       const msg = 'เกมยังไม่เริ่มหรือจบไปแล้ว';
       socket.emit('error_message', msg);
       return typeof ack === 'function' && ack({ ok: false, error: msg });
+    }
+
+    if (!checkAndRegisterAction(room, actionId)) {
+      return typeof ack === 'function' && ack({ ok: true, duplicated: true });
     }
 
     const res = executeMove(room, socket.id, centerIdx, slotIdx, animalCardId);
@@ -874,13 +1020,17 @@ io.on('connection', (socket) => {
   });
 
   // 5.1 เล่นการ์ดพิเศษ (Play Special Card Action)
-  socket.on('play_special_card', ({ cardId, targetPlayerId, targetCardIndex } = {}, ack) => {
+  socket.on('play_special_card', ({ cardId, targetPlayerId, targetCardIndex, actionId } = {}, ack) => {
     const roomId = socket.data.roomId;
     const room = rooms.get(roomId);
     if (!room || room.status !== 'playing') {
       const msg = 'เกมยังไม่เริ่มหรือจบไปแล้ว';
       socket.emit('error_message', msg);
       return typeof ack === 'function' && ack({ ok: false, error: msg });
+    }
+
+    if (!checkAndRegisterAction(room, actionId)) {
+      return typeof ack === 'function' && ack({ ok: true, duplicated: true });
     }
 
     const res = executeSpecialCard(room, socket.id, cardId, targetPlayerId, targetCardIndex);
@@ -891,14 +1041,18 @@ io.on('connection', (socket) => {
   });
 
   // 6. ข้ามตา / ทิ้งการ์ด (Pass Turn)
-  socket.on('pass_turn', (ack) => {
+  socket.on('pass_turn', ({ actionId } = {}, ack) => {
     const roomId = socket.data.roomId;
     const room = rooms.get(roomId);
     if (!room || room.status !== 'playing') return;
 
+    if (!checkAndRegisterAction(room, actionId)) {
+      return typeof ack === 'function' && ack({ ok: true, duplicated: true });
+    }
+
     if (room.roomMode !== 'time_attack') {
       const activePlayer = room.players[room.currentTurnIndex];
-      if (!activePlayer || activePlayer.id !== socket.id) {
+      if (!activePlayer || (activePlayer.socketId !== socket.id && activePlayer.id !== socket.id)) {
         const msg = 'ยังไม่ถึงตาของคุณ';
         socket.emit('error_message', msg);
         return typeof ack === 'function' && ack({ ok: false, error: msg });
@@ -921,7 +1075,7 @@ io.on('connection', (socket) => {
       advanceTurn(room);
       if (typeof ack === 'function') ack({ ok: true });
     } else {
-      const player = room.players.find(p => p.id === socket.id);
+      const player = room.players.find(p => p.socketId === socket.id || p.id === socket.id);
       if (player && player.hand.length > 0) {
         const discardedCard = player.hand.shift();
         if (room.animalDeck.length === 0) {
@@ -936,21 +1090,25 @@ io.on('connection', (socket) => {
           discardedAnimal: discardedCard,
           newAnimal: newCard
         });
-        io.to(room.roomId).emit('room_updated', room);
+        broadcastRoomState(room.roomId);
         if (typeof ack === 'function') ack({ ok: true });
       }
     }
   });
 
   // 6.2 ทิ้งการ์ดใบที่เลือกเจาะจง 1 ใบ
-  socket.on('discard_card', ({ animalCardId } = {}, ack) => {
+  socket.on('discard_card', ({ animalCardId, actionId } = {}, ack) => {
     const roomId = socket.data.roomId;
     const room = rooms.get(roomId);
     if (!room || room.status !== 'playing') return;
 
+    if (!checkAndRegisterAction(room, actionId)) {
+      return typeof ack === 'function' && ack({ ok: true, duplicated: true });
+    }
+
     if (room.roomMode !== 'time_attack') {
       const activePlayer = room.players[room.currentTurnIndex];
-      if (!activePlayer || activePlayer.id !== socket.id) {
+      if (!activePlayer || (activePlayer.socketId !== socket.id && activePlayer.id !== socket.id)) {
         const msg = 'ยังไม่ถึงตาของคุณ';
         socket.emit('error_message', msg);
         return typeof ack === 'function' && ack({ ok: false, error: msg });
@@ -975,7 +1133,7 @@ io.on('connection', (socket) => {
       advanceTurn(room);
       if (typeof ack === 'function') ack({ ok: true, newAnimal: newCard });
     } else {
-      const player = room.players.find(p => p.id === socket.id);
+      const player = room.players.find(p => p.socketId === socket.id || p.id === socket.id);
       if (player && player.hand.length > 0) {
         const cardIdx = player.hand.findIndex(c => (c.cardInstanceId && c.cardInstanceId === animalCardId) || c.id === animalCardId);
         const discardedCard = cardIdx !== -1 ? player.hand.splice(cardIdx, 1)[0] : player.hand.shift();
@@ -992,7 +1150,7 @@ io.on('connection', (socket) => {
           discardedAnimal: discardedCard,
           newAnimal: newCard
         });
-        io.to(room.roomId).emit('room_updated', room);
+        broadcastRoomState(room.roomId);
         if (typeof ack === 'function') ack({ ok: true, newAnimal: newCard });
       }
     }
@@ -1061,9 +1219,9 @@ io.on('connection', (socket) => {
 
     const timer = setTimeout(() => {
       disconnectTimers.delete(socket.id);
-      const stillThere = rooms.get(roomId)?.players.find((p) => p.id === socket.id);
+      const stillThere = rooms.get(roomId)?.players.find((p) => p.socketId === socket.id || p.id === socket.id);
       if (stillThere && !stillThere.connected) {
-        removePlayerFromRoom(roomId, socket.id);
+        removePlayerFromRoom(roomId, stillThere.id || socket.id);
       }
     }, RECONNECT_GRACE_MS);
 

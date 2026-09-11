@@ -9,7 +9,6 @@ export default function GameScreen({
   myId,
   selectedCardId,
   timeAttackSeconds,
-  showDropHints = true,
   onSelectCard,
   onPlaySpecialCard,
   onSlotClick,
@@ -119,10 +118,6 @@ export default function GameScreen({
               key={centerIdx}
               centerIdx={centerIdx}
               categoryItem={categoryItem}
-              activeAnimal={activeAnimal}
-              myHand={me?.hand || []}
-              isMyTurn={isMyTurn}
-              showDropHints={showDropHints}
               onSlotClick={onSlotClick}
               onDropCard={onDropCardOnSlot}
             />
@@ -139,6 +134,7 @@ export default function GameScreen({
         onPlaySpecialCard={onPlaySpecialCard}
         onDiscardSingle={onDiscardSingle}
         onDiscardSelectedOrFirst={onDiscardSelectedOrFirst}
+        onDropCardOnSlot={onDropCardOnSlot}
         onSendEmote={onSendEmote}
       />
     </section>

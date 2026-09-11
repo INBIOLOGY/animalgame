@@ -20,20 +20,56 @@ export default function EncyclopediaModal({ onClose }) {
       .catch((err) => console.error('Failed to load animals data:', err));
   }, []);
 
+  // Keyboard shortcut: Escape to close modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const phylaList = Object.keys(PHYLA_MAP);
   const raritiesList = Object.keys(ANIMAL_RARITIES);
 
+  const cleanQuery = searchTerm.trim().toLowerCase();
+
   const filteredAnimals = animalsData.filter((animal) => {
-    const matchesSearch =
-      animal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (animal.englishName && animal.englishName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (animal.desc && animal.desc.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesPhylum =
       selectedPhylum === 'all' || animal.phylum === selectedPhylum;
     const matchesRarity =
       selectedRarity === 'all' || animal.rarity === selectedRarity;
-    return matchesSearch && matchesPhylum && matchesRarity;
+
+    if (!matchesPhylum || !matchesRarity) return false;
+    if (!cleanQuery) return true;
+
+    const thaiPhylum = PHYLA_MAP[animal.phylum] || '';
+    const traitLabels = (animal.traits || []).map((t) => TRAIT_MAP[t] || t).join(' ');
+
+    return (
+      (animal.name && animal.name.toLowerCase().includes(cleanQuery)) ||
+      (animal.englishName && animal.englishName.toLowerCase().includes(cleanQuery)) ||
+      (animal.sciName && animal.sciName.toLowerCase().includes(cleanQuery)) ||
+      (animal.phylum && animal.phylum.toLowerCase().includes(cleanQuery)) ||
+      (thaiPhylum && thaiPhylum.toLowerCase().includes(cleanQuery)) ||
+      (animal.className && animal.className.toLowerCase().includes(cleanQuery)) ||
+      (animal.habitat && animal.habitat.toLowerCase().includes(cleanQuery)) ||
+      (animal.desc && animal.desc.toLowerCase().includes(cleanQuery)) ||
+      (animal.funFact && animal.funFact.toLowerCase().includes(cleanQuery)) ||
+      traitLabels.toLowerCase().includes(cleanQuery)
+    );
   });
+
+  // Keep selected animal synced with current filtered list
+  useEffect(() => {
+    if (filteredAnimals.length > 0) {
+      if (!selectedAnimal || !filteredAnimals.some((a) => a.id === selectedAnimal.id)) {
+        setSelectedAnimal(filteredAnimals[0]);
+      }
+    } else {
+      setSelectedAnimal(null);
+    }
+  }, [searchTerm, selectedPhylum, selectedRarity, animalsData]);
 
   const curRarity = ANIMAL_RARITIES[selectedAnimal?.rarity] || ANIMAL_RARITIES.common;
   const distinctTraits = Array.from(
@@ -61,6 +97,8 @@ export default function EncyclopediaModal({ onClose }) {
               playSfx('pop');
               onClose();
             }}
+            title="ปิดหน้าต่าง (Esc)"
+            aria-label="ปิดหน้าต่างสารานุกรม"
           >
             ✕
           </button>
@@ -71,20 +109,34 @@ export default function EncyclopediaModal({ onClose }) {
           <div className="cute-dex-search-wrap">
             <UIIcon name="search" size={15} color="#A7F3D0" />
             <input
+              id="dex-search-input"
               type="text"
-              placeholder="ค้นหาชื่อสัตว์, ไฟลัม, ถิ่นที่อยู่..."
+              placeholder="ค้นหาชื่อสัตว์, ไฟลัม, ถิ่นที่อยู่, ลักษณะ..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="cute-dex-search-input"
+              aria-label="ค้นหาสัตว์ในสารานุกรม"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                className="cute-dex-search-clear-btn"
+                onClick={() => setSearchTerm('')}
+                title="ล้างคำค้นหา"
+                aria-label="ล้างคำค้นหา"
+              >
+                ✕
+              </button>
+            )}
           </div>
 
-          {/* Phylum & Rarity Dropdowns */}
+          {/* Phylum & Rarity Dropdowns + Count Badge */}
           <div className="cute-dex-dropdowns">
             <select
               className="cute-dex-select"
               value={selectedPhylum}
               onChange={(e) => setSelectedPhylum(e.target.value)}
+              aria-label="กรองตามไฟลัม"
             >
               <option value="all">🌐 ไฟลัมทั้งหมด (9 Phyla)</option>
               {phylaList.map((pKey) => (
@@ -98,6 +150,7 @@ export default function EncyclopediaModal({ onClose }) {
               className="cute-dex-select"
               value={selectedRarity}
               onChange={(e) => setSelectedRarity(e.target.value)}
+              aria-label="กรองตามความหายาก"
             >
               <option value="all">⭐ ความหายากทั้งหมด</option>
               {raritiesList.map((r) => (
@@ -106,6 +159,10 @@ export default function EncyclopediaModal({ onClose }) {
                 </option>
               ))}
             </select>
+
+            <span className="cute-dex-count-badge">
+              พบ <strong>{filteredAnimals.length}</strong>/{animalsData.length} ชนิด
+            </span>
           </div>
         </div>
 
