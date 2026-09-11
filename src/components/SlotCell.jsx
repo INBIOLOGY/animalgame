@@ -86,6 +86,14 @@ export default function SlotCell({
         {/* ตราประทับมุมการ์ดขนาดกะทัดรัด บอกว่าใครเป็นคนวาง โดยไม่บังรูปสัตว์ */}
         <div
           className={`stacked-corner-seal ${isBot ? 'seal-bot' : 'seal-player'}`}
+          style={
+            slotData.playerColor
+              ? {
+                  background: `linear-gradient(135deg, ${slotData.playerColor}, ${slotData.playerColor}CC)`,
+                  boxShadow: `0 2px 5px rgba(0, 0, 0, 0.55), 0 0 6px ${slotData.playerColor}88`,
+                }
+              : undefined
+          }
           title={`วางโดย: ${slotData.playerName}`}
         >
           <span className="seal-icon">{isBot ? '🤖' : '✓'}</span>

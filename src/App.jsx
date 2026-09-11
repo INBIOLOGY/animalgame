@@ -319,14 +319,14 @@ export default function App() {
   }, []);
 
   // Socket Actions
-  const handleCreateRoom = (playerName, avatarId, roomMode, timeLimitSec, maxPlayers = 8, botDifficulty = 'medium') => {
-    socket.emit('create_room', { playerName, avatarId, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId: playerId }, (res) => {
+  const handleCreateRoom = (playerName, avatarId, roomMode, timeLimitSec, maxPlayers = 8, botDifficulty = 'medium', playerColor = '#10B981') => {
+    socket.emit('create_room', { playerName, avatarId, playerColor, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId: playerId }, (res) => {
       if (res && !res.ok) showToastMsg(res.error || 'สร้างห้องไม่สำเร็จ');
     });
   };
 
-  const handleJoinRoom = (playerName, avatarId, roomId) => {
-    socket.emit('join_room', { playerName, avatarId, roomId, clientPlayerId: playerId }, (res) => {
+  const handleJoinRoom = (playerName, avatarId, roomId, playerColor = '#EC4899') => {
+    socket.emit('join_room', { playerName, avatarId, playerColor, roomId, clientPlayerId: playerId }, (res) => {
       if (res && !res.ok) showToastMsg(res.error || 'เข้าร่วมห้องไม่สำเร็จ');
     });
   };

@@ -115,13 +115,30 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
                 const isMe = p.id === myId;
                 return (
                   <div key={p.id} className={`cute-player-slot ${isMe ? 'is-me' : ''}`} id={`scoreChip-${p.id}`}>
-                    <div className="cute-slot-avatar-wrap">
+                    <div
+                      className="cute-slot-avatar-wrap"
+                      style={
+                        p.color
+                          ? {
+                              border: `2.5px solid ${p.color}`,
+                              boxShadow: `0 0 8px ${p.color}66`,
+                            }
+                          : undefined
+                      }
+                    >
                       <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={32} />
                     </div>
                     <div className="cute-slot-details">
                       <div className="cute-slot-name">
                         {p.name}
-                        {isMe && <span className="cute-me-sub"> (คุณ)</span>}
+                        {isMe && (
+                          <span
+                            className="cute-me-sub"
+                            style={p.color ? { color: p.color, fontWeight: 800 } : undefined}
+                          >
+                            {' '}(คุณ)
+                          </span>
+                        )}
                       </div>
                       <div className="cute-slot-status">
                         {p.isHost && <span className="cute-host-tag">👑 เจ้าของห้อง</span>}

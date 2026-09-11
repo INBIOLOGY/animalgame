@@ -574,6 +574,7 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
     animalCard: cardToPlace,
     playerId: player.id,
     playerName: player.name,
+    playerColor: player.color || '#10B981',
     isBot: player.isBot
   };
 
@@ -696,7 +697,7 @@ function removePlayerFromRoom(roomId, socketId) {
 
 io.on('connection', (socket) => {
   // 1. สร้างห้อง
-  socket.on('create_room', ({ playerName, avatarId, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId } = {}, ack) => {
+  socket.on('create_room', ({ playerName, avatarId, playerColor, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId } = {}, ack) => {
     const cleanName = sanitizeName(playerName);
     if (!cleanName) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นที่ถูกต้อง (1-16 ตัวอักษร)';
@@ -716,6 +717,7 @@ io.on('connection', (socket) => {
       socketId: socket.id,
       name: cleanName,
       avatarId: avatarId || 'sponge_bath',
+      color: playerColor || '#10B981',
       isHost: true,
       isBot: false,
       score: 0,
@@ -753,6 +755,7 @@ io.on('connection', (socket) => {
         socketId: null,
         name: botNames[0],
         avatarId: botAvatars[0],
+        color: '#0284C7',
         isHost: false,
         isBot: true,
         score: 0,
@@ -768,7 +771,7 @@ io.on('connection', (socket) => {
   });
 
   // 2. เข้าร่วมห้อง หรือ Reconnect กลับเข้าห้องเดิม
-  socket.on('join_room', ({ playerName, avatarId, roomId, clientPlayerId } = {}, ack) => {
+  socket.on('join_room', ({ playerName, avatarId, playerColor, roomId, clientPlayerId } = {}, ack) => {
     const cleanName = sanitizeName(playerName);
     if (!cleanName) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นที่ถูกต้อง (1-16 ตัวอักษร)';
@@ -832,6 +835,7 @@ io.on('connection', (socket) => {
       socketId: socket.id,
       name: cleanName,
       avatarId: avatarId || 'sponge_bath',
+      color: playerColor || '#EC4899',
       isHost: false,
       isBot: false,
       score: 0,
@@ -895,12 +899,15 @@ io.on('connection', (socket) => {
 
     const botAvatars = ['sponge_glass', 'sea_fan', 'jellyfish_sea_nettle', 'starfish', 'dragonfly', 'horseshoe_crab'];
     const botNames = ['Dr. Sponge 🧽', 'Prof. Fan 🪸', 'Bot Nettle 🌊', 'Starry Bot ⭐', 'Dragonfly AI 🛸', 'Ancient Crab 🦀'];
+    const botColors = ['#0284C7', '#8B5CF6', '#F97316', '#EC4899', '#0D9488', '#F59E0B'];
     const botIdx = room.players.filter(p => p.isBot).length;
+    const botColor = botColors[botIdx % botColors.length];
 
     const botPlayer = {
       id: `bot-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       name: botNames[botIdx % botNames.length],
       avatarId: botAvatars[botIdx % botAvatars.length],
+      color: botColor,
       isHost: false,
       isBot: true,
       score: 0,

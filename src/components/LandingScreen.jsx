@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AnimalAvatar } from '../assets/animalIllustrations';
 import { TraitIcon, UIIcon } from '../assets/natureIcons';
 import { ALL_ANIMALS_DATA, TRAIT_MAP, TRAIT_COLORS } from '../utils/traits';
+import { PLAYER_COLORS, DEFAULT_PLAYER_COLOR, getPlayerColorObj } from '../utils/playerColors';
 import { CUTE_ARENA_BACKDROP } from '../assets/artAssets';
 import { playSfx } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -201,6 +202,9 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
 // ─── Main LandingScreen ──────────────────────────────────────────
 export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial }) {
   const [selectedAvatarId, setSelectedAvatarId] = useState('lion');
+  const [selectedColor, setSelectedColor] = useState(
+    () => localStorage.getItem('animal_tcg_player_color') || DEFAULT_PLAYER_COLOR
+  );
   const [playerName, setPlayerName] = useState('');
   const [mode, setMode] = useState('multiplayer');
   const [timeLimit, setTimeLimit] = useState(60);
@@ -218,10 +222,19 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
 
   const curAnimalData = ALL_ANIMALS_DATA.find((a) => a.id === selectedAvatarId) || ALL_ANIMALS_DATA[0];
   const curAvatarMeta = ANIMAL_AVATARS.find((a) => a.id === selectedAvatarId) || ANIMAL_AVATARS[0];
+  const curColorObj = getPlayerColorObj(selectedColor);
 
   const distinctTraits = Array.from(
     new Set((curAnimalData.traits || []).map((t) => TRAIT_MAP[t] || t))
   ).slice(0, 3);
+
+  const handleSelectColor = (colorHex) => {
+    playSfx('pop');
+    setSelectedColor(colorHex);
+    try {
+      localStorage.setItem('animal_tcg_player_color', colorHex);
+    } catch (e) {}
+  };
 
   const handleCreate = () => {
     const raw = playerName.trim();
@@ -242,7 +255,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
       });
     } catch (e) {}
     setSheetMode(false);
-    onCreateRoom(raw, selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty);
+    onCreateRoom(raw, selectedAvatarId, mode, timeLimit, maxPlayers, botDifficulty, selectedColor);
   };
 
   const handleJoin = () => {
@@ -262,7 +275,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
     setCodeError('');
     playSfx('select');
     setSheetJoin(false);
-    onJoinRoom(raw, selectedAvatarId, code);
+    onJoinRoom(raw, selectedAvatarId, code, selectedColor);
   };
 
   const handleSelectAvatar = (id) => {
@@ -344,7 +357,15 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
           </div>
 
           <div className={`cute-mascot-card ${mascotBounce ? 'card-bounce' : ''}`} onClick={() => handleSelectAvatar(selectedAvatarId)} title="แตะเพื่อเลือก">
-            <div className="cute-mascot-avatar-wrap"><AnimalAvatar id={curAnimalData.id} size={58} /></div>
+            <div
+              className="cute-mascot-avatar-wrap"
+              style={{
+                boxShadow: `0 0 0 3px ${selectedColor}, 0 6px 18px ${selectedColor}44`,
+                borderColor: selectedColor,
+              }}
+            >
+              <AnimalAvatar id={curAnimalData.id} size={58} />
+            </div>
             <div className="cute-mascot-info">
               <div className="cute-mascot-name-line">
                 <h2 className="cute-mascot-name">{curAnimalData.name}</h2>
@@ -381,6 +402,41 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
                     <AnimalAvatar id={av.id} size={24} />
                     <span className="cute-avatar-name">{av.name}</span>
                     {isSelected && <span className="cute-active-dot" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4. Color Palette Picker (เลือกสีประจำตัว) */}
+          <div className="cute-color-picker-section">
+            <div className="cute-picker-header">
+              <span className="cute-picker-label">🎨 เลือกสีประจำตัว:</span>
+              <span
+                className="cute-color-name-tag"
+                style={{
+                  color: curColorObj.text,
+                  background: curColorObj.soft,
+                  borderColor: curColorObj.border,
+                }}
+              >
+                {curColorObj.name}
+              </span>
+            </div>
+            <div className="cute-color-palette-row">
+              {PLAYER_COLORS.map((col) => {
+                const isColSelected = selectedColor === col.hex;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    className={`cute-color-circle-btn ${isColSelected ? 'active-color' : ''}`}
+                    style={{ backgroundColor: col.hex }}
+                    onClick={() => handleSelectColor(col.hex)}
+                    title={`สี${col.name}`}
+                    aria-label={`สี${col.name}`}
+                  >
+                    {isColSelected && <span className="color-check-icon">✓</span>}
                   </button>
                 );
               })}
@@ -657,6 +713,36 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
               </button>
             );
           })}
+        </div>
+
+        {/* 🎨 Mobile Color Picker Palette */}
+        <div className="cute-color-picker-section" style={{ marginTop: '16px', padding: '10px 14px', background: '#F8FAF5', borderRadius: '16px', border: '1.5px solid #E2E8F0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B' }}>
+              🎨 สีประจำตัวผู้เล่น: <strong style={{ color: curColorObj.hex }}>{curColorObj.name}</strong>
+            </span>
+            <span style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>แสดงบนกระดาน & สกอร์</span>
+          </div>
+          <div className="cute-color-palette-row">
+            {PLAYER_COLORS.map((col) => {
+              const isActive = selectedColor === col.id || selectedColor === col.hex;
+              return (
+                <button
+                  key={col.id}
+                  type="button"
+                  className={`cute-color-circle-btn ${isActive ? 'active-color' : ''}`}
+                  style={{
+                    backgroundColor: col.hex,
+                    boxShadow: isActive ? `0 0 0 3px #FFFFFF, 0 0 0 5px ${col.hex}, 0 4px 10px ${col.shadow}` : 'none',
+                  }}
+                  onClick={() => handleSelectColor(col.hex)}
+                  title={col.name}
+                >
+                  {isActive && <span className="cute-color-check">✓</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </MobileSheet>
 

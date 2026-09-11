@@ -5920,4 +5920,70 @@ body {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   🎨 PLAYER COLOR PICKER PALETTE
+   ═══════════════════════════════════════════════════════════════ */
+.cute-color-picker-section {
+  transition: all 0.2s ease;
+}
+
+.cute-color-palette-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cute-color-circle-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease;
+  position: relative;
+  outline: none;
+}
+
+.cute-color-circle-btn:hover {
+  transform: scale(1.18);
+  z-index: 2;
+}
+
+.cute-color-circle-btn:active {
+  transform: scale(0.95);
+}
+
+.cute-color-circle-btn.active-color {
+  transform: scale(1.12);
+  z-index: 3;
+}
+
+.cute-color-check {
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 900;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  line-height: 1;
+}
+
+/* Dynamic glow on chips when active */
+.cute-player-chip.active-turn {
+  animation: cutePulseGlow 2.4s infinite ease-in-out;
+}
+
+@keyframes cutePulseGlow {
+  0%, 100% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+  }
+  50% {
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.16));
+  }
+}
+
+
 
