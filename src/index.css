@@ -1265,37 +1265,34 @@ body {
 
 .cute-scoreboard-chips {
   display: flex;
-  gap: 6px;
+  gap: 10px;
   overflow-x: auto;
   align-items: center;
   flex: 1;
   min-width: 0;
+  padding: 2px 2px 4px;
 }
 
 .cute-player-chip {
   background: #FFFFFF;
-  border: 1.5px solid var(--card-border-soft);
-  border-radius: var(--r-md);
-  padding: 3px 8px 3px 4px;
-  display: flex;
+  border-radius: var(--r-pill);
+  padding: 4px 16px 4px 5px;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   white-space: nowrap;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: all 0.16s;
+  min-height: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cute-player-chip.is-me {
-  border-color: var(--matcha-border);
-  background: var(--bg-matcha-card);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .cute-player-chip.active-turn {
-  border-color: var(--forest-primary);
-  background: var(--bg-matcha-soft);
-  box-shadow: 0 0 0 1.5px var(--forest-primary), 0 2px 6px rgba(45, 90, 35, 0.12);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .cute-chip-avatar-box {
@@ -1303,52 +1300,85 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
 .cute-crown-badge {
   position: absolute;
-  top: -7px;
-  right: -7px;
-  font-size: 12px;
+  top: -8px;
+  right: -8px;
+  font-size: 14px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
 
 .cute-chip-info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
+  justify-content: center;
 }
 
-.cute-chip-name {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--ink-primary);
+.cute-chip-name-row {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 6px;
+}
+
+.cute-chip-name-text {
+  font-family: var(--font-thai);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
 }
 
 .cute-me-pill {
-  font-size: 8.5px;
-  background: var(--forest-primary);
+  font-family: var(--font-thai);
+  font-size: 11px;
   color: #FFFFFF;
-  padding: 0.5px 4px;
-  border-radius: var(--r-xs);
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.cute-bot-pill {
+  font-family: var(--font-thai);
+  font-size: 10px;
+  color: #0284C7;
+  background: rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(2, 132, 199, 0.3);
+  padding: 0.5px 6px;
+  border-radius: var(--r-pill);
   font-weight: 800;
 }
 
 .cute-chip-score {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   font-family: var(--font-num);
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--warm-gold-dark);
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--warm-gold-dark, #D97706);
+  line-height: 1.1;
+}
+
+.cute-star-icon {
+  font-size: 12px;
+}
+
+.cute-score-val {
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .cute-score-unit {
   font-family: var(--font-thai);
-  font-size: 9px;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--ink-muted);
 }
 
@@ -4253,8 +4283,8 @@ body {
   .cute-player-chip {
     padding: 3px 14px 3px 5px !important;
     gap: 8px !important;
-    height: 42px !important;
-    min-height: 42px !important;
+    height: 46px !important;
+    min-height: 46px !important;
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
@@ -4267,9 +4297,9 @@ body {
   }
 
   .cute-chip-avatar-box {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4293,8 +4323,9 @@ body {
     gap: 8px;
   }
 
+  .cute-chip-name-row,
   .cute-chip-name {
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 900 !important;
     color: var(--ink-primary);
     display: flex;
@@ -4303,8 +4334,11 @@ body {
     white-space: nowrap;
   }
 
+  .cute-chip-name-text,
   .cute-chip-name span {
-    max-width: 90px;
+    font-size: 15px !important;
+    font-weight: 900 !important;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -5347,45 +5381,6 @@ body {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   ✨ COMPATIBLE SLOT HINT GLOW & BOUNCE
-   ═══════════════════════════════════════════════════════════════════ */
-.real-slot-zone.slot-hint-compatible {
-  border: 2px dashed #10B981 !important;
-  background: rgba(16, 185, 129, 0.18) !important;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.45), inset 0 0 12px rgba(16, 185, 129, 0.25) !important;
-  animation: pulse-emerald 1.5s infinite ease-in-out;
-  cursor: pointer;
-  z-index: 10;
-}
-
-@keyframes pulse-emerald {
-  0%, 100% {
-    border-color: #10B981;
-    box-shadow: 0 0 14px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.2);
-  }
-  50% {
-    border-color: #34D399;
-    box-shadow: 0 0 22px rgba(16, 185, 129, 0.75), inset 0 0 16px rgba(16, 185, 129, 0.35);
-  }
-}
-
-.slot-match-pill-hint {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  font-family: var(--font-thai);
-  font-size: 8.5px;
-  font-weight: 900;
-  padding: 2px 6px;
-  border-radius: var(--r-pill);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  pointer-events: none;
-  animation: bounce-small 1.2s infinite ease-in-out;
 }
 
 @keyframes bounce-small {

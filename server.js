@@ -132,6 +132,119 @@ function buildGameDeck(numPlayers = 4) {
   return shuffled;
 }
 
+function extractCardFromDeck(deck, predicate) {
+  const idx = deck.findIndex(predicate);
+  if (idx !== -1) {
+    return deck.splice(idx, 1)[0];
+  }
+  return null;
+}
+
+function initializeGameSession(room) {
+  room.animalDeck = buildGameDeck(room.players.length);
+
+  // สุ่มและกรอง category ซ้ำออกก่อนสร้าง deck
+  const shuffledCats = shuffle(ALL_CATEGORIES);
+  const usedSlotSignatures = new Set();
+  const dedupedCats = [];
+  for (const cat of shuffledCats) {
+    const slotSig = cat.slots.map((s) => (typeof s === 'object' ? s.requiredTrait : s)).sort().join('|');
+    if (!usedSlotSignatures.has(slotSig)) {
+      usedSlotSignatures.add(slotSig);
+      dedupedCats.push(cat);
+    }
+    if (dedupedCats.length >= 12) break;
+  }
+  if (dedupedCats.length < 12) {
+    for (const cat of shuffledCats) {
+      if (!dedupedCats.includes(cat)) {
+        dedupedCats.push(cat);
+        if (dedupedCats.length >= 12) break;
+      }
+    }
+  }
+
+  const selectedCats = dedupedCats;
+  room.totalCategories = selectedCats.length;
+  room.categoryDeck = selectedCats;
+
+  room.centerCategories = [];
+  for (let i = 0; i < 6; i++) {
+    if (room.categoryDeck.length > 0) {
+      const cat = room.categoryDeck.pop();
+      room.centerCategories.push({
+        category: cat,
+        filledSlots: new Array(cat.slots.length).fill(null),
+      });
+    }
+  }
+
+  if (room.roomMode !== 'time_attack' && room.roomMode !== 'vs_bot') {
+    room.players = shuffle(room.players);
+  }
+
+  // แจกการ์ด 4 ใบเริ่มต้น:
+  // สำหรับผู้เล่นคน (Host/Tester) เตรียมการ์ดพิเศษทดสอบตามคำขอ: Play Double, Swap Hands, Drop It + สัตว์ 1 ใบ
+  room.players.forEach((p) => {
+    p.score = 0;
+    p.wonCount = 0;
+    p.hand = [];
+
+    if (!p.isBot) {
+      const doubleCard = extractCardFromDeck(room.animalDeck, (c) => c.actionType === 'double_play' || c.id === 'special_play_double') || {
+        ...ALL_SPECIALS.find((s) => s.actionType === 'double_play'),
+        cardInstanceId: `test_double_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        cardType: 'special',
+      };
+      const swapCard = extractCardFromDeck(room.animalDeck, (c) => c.actionType === 'swap_hands' || c.id === 'special_swap') || {
+        ...ALL_SPECIALS.find((s) => s.actionType === 'swap_hands'),
+        cardInstanceId: `test_swap_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        cardType: 'special',
+      };
+      const dropCard = extractCardFromDeck(room.animalDeck, (c) => c.actionType === 'drop_it' || c.id === 'special_drop_it') || {
+        ...ALL_SPECIALS.find((s) => s.actionType === 'drop_it'),
+        cardInstanceId: `test_drop_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        cardType: 'special',
+      };
+      const animalCard = extractCardFromDeck(room.animalDeck, (c) => c.cardType === 'animal') || room.animalDeck.pop();
+
+      p.hand = [doubleCard, swapCard, dropCard, animalCard].filter(Boolean);
+    } else {
+      const phylaInHand = new Set();
+      let specialCount = 0;
+      let attempts = 0;
+      while (p.hand.length < 4 && attempts < 100) {
+        if (room.animalDeck.length === 0) {
+          room.animalDeck = buildGameDeck(room.players.length);
+        }
+        attempts++;
+        const candidateIdx = room.animalDeck.findIndex((c) => {
+          if (c.cardType === 'special') return specialCount === 0;
+          return !phylaInHand.has(c.phylum);
+        });
+        if (candidateIdx !== -1) {
+          const card = room.animalDeck.splice(candidateIdx, 1)[0];
+          p.hand.push(card);
+          if (card.cardType === 'special') specialCount++;
+          if (card.phylum) phylaInHand.add(card.phylum);
+        } else {
+          const card = room.animalDeck.pop();
+          p.hand.push(card);
+          if (card && card.cardType === 'special') specialCount++;
+        }
+      }
+    }
+  });
+
+  room.status = 'playing';
+  room.currentTurnIndex = 0;
+  room.playDirection = 1;
+  room.shieldedPlayerIds = [];
+  room.doublePlayPlayerId = null;
+  room.doublePlayStep = null;
+  room.startTime = Date.now();
+}
+
 function findRoomBySocket(socketId) {
   for (const [roomId, room] of rooms.entries()) {
     const player = room.players.find((p) => p.socketId === socketId || p.id === socketId);
@@ -238,6 +351,8 @@ function checkValidMove(card, categoryCard, slotIndex) {
 
 function advanceTurn(room, step = 1) {
   if (!room || room.players.length === 0) return;
+  room.doublePlayPlayerId = null;
+  room.doublePlayStep = null;
   const dir = room.playDirection || 1;
   const numPlayers = room.players.length;
   room.currentTurnIndex = (room.currentTurnIndex + step * dir + numPlayers * 100) % numPlayers;
@@ -429,6 +544,7 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
 
     case 'double_play': {
       room.doublePlayPlayerId = player.id;
+      room.doublePlayStep = 1;
       actionNotice.message = `⚔️ ${player.name} ใช้ Play Double !! สามารถวางการ์ดได้ 2 ใบในตานี้!`;
       break;
     }
@@ -667,14 +783,21 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
     return { ok: true };
   }
 
-  // ตรวจสอบ Double Play
-  if (room.doublePlayPlayerId === playerId) {
-    room.doublePlayPlayerId = null; // ใช้สิทธิ์ใบที่ 1 แล้ว เหลือใบที่ 2 ในเทิร์นนี้
-    broadcastRoomState(room.roomId);
-    if (player.isBot) {
-      setTimeout(() => runBotTurn(room, player), 1100);
+  // ตรวจสอบ Double Play (รองรับการลงการ์ด 2 ใบใน 1 เทิร์นอย่างถูกต้อง)
+  const isDoublePlayer = room.doublePlayPlayerId === player.id || room.doublePlayPlayerId === playerId;
+  if (isDoublePlayer) {
+    if ((room.doublePlayStep || 1) === 1) {
+      room.doublePlayStep = 2; // ใช้สิทธิ์ใบที่ 1 แล้ว เหลือใบที่ 2 ในเทิร์นนี้
+      broadcastRoomState(room.roomId);
+      if (player.isBot) {
+        setTimeout(() => runBotTurn(room, player), 1100);
+      }
+      return { ok: true, doublePlayRemaining: true, doublePlayStep: 2 };
+    } else {
+      // ลงใบที่ 2 เรียบร้อยแล้ว -> จบสิทธิ์ Double Play
+      room.doublePlayPlayerId = null;
+      room.doublePlayStep = null;
     }
-    return { ok: true, doublePlayRemaining: true };
   }
 
   // สลับตาเล่นไปยังคนถัดไป
@@ -789,11 +912,19 @@ io.on('connection', (socket) => {
         hand: [],
         connected: true
       });
+
+      // ⚡ Skip Lobby: เริ่มเกมเข้าสู่สนามแข่งทันทีสำหรับโหมด Vs Bot
+      initializeGameSession(room);
     }
 
     rooms.set(roomId, room);
-    socket.emit('room_created', serializeRoomForPlayer(room, playerId));
-    if (typeof ack === 'function') ack({ ok: true, room: serializeRoomForPlayer(room, playerId), playerId });
+    const serializedRoom = serializeRoomForPlayer(room, playerId);
+    socket.emit('room_created', serializedRoom);
+    if (room.status === 'playing') {
+      socket.emit('game_started', serializedRoom);
+      broadcastRoomState(roomId);
+    }
+    if (typeof ack === 'function') ack({ ok: true, room: serializedRoom, playerId });
   });
 
   // 2. เข้าร่วมห้อง หรือ Reconnect กลับเข้าห้องเดิม
@@ -965,90 +1096,7 @@ io.on('connection', (socket) => {
       return typeof ack === 'function' && ack({ ok: false, error: msg });
     }
 
-    room.animalDeck = buildGameDeck(room.players.length);
-
-    // สุ่มและกรอง category ซ้ำออกก่อนสร้าง deck
-    // ป้องกัน Quest ที่มีหัวข้อ/รูปแบบ slot เหมือนกันปรากฏพร้อมกันในกระดาน
-    const shuffledCats = shuffle(ALL_CATEGORIES);
-    const usedSlotSignatures = new Set();
-    const dedupedCats = [];
-    for (const cat of shuffledCats) {
-      // สร้าง signature จาก slot traits เพื่อตรวจหา Quest ที่หน้าตาซ้ำกัน
-      const slotSig = cat.slots.map(s => typeof s === 'object' ? s.requiredTrait : s).sort().join('|');
-      if (!usedSlotSignatures.has(slotSig)) {
-        usedSlotSignatures.add(slotSig);
-        dedupedCats.push(cat);
-      }
-      if (dedupedCats.length >= 12) break;
-    }
-    // Fallback: ถ้ากรองแล้วได้น้อยกว่า 12 ให้เพิ่มจากที่เหลือ
-    if (dedupedCats.length < 12) {
-      for (const cat of shuffledCats) {
-        if (!dedupedCats.includes(cat)) {
-          dedupedCats.push(cat);
-          if (dedupedCats.length >= 12) break;
-        }
-      }
-    }
-
-    const selectedCats = dedupedCats;
-    room.totalCategories = selectedCats.length;
-    room.categoryDeck = selectedCats;
-
-    room.centerCategories = [];
-    for (let i = 0; i < 6; i++) {
-      if (room.categoryDeck.length > 0) {
-        const cat = room.categoryDeck.pop();
-        room.centerCategories.push({
-          category: cat,
-          filledSlots: new Array(cat.slots.length).fill(null)
-        });
-      }
-    }
-
-
-    if (room.roomMode !== 'time_attack') {
-      room.players = shuffle(room.players);
-    }
-
-    // แจกการ์ด 4 ใบเริ่มต้น: เน้นการ์ดสัตว์ (การ์ดพิเศษเริ่มต้นไม่เกิน 1 ใบ)
-    room.players.forEach((p) => {
-      p.score = 0;
-      p.wonCount = 0;
-      p.hand = [];
-      const phylaInHand = new Set();
-      let specialCount = 0;
-      let attempts = 0;
-      while (p.hand.length < 4 && attempts < 100) {
-        if (room.animalDeck.length === 0) {
-          room.animalDeck = buildGameDeck(room.players.length);
-        }
-        attempts++;
-        const candidateIdx = room.animalDeck.findIndex(c => {
-          if (c.cardType === 'special') {
-            return specialCount === 0;
-          }
-          return !phylaInHand.has(c.phylum);
-        });
-        if (candidateIdx !== -1) {
-          const card = room.animalDeck.splice(candidateIdx, 1)[0];
-          p.hand.push(card);
-          if (card.cardType === 'special') specialCount++;
-          if (card.phylum) phylaInHand.add(card.phylum);
-        } else {
-          const card = room.animalDeck.pop();
-          p.hand.push(card);
-          if (card.cardType === 'special') specialCount++;
-        }
-      }
-    });
-
-    room.status = 'playing';
-    room.currentTurnIndex = 0;
-    room.playDirection = 1;
-    room.shieldedPlayerIds = [];
-    room.doublePlayPlayerId = null;
-    room.startTime = Date.now();
+    initializeGameSession(room);
 
     const socketsInRoom = io.sockets.adapter.rooms.get(roomId);
     if (socketsInRoom) {

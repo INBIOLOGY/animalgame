@@ -25,11 +25,11 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
               borderWidth: isCur ? '2.5px' : '2px',
               borderStyle: 'solid',
               boxShadow: isCur
-                ? `0 0 0 2px ${colorObj.hex}, 0 4px 14px ${colorObj.shadow || 'rgba(0,0,0,0.15)'}`
-                : `0 2px 6px ${colorObj.shadow || 'rgba(0,0,0,0.06)'}`,
+                ? `0 0 0 2.5px ${colorObj.hex}55, 0 4px 14px ${colorObj.shadow || 'rgba(0,0,0,0.18)'}`
+                : `0 2px 8px ${colorObj.shadow || 'rgba(0,0,0,0.07)'}`,
               background: isCur
-                ? `linear-gradient(135deg, #FFFFFF 50%, ${colorObj.hex}25)`
-                : `linear-gradient(135deg, #FFFFFF 75%, ${colorObj.hex}14)`,
+                ? `linear-gradient(135deg, #FFFFFF 45%, ${colorObj.hex}22)`
+                : `linear-gradient(135deg, #FFFFFF 72%, ${colorObj.hex}10)`,
             }}
             title={`คะแนนของ ${p.name}: ${p.score} แต้ม`}
           >
@@ -38,20 +38,22 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
               className="cute-chip-avatar-box"
               style={{
                 borderRadius: '50%',
-                padding: '1.5px',
+                padding: '2px',
                 border: `2px solid ${colorObj.hex}`,
                 background: '#FFFFFF',
-                boxShadow: `0 0 6px ${colorObj.shadow || 'rgba(0,0,0,0.1)'}`,
+                boxShadow: `0 2px 6px ${colorObj.shadow || 'rgba(0,0,0,0.12)'}`,
               }}
             >
-              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={30} />
+              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={36} />
               {isLeader && <span className="cute-crown-badge">👑</span>}
             </div>
 
-            {/* Name & Status */}
+            {/* Name & Status & Score */}
             <div className="cute-chip-info">
-              <div className="cute-chip-name">
-                <span style={{ color: isCur ? colorObj.hex : undefined }}>{p.name}</span>
+              <div className="cute-chip-name-row">
+                <span className="cute-chip-name-text" style={{ color: isCur ? colorObj.hex : '#0F172A' }}>
+                  {p.name}
+                </span>
                 {isMe && (
                   <span
                     className="cute-me-pill"
@@ -63,6 +65,7 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
                     คุณ
                   </span>
                 )}
+                {p.isBot && <span className="cute-bot-pill">บอท</span>}
               </div>
               <div className="cute-chip-score">
                 <span className="cute-star-icon">⭐</span>

@@ -38,18 +38,25 @@ export default function GameScreen({
 
   const isShielded = room.shieldedPlayerIds?.includes(myId);
   const isDoublePlay = room.doublePlayPlayerId === myId;
+  const doubleStep = room.doublePlayStep || 1;
   const playDirText = (room.playDirection || 1) === 1 ? '↻ ตามเข็ม' : '↺ ทวนเข็ม';
 
   const turnMessageDesktop = isTimeAttack
     ? '⏱️ โหมดจับเวลา: วางการ์ดลงช่อง'
     : isMyTurn
-    ? '🌟 ถึงตาของคุณแล้ว: เลือกการ์ดแล้ววางลงช่อง'
+    ? isDoublePlay
+      ? doubleStep === 2
+        ? '⚡ Play Double (ใบที่ 2/2): วางการ์ดใบที่สองได้ทันที!'
+        : '⚔️ Play Double (ใบที่ 1/2): เลือกการ์ดแล้ววางใบแรกได้เลย!'
+      : '🌟 ถึงตาของคุณแล้ว: เลือกการ์ดแล้ววางลงช่อง'
     : `⏳ รอตาของ: ${activePlayer?.name || 'ผู้เล่นอื่น'}`;
 
   const turnMessageMobile = isTimeAttack
     ? '⏱️ จับเวลา'
     : isMyTurn
-    ? '🌟 ถึงตาคุณแล้ว'
+    ? isDoublePlay
+      ? `⚔️ ใบที่ ${doubleStep}/2`
+      : '🌟 ถึงตาคุณแล้ว'
     : `⏳ รอตา: ${activePlayer?.name || 'คนอื่น'}`;
 
   const passLabel = selectedAnimal
@@ -70,10 +77,10 @@ export default function GameScreen({
       <div className="game-header-bar">
         <div className="game-header-main-row">
           <div className="game-header-left-group">
-            <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''}`}>
+            <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''} ${isDoublePlay ? 'double-active' : ''}`}>
               <span className="turn-msg-desktop">{turnMessageDesktop}</span>
               <span className="turn-msg-mobile">{turnMessageMobile}</span>
-              {isDoublePlay && <span className="double-play-tag">⚔️ x2</span>}
+              {isDoublePlay && <span className="double-play-tag">⚔️ ลง 2 ใบ ({doubleStep}/2)</span>}
               {isShielded && <span className="shield-active-tag">🛡️ เกราะ</span>}
             </div>
 

@@ -166,19 +166,6 @@ export default function HandDock({
     (c) => (c.cardInstanceId && c.cardInstanceId === selectedCardId) || c.id === selectedCardId
   );
 
-  const matchingQuestNums = [];
-  if (selectedCard && centerCategories && selectedCard.cardType !== 'special') {
-    centerCategories.forEach((catItem, idx) => {
-      if (!catItem?.category?.slots) return;
-      const hasMatch = catItem.category.slots.some((s, sIdx) => {
-        if (catItem.filledSlots[sIdx] !== null) return false;
-        const req = typeof s === 'object' ? s.requiredTrait : s;
-        return isTraitCompatible(selectedCard, req);
-      });
-      if (hasMatch) matchingQuestNums.push(idx + 1);
-    });
-  }
-
   return (
     <div className={`cute-hand-dock ${isMyTurn ? 'my-turn-active' : 'waiting-turn'} ${selectedCard ? 'has-active-card' : ''}`}>
       {/* 🌟 Floating Active Card Info Ribbon for Crystal Clear Reading on Phone/Tablet */}
@@ -205,18 +192,16 @@ export default function HandDock({
                     {selectedCard.actionType === 'wildcard'
                       ? '✨ การ์ด Fit Free: แตะช่องบนกระดานเพื่อวางลงได้ทุกช่องทันที!'
                       : selectedCard.actionType === 'double_play'
-                      ? '⚔️ การ์ด Play Double: กดปุ่ม "⚡ กดใช้การ์ด" เพื่อเล่น 2 ใบในตานี้!'
+                      ? '⚔️ การ์ด Play Double: กดปุ่ม "⚡ กดใช้การ์ด" ด้านขวา เพื่อวางได้ 2 ใบในตานี้!'
                       : selectedCard.actionType === 'swap_hands'
-                      ? '🤝🏻 การ์ด Swap Hands: กดปุ่ม "⚡ กดใช้การ์ด" เพื่อสลับไพ่ทั้งมือกับเพื่อน!'
+                      ? '🤝🏻 การ์ด Swap Hands: กดปุ่ม "⚡ กดใช้การ์ด" ด้านขวา เพื่อสลับการ์ดกับเพื่อน!'
+                      : selectedCard.actionType === 'drop_it'
+                      ? '💥 การ์ด Drop It: กดปุ่ม "⚡ กดใช้การ์ด" ด้านขวา เพื่อบังคับเพื่อนทิ้งการ์ด!'
                       : '✨ การ์ดพิเศษ: กดปุ่ม "⚡ กดใช้การ์ด" เพื่อเปิดใช้งานความสามารถ!'}
                   </span>
-                ) : matchingQuestNums.length > 0 ? (
-                  <span className="match-success-hint">
-                    ✨ ตรงกับภารกิจ #{matchingQuestNums.join(', #')} (แตะช่องบนกระดานเพื่อวาง)
-                  </span>
                 ) : (
-                  <span className="match-none-hint">
-                    ยังไม่มีช่องบนกระดานที่ตรงกับการ์ดใบนี้
+                  <span className="match-neutral-hint">
+                    (แตะเลือกช่องบนกระดาน หรือลากการ์ดไปวางเพื่อตอบคำถาม)
                   </span>
                 )}
               </div>

@@ -444,6 +444,21 @@ export default function App() {
       return showToastMsg(`ยังไม่ถึงตาของคุณ (รอตาของ: ${activePlayer ? activePlayer.name : 'เพื่อน'})`);
     }
 
+    const card = me?.hand?.find((c) => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
+    if (card && card.cardType === 'special' && card.actionType !== 'wildcard') {
+      playSfx('pop');
+      if (card.actionType === 'double_play') {
+        return showToastMsg('⚔️ กดปุ่ม "⚡ กดใช้การ์ด" ด้านล่าง เพื่อเปิดใช้สิทธิ์ลง 2 ใบ!');
+      }
+      if (card.actionType === 'swap_hands') {
+        return showToastMsg('🤝🏻 กดปุ่ม "⚡ กดใช้การ์ด" ด้านล่าง เพื่อสลับการ์ดกับเพื่อน');
+      }
+      if (card.actionType === 'drop_it') {
+        return showToastMsg('💥 กดปุ่ม "⚡ กดใช้การ์ด" ด้านล่าง เพื่อบังคับเพื่อนทิ้งไพ่');
+      }
+      return showToastMsg('💡 การ์ดพิเศษนี้ให้กดปุ่ม "⚡ กดใช้การ์ด" ด้านล่าง');
+    }
+
     actionLockRef.current = true;
     socket.emit('play_card', { centerIdx, slotIdx, animalCardId: cardId, actionId: getActionId() }, (res) => {
       setTimeout(() => { actionLockRef.current = false; }, 350);
@@ -466,24 +481,15 @@ export default function App() {
     if (!centerItem || !centerItem.category) return;
     if (centerItem.filledSlots[slotIdx] !== null) return;
 
-    // 1. If a card is already selected in hand, play that selected card
+    // 1. If a card is selected in hand, place that card
     if (selectedCardId) {
       executeMoveAction(centerIdx, slotIdx, selectedCardId);
       return;
     }
 
-    // 2. If NO card was pre-selected: automatically check if any card in hand matches this slot!
-    const slotConfig = centerItem.category.slots[slotIdx];
-    const requiredTrait = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
-
-    const matchingCard = me.hand.find((card) => isTraitCompatible(card, requiredTrait));
-    if (matchingCard) {
-      const cardId = matchingCard.cardInstanceId || matchingCard.id;
-      executeMoveAction(centerIdx, slotIdx, cardId);
-    } else {
-      playSfx('discard');
-      showToastMsg('ไม่มีการ์ดในมือที่ตรงกับช่องคำถามนี้');
-    }
+    // 2. If no card was selected: prompt player to pick a card first (no auto-solve helper)
+    playSfx('pop');
+    showToastMsg('กรุณาแตะเลือกการ์ดในมือก่อน แล้วแตะช่องเพื่อตอบคำถาม');
   };
 
   const handleDiscardSingleCard = (cardId) => {

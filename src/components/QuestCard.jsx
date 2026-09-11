@@ -86,11 +86,6 @@ export default function QuestCard({
         <div className={`quest-overlay-slots layout-${layout}`}>
           {categoryItem.filledSlots.map((slotData, slotIdx) => {
             const slotConfig = cat.slots[slotIdx];
-            const reqTraitKey = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
-            const isCompatible = selectedAnimal && slotData === null
-              ? isTraitCompatible(selectedAnimal, reqTraitKey)
-              : false;
-
             return (
               <SlotCell
                 key={slotIdx}
@@ -98,7 +93,6 @@ export default function QuestCard({
                 slotIdx={slotIdx}
                 slotData={slotData}
                 slotConfig={slotConfig}
-                isCompatible={isCompatible}
                 onSlotClick={onSlotClick}
                 onDropCard={onDropCard}
               />
