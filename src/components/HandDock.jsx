@@ -55,7 +55,7 @@ export default function HandDock({
     if (!cur.pointerId || cur.pointerId !== e.pointerId) return;
 
     const dist = Math.hypot(e.clientX - cur.startX, e.clientY - cur.startY);
-    if (dist > 8 && !cur.isDragging) {
+    if (dist > 6 && !cur.isDragging) {
       try {
         cur.targetEl.setPointerCapture(e.pointerId);
       } catch (err) {}
@@ -63,14 +63,17 @@ export default function HandDock({
         ...prev,
         isDragging: true,
         hasMoved: true,
-        currentX: e.clientX,
-        currentY: e.clientY,
+        currentX: Math.max(42, Math.min(e.clientX, window.innerWidth - 42)),
+        currentY: Math.max(60, Math.min(e.clientY, window.innerHeight - 60)),
       }));
     } else if (cur.isDragging) {
+      // Clamp ghost card so it stays within viewport on all screen sizes
+      const clampedX = Math.max(42, Math.min(e.clientX, window.innerWidth - 42));
+      const clampedY = Math.max(60, Math.min(e.clientY, window.innerHeight - 60));
       setDragInfo((prev) => ({
         ...prev,
-        currentX: e.clientX,
-        currentY: e.clientY,
+        currentX: clampedX,
+        currentY: clampedY,
       }));
     }
   };
@@ -80,8 +83,9 @@ export default function HandDock({
     if (!cur.pointerId || cur.pointerId !== e.pointerId) return;
 
     if (cur.isDragging) {
-      const dropX = e.clientX;
-      const dropY = e.clientY;
+      // Use clamped coords for hit-testing so it works consistently with ghost position
+      const dropX = Math.max(0, Math.min(e.clientX, window.innerWidth - 1));
+      const dropY = Math.max(0, Math.min(e.clientY, window.innerHeight - 1));
 
       const elUnder = document.elementFromPoint(dropX, dropY);
       const slotEl = elUnder?.closest('.real-slot-zone');

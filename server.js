@@ -273,7 +273,7 @@ function runBotTurn(room, botPlayer) {
           if (slot === null) {
             if (checkValidMove(card, centerItem.category, slotIdx)) {
               const emptyCount = centerItem.filledSlots.filter((s) => s === null).length;
-              const points = centerItem.category.points || 20;
+              const points = emptyCount === 1 ? 15 : 5;
               possibleMoves.push({
                 card,
                 centerIdx,
@@ -585,10 +585,14 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
   player.hand.push(room.animalDeck.pop());
 
   let completedNotice = null;
+  const isCompleted = centerItem.filledSlots.every((s) => s !== null);
+  const totalSlots = centerItem.filledSlots.length;
+  let gainedPoints = 0;
 
-  // ตรวจสอบว่าเติมเต็มครบทุกช่องแล้วหรือยัง
-  if (centerItem.filledSlots.every((s) => s !== null)) {
-    const gainedPoints = centerItem.category.points || 20;
+  // ตรวจสอบว่าเติมเต็มครบทุกช่องแล้วหรือยัง (ระบบคะแนน 5/15 สำหรับ Quest 2 ช่อง)
+  if (isCompleted) {
+    // โบนัสปิดหมวดหมู่สำเร็จ (Finisher Bonus: 15 แต้ม สำหรับ 2 ช่อง, รวมทั้ง Quest ไม่เกิน 20 แต้ม)
+    gainedPoints = totalSlots === 2 ? 15 : Math.max(5, (centerItem.category.points || 20) - ((totalSlots - 1) * 5));
     player.score += gainedPoints;
     player.wonCount = (player.wonCount || 0) + 1;
 
@@ -609,6 +613,19 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
     } else {
       room.centerCategories[centerIdx] = null;
     }
+  } else {
+    // แต้มวางการ์ดถูกช่องทันที (Placement Score: 5 แต้ม ไม่ต้องรอปิดหมวดหมู่)
+    gainedPoints = 5;
+    player.score += gainedPoints;
+
+    io.to(room.roomId).emit('slot_placed', {
+      playerId: player.id,
+      playerName: player.name,
+      points: gainedPoints,
+      categoryTitle: centerItem.category.title,
+      centerIdx,
+      slotIdx
+    });
   }
 
   if (completedNotice) {
@@ -916,7 +933,32 @@ io.on('connection', (socket) => {
     }
 
     room.animalDeck = buildGameDeck(room.players.length);
-    const selectedCats = shuffle(ALL_CATEGORIES).slice(0, 12);
+
+    // สุ่มและกรอง category ซ้ำออกก่อนสร้าง deck
+    // ป้องกัน Quest ที่มีหัวข้อ/รูปแบบ slot เหมือนกันปรากฏพร้อมกันในกระดาน
+    const shuffledCats = shuffle(ALL_CATEGORIES);
+    const usedSlotSignatures = new Set();
+    const dedupedCats = [];
+    for (const cat of shuffledCats) {
+      // สร้าง signature จาก slot traits เพื่อตรวจหา Quest ที่หน้าตาซ้ำกัน
+      const slotSig = cat.slots.map(s => typeof s === 'object' ? s.requiredTrait : s).sort().join('|');
+      if (!usedSlotSignatures.has(slotSig)) {
+        usedSlotSignatures.add(slotSig);
+        dedupedCats.push(cat);
+      }
+      if (dedupedCats.length >= 12) break;
+    }
+    // Fallback: ถ้ากรองแล้วได้น้อยกว่า 12 ให้เพิ่มจากที่เหลือ
+    if (dedupedCats.length < 12) {
+      for (const cat of shuffledCats) {
+        if (!dedupedCats.includes(cat)) {
+          dedupedCats.push(cat);
+          if (dedupedCats.length >= 12) break;
+        }
+      }
+    }
+
+    const selectedCats = dedupedCats;
     room.totalCategories = selectedCats.length;
     room.categoryDeck = selectedCats;
 
@@ -930,6 +972,7 @@ io.on('connection', (socket) => {
         });
       }
     }
+
 
     if (room.roomMode !== 'time_attack') {
       room.players = shuffle(room.players);

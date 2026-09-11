@@ -3,6 +3,13 @@ import SlotCell from './SlotCell';
 import { UIIcon } from '../assets/natureIcons';
 import { isTraitCompatible } from '../utils/traits';
 
+/** ช่วยคำนวณป้ายคะแนนแบบ breakdown ตามระบบ 5/15 */
+function getScoreBadgeLabel(totalSlots, totalPoints) {
+  if (totalSlots === 2) return '+5→15★';
+  if (totalSlots === 3) return '+5→5→20★';
+  return `+${totalPoints || 20}★`;
+}
+
 export default function QuestCard({
   centerIdx,
   categoryItem,
@@ -23,13 +30,22 @@ export default function QuestCard({
   const cat = categoryItem.category;
   const layout = cat.layout || (cat.slots?.length === 3 ? 'three_slots' : 'two_slots');
   const questionImg = cat.image || (cat.id ? `/cards/questions/${cat.id}.png` : `/cards/questions/q_01.png`);
+  const totalSlots = cat.slots?.length || 2;
+  const filledCount = categoryItem.filledSlots.filter(s => s !== null).length;
+  const openCount = totalSlots - filledCount;
+  const scoreBadgeLabel = getScoreBadgeLabel(totalSlots, cat.points);
 
   return (
     <div id={`catCard-${centerIdx}`} className={`vertical-quest-card layout-${layout}`}>
       {/* Top Header Floating Badge */}
       <div className="quest-card-top-pill">
         <span className="quest-pill-idx">#{centerIdx + 1}</span>
-        <span className="quest-pill-pts">+{cat.points || 20}★</span>
+        <span className="quest-pill-pts" title={`วางถูก +5 แต้ม / ปิดครบ +${totalSlots === 2 ? 15 : 20} แต้ม`}>{scoreBadgeLabel}</span>
+        {openCount > 0 && (
+          <span className="quest-pill-slots" title={`ยังว่าง ${openCount} ช่อง`}>
+            {'○'.repeat(openCount)}{'●'.repeat(filledCount)}
+          </span>
+        )}
       </div>
 
       {/* Real Full-Sized Question Card Artwork */}

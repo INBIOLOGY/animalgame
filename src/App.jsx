@@ -222,6 +222,28 @@ export default function App() {
       }
     });
 
+    socket.on('slot_placed', (info) => {
+      const isMe = info.playerId === playerId || info.playerId === socket.id;
+      if (isMe) {
+        playSfx('sparkle');
+        showToastMsg(`✨ ตอบคำถามถูกช่อง! (+${info.points} แต้ม)`, 'success');
+      }
+
+      if (info.centerIdx !== undefined) {
+        const cardEl = document.getElementById(`catCard-${info.centerIdx}`);
+        if (cardEl) {
+          const rect = cardEl.getBoundingClientRect();
+          const scorePop = document.createElement('div');
+          scorePop.className = 'floating-score placement-score';
+          scorePop.innerText = `+${info.points} แต้ม`;
+          scorePop.style.left = `${rect.left + rect.width / 2}px`;
+          scorePop.style.top = `${rect.top + rect.height / 2}px`;
+          document.body.appendChild(scorePop);
+          setTimeout(() => scorePop.remove(), 1200);
+        }
+      }
+    });
+
     socket.on('card_discarded', (info) => {
       const isMe = info.playerId === socket.id;
       if (isMe) {
@@ -287,6 +309,7 @@ export default function App() {
       socket.off('game_started');
       socket.off('special_card_played');
       socket.off('category_completed');
+      socket.off('slot_placed');
       socket.off('card_discarded');
       socket.off('player_emote');
       socket.off('game_ended');

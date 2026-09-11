@@ -1560,6 +1560,19 @@ body {
   font-size: 9.5px;
   font-weight: 900;
   box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+  letter-spacing: -0.2px;
+}
+
+/* ช่องแสดงสถานะ slot ว่าง/เต็ม ○●  */
+.quest-pill-slots {
+  background: rgba(30, 41, 59, 0.75);
+  color: #CBD5E1;
+  padding: 1.5px 5px;
+  border-radius: var(--r-pill);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  backdrop-filter: blur(4px);
 }
 
 .quest-card-art-wrap {
@@ -4302,6 +4315,13 @@ body {
     padding: 1.5px 4px;
   }
 
+  .quest-pill-slots {
+    font-size: 6.5px;
+    padding: 1px 3px;
+    letter-spacing: 1px;
+  }
+
+
   /* Phone hand dock — ELEVATED, SPACIOUS, LARGER HAND CARDS */
   .cute-hand-dock {
     padding: 4px 6px;
@@ -4403,14 +4423,16 @@ body {
   }
 
   .vertical-discard-card {
-    height: 104px !important;
-    min-height: 104px !important;
-    width: 52px !important;
-    min-width: 52px !important;
-    aspect-ratio: 1395 / 1949;
-    border-radius: 7px;
-    padding: 2px;
+    height: 110px !important;
+    min-height: 110px !important;
+    width: 68px !important;
+    min-width: 68px !important;
+    aspect-ratio: unset;
+    border-radius: 10px;
+    padding: 4px;
     flex-shrink: 0 !important;
+    /* ขยาย touch area ด้วย padding ที่ซ่อนไว้เพื่อให้กด/ลากง่ายขึ้นบน Mobile */
+    touch-action: auto;
   }
 
   .cute-discard-icon-frame {
