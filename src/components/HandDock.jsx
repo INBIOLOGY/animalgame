@@ -201,7 +201,15 @@ export default function HandDock({
               </div>
               <div className="active-ribbon-match-hint">
                 {selectedCard.cardType === 'special' ? (
-                  <span className="match-special-hint">✨ การ์ดเวทมนตร์พิเศษ</span>
+                  <span className="match-special-hint">
+                    {selectedCard.actionType === 'wildcard'
+                      ? '✨ การ์ด Fit Free: แตะช่องบนกระดานเพื่อวางลงได้ทุกช่องทันที!'
+                      : selectedCard.actionType === 'double_play'
+                      ? '⚔️ การ์ด Play Double: กดปุ่ม "⚡ กดใช้การ์ด" เพื่อเล่น 2 ใบในตานี้!'
+                      : selectedCard.actionType === 'swap_hands'
+                      ? '🤝🏻 การ์ด Swap Hands: กดปุ่ม "⚡ กดใช้การ์ด" เพื่อสลับไพ่ทั้งมือกับเพื่อน!'
+                      : '✨ การ์ดพิเศษ: กดปุ่ม "⚡ กดใช้การ์ด" เพื่อเปิดใช้งานความสามารถ!'}
+                  </span>
                 ) : matchingQuestNums.length > 0 ? (
                   <span className="match-success-hint">
                     ✨ ตรงกับภารกิจ #{matchingQuestNums.join(', #')} (แตะช่องบนกระดานเพื่อวาง)
@@ -216,6 +224,21 @@ export default function HandDock({
           </div>
 
           <div className="active-ribbon-actions">
+            {/* Direct Trigger Button for Special Cards (ยกเว้น wildcard ที่ลากลงช่อง) */}
+            {selectedCard.cardType === 'special' && selectedCard.actionType !== 'wildcard' && (isMyTurn || selectedCard.actionType === 'shield') && (
+              <button
+                type="button"
+                className="btn-ribbon-action btn-ribbon-use-special"
+                onClick={() => {
+                  const cardIdKey = selectedCard.cardInstanceId || selectedCard.id;
+                  if (onPlaySpecialCard) onPlaySpecialCard(cardIdKey);
+                }}
+                title={selectedCard.actionType === 'shield' ? 'กางโล่ปูป้องกันการโจมตี' : 'เปิดใช้งานความสามารถการ์ดพิเศษใบนี้'}
+              >
+                {selectedCard.actionType === 'shield' ? '🛡️ กางโล่ปู' : '⚡ กดใช้การ์ด'}
+              </button>
+            )}
+
             {onInspectCard && (
               <button
                 type="button"

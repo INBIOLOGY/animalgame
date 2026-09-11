@@ -224,6 +224,7 @@ export default function TutorialModal({ onClose, onStartPlaying }) {
                   { name: 'Reverse', desc: 'สลับทิศทางการเล่น', img: '/cards/specials/special_reverse.png' },
                   { name: 'Skip', desc: 'ข้ามตาผู้เล่นถัดไป', img: '/cards/specials/special_skip.png' },
                   { name: 'Shuffle', desc: 'สลับไพ่ทุกคนแล้วแจกใหม่', img: '/cards/specials/special_shuffle.png' },
+                  { name: 'Swap Hands', desc: 'สลับการ์ดทั้งหมดกับเพื่อน', img: '/cards/specials/special_swap.png' },
                 ].map((sp) => (
                   <div key={sp.name} className="demo-special-chip">
                     <img src={sp.img} alt={sp.name} className="demo-special-chip-img" />

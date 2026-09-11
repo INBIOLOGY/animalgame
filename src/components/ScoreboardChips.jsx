@@ -21,13 +21,15 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
             id={`scoreChip-${p.id}`}
             className={`cute-player-chip ${isCur ? 'active-turn' : ''} ${isMe ? 'is-me' : ''}`}
             style={{
-              borderColor: isCur ? colorObj.hex : (isMe ? `${colorObj.hex}88` : undefined),
+              borderColor: colorObj.hex,
+              borderWidth: isCur ? '2.5px' : '2px',
+              borderStyle: 'solid',
               boxShadow: isCur
-                ? `0 0 0 2px ${colorObj.hex}, 0 3px 10px ${colorObj.shadow || 'rgba(0,0,0,0.1)'}`
-                : undefined,
+                ? `0 0 0 2px ${colorObj.hex}, 0 4px 14px ${colorObj.shadow || 'rgba(0,0,0,0.15)'}`
+                : `0 2px 6px ${colorObj.shadow || 'rgba(0,0,0,0.06)'}`,
               background: isCur
-                ? `linear-gradient(135deg, #FFFFFF 60%, ${colorObj.hex}18)`
-                : undefined,
+                ? `linear-gradient(135deg, #FFFFFF 50%, ${colorObj.hex}25)`
+                : `linear-gradient(135deg, #FFFFFF 75%, ${colorObj.hex}14)`,
             }}
             title={`คะแนนของ ${p.name}: ${p.score} แต้ม`}
           >

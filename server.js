@@ -520,6 +520,32 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
       break;
     }
 
+    case 'swap_hands': {
+      const hasShieldInHand = targetPlayer.hand?.some(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+      const hasActiveShield = room.shieldedPlayerIds?.includes(targetPlayer.id);
+
+      if (hasActiveShield || hasShieldInHand) {
+        if (hasActiveShield) {
+          room.shieldedPlayerIds = room.shieldedPlayerIds.filter(id => id !== targetPlayer.id);
+        } else {
+          const sIdx = targetPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
+          if (sIdx !== -1) {
+            targetPlayer.hand.splice(sIdx, 1);
+            if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
+            targetPlayer.hand.push(room.animalDeck.pop());
+          }
+        }
+        actionNotice.message = `🛡️ ${targetPlayer.name} ใช้ Crab Shield ป้องกันการ์ด Swap Hands ของ ${player.name} ได้สำเร็จ! (ไม่ถูกสลับการ์ด)`;
+      } else {
+        // สลับไพ่บนมือระหว่าง player กับ targetPlayer แบบ UNO!
+        const tempHand = [...player.hand];
+        player.hand = [...targetPlayer.hand];
+        targetPlayer.hand = tempHand;
+        actionNotice.message = `🔄 ${player.name} ใช้ Swap Hands สลับการ์ดบนมือทั้งหมดกับ ${targetPlayer.name} เรียบร้อย! (ฟีล UNO)`;
+      }
+      break;
+    }
+
     default:
       actionNotice.message = `✨ ${player.name} ใช้การ์ดพิเศษ "${card.title || card.name}"`;
       break;

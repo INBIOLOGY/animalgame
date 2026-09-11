@@ -96,5 +96,19 @@
     "isPlayableOnSlot": false,
     "requiresTarget": true,
     "targetType": "player"
+  },
+  {
+    "id": "special_swap",
+    "title": "Swap Hands !!",
+    "name": "Swap Hands !! (สลับการ์ดกับเพื่อน)",
+    "image": "/cards/specials/special_swap.png",
+    "actionType": "swap_hands",
+    "cardType": "special",
+    "rarity": "legendary",
+    "copiesInDeck": 3,
+    "description": "เลือกผู้เล่นคู่แข่ง 1 คน เพื่อสลับการ์ดทั้งหมดบนมือกับเขา ฟีล UNO!",
+    "isPlayableOnSlot": false,
+    "requiresTarget": true,
+    "targetType": "player"
   }
 ]

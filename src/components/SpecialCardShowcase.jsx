@@ -53,6 +53,7 @@ export default function SpecialCardShowcase({ specialEvent, onComplete }) {
     skip: '⏭️',
     shuffle: '🔀',
     drop_it: '💥',
+    swap_hands: '🤝🏻',
     wildcard: '✨',
   };
 

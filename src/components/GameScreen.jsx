@@ -5,6 +5,7 @@ import HandDock from './HandDock';
 import QuestInspectModal from './QuestInspectModal';
 import CardInspectModal from './CardInspectModal';
 import { UIIcon } from '../assets/natureIcons';
+import { CUTE_ARENA_BACKDROP } from '../assets/artAssets';
 
 export default function GameScreen({
   room,
@@ -57,6 +58,14 @@ export default function GameScreen({
 
   return (
     <section className="game-screen-wrap page-screen-anim">
+      {/* 🌸 Cute Animal Crossing Meadow Backdrop */}
+      <div
+        className="cute-meadow-backdrop"
+        style={{ backgroundImage: `url(${CUTE_ARENA_BACKDROP})` }}
+        aria-hidden="true"
+      />
+      <div className="cute-meadow-overlay" aria-hidden="true" />
+
       {/* ─── Header Bar ─── */}
       <div className="game-header-bar">
         <div className="game-header-main-row">
