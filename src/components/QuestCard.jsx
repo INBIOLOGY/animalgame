@@ -13,6 +13,8 @@ function getScoreBadgeLabel(totalSlots, totalPoints) {
 export default function QuestCard({
   centerIdx,
   categoryItem,
+  selectedAnimal,
+  onInspectQuest,
   onSlotClick,
   onDropCard,
 }) {
@@ -46,6 +48,19 @@ export default function QuestCard({
             {'○'.repeat(openCount)}{'●'.repeat(filledCount)}
           </span>
         )}
+        {onInspectQuest && (
+          <button
+            type="button"
+            className="quest-pill-inspect-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onInspectQuest(centerIdx);
+            }}
+            title="กดดูคำถามขนาดใหญ่ คมชัด 100%"
+          >
+            🔍
+          </button>
+        )}
       </div>
 
       {/* Real Full-Sized Question Card Artwork */}
@@ -71,6 +86,10 @@ export default function QuestCard({
         <div className={`quest-overlay-slots layout-${layout}`}>
           {categoryItem.filledSlots.map((slotData, slotIdx) => {
             const slotConfig = cat.slots[slotIdx];
+            const reqTraitKey = typeof slotConfig === 'object' ? slotConfig.requiredTrait : slotConfig;
+            const isCompatible = selectedAnimal && slotData === null
+              ? isTraitCompatible(selectedAnimal, reqTraitKey)
+              : false;
 
             return (
               <SlotCell
@@ -79,6 +98,7 @@ export default function QuestCard({
                 slotIdx={slotIdx}
                 slotData={slotData}
                 slotConfig={slotConfig}
+                isCompatible={isCompatible}
                 onSlotClick={onSlotClick}
                 onDropCard={onDropCard}
               />

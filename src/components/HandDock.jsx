@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { PHYLA_MAP, isTraitCompatible } from '../utils/traits';
 import { UIIcon } from '../assets/natureIcons';
 
 const CUTE_EMOTES = ['🎉', '💖', '🐾', '🦁', '✨', '👏'];
@@ -7,13 +8,17 @@ export default function HandDock({
   hand = [],
   selectedCardId,
   isMyTurn = true,
+  centerCategories = [],
   onSelectCard,
+  onInspectCard,
   onPlaySpecialCard,
   onDiscardSingle,
   onDiscardSelectedOrFirst,
   onDropCardOnSlot,
   onSendEmote,
 }) {
+  const ghostRef = useRef(null);
+
   const [dragInfo, setDragInfo] = useState({
     pointerId: null,
     targetEl: null,
@@ -55,7 +60,15 @@ export default function HandDock({
     if (!cur.pointerId || cur.pointerId !== e.pointerId) return;
 
     const dist = Math.hypot(e.clientX - cur.startX, e.clientY - cur.startY);
+    const clampedX = Math.max(42, Math.min(e.clientX, window.innerWidth - 42));
+    const clampedY = Math.max(60, Math.min(e.clientY, window.innerHeight - 60));
+
+    cur.currentX = clampedX;
+    cur.currentY = clampedY;
+
     if (dist > 6 && !cur.isDragging) {
+      cur.isDragging = true;
+      cur.hasMoved = true;
       try {
         cur.targetEl.setPointerCapture(e.pointerId);
       } catch (err) {}
@@ -63,18 +76,14 @@ export default function HandDock({
         ...prev,
         isDragging: true,
         hasMoved: true,
-        currentX: Math.max(42, Math.min(e.clientX, window.innerWidth - 42)),
-        currentY: Math.max(60, Math.min(e.clientY, window.innerHeight - 60)),
-      }));
-    } else if (cur.isDragging) {
-      // Clamp ghost card so it stays within viewport on all screen sizes
-      const clampedX = Math.max(42, Math.min(e.clientX, window.innerWidth - 42));
-      const clampedY = Math.max(60, Math.min(e.clientY, window.innerHeight - 60));
-      setDragInfo((prev) => ({
-        ...prev,
         currentX: clampedX,
         currentY: clampedY,
       }));
+    } else if (cur.isDragging) {
+      // Direct GPU transform update without React re-render: 120fps zero-lag!
+      if (ghostRef.current) {
+        ghostRef.current.style.transform = `translate3d(${clampedX - 42}px, ${clampedY - 60}px, 0)`;
+      }
     }
   };
 
@@ -95,12 +104,15 @@ export default function HandDock({
         const centerIdx = parseInt(slotEl.getAttribute('data-center-idx'), 10);
         const slotIdx = parseInt(slotEl.getAttribute('data-slot-idx'), 10);
         if (!isNaN(centerIdx) && !isNaN(slotIdx) && onDropCardOnSlot) {
+          try { navigator?.vibrate?.(15); } catch (err) {}
           onDropCardOnSlot(centerIdx, slotIdx, cur.cardId);
         }
       } else if (discardEl && onDiscardSingle) {
+        try { navigator?.vibrate?.(10); } catch (err) {}
         onDiscardSingle(cur.cardId);
       }
     } else if (!cur.hasMoved) {
+      try { navigator?.vibrate?.(10); } catch (err) {}
       onSelectCard(cur.cardId);
     }
 
@@ -150,8 +162,84 @@ export default function HandDock({
     }
   };
 
+  const selectedCard = hand.find(
+    (c) => (c.cardInstanceId && c.cardInstanceId === selectedCardId) || c.id === selectedCardId
+  );
+
+  const matchingQuestNums = [];
+  if (selectedCard && centerCategories && selectedCard.cardType !== 'special') {
+    centerCategories.forEach((catItem, idx) => {
+      if (!catItem?.category?.slots) return;
+      const hasMatch = catItem.category.slots.some((s, sIdx) => {
+        if (catItem.filledSlots[sIdx] !== null) return false;
+        const req = typeof s === 'object' ? s.requiredTrait : s;
+        return isTraitCompatible(selectedCard, req);
+      });
+      if (hasMatch) matchingQuestNums.push(idx + 1);
+    });
+  }
+
   return (
-    <div className={`cute-hand-dock ${isMyTurn ? 'my-turn-active' : 'waiting-turn'}`}>
+    <div className={`cute-hand-dock ${isMyTurn ? 'my-turn-active' : 'waiting-turn'} ${selectedCard ? 'has-active-card' : ''}`}>
+      {/* 🌟 Floating Active Card Info Ribbon for Crystal Clear Reading on Phone/Tablet */}
+      {selectedCard && (
+        <div className="cute-active-card-ribbon animate-slide-up">
+          <div className="active-ribbon-left">
+            <img
+              src={selectedCard.image || selectedCard.origImage || '/cards/animals/animal_01.png'}
+              alt={selectedCard.name}
+              className="active-ribbon-thumb"
+            />
+            <div className="active-ribbon-text">
+              <div className="active-ribbon-title-row">
+                <strong className="active-ribbon-name">{selectedCard.name || selectedCard.title}</strong>
+                {selectedCard.phylum && (
+                  <span className="active-ribbon-phylum">
+                    {PHYLA_MAP[selectedCard.phylum] || selectedCard.phylum}
+                  </span>
+                )}
+              </div>
+              <div className="active-ribbon-match-hint">
+                {selectedCard.cardType === 'special' ? (
+                  <span className="match-special-hint">✨ การ์ดเวทมนตร์พิเศษ</span>
+                ) : matchingQuestNums.length > 0 ? (
+                  <span className="match-success-hint">
+                    ✨ ตรงกับภารกิจ #{matchingQuestNums.join(', #')} (แตะช่องบนกระดานเพื่อวาง)
+                  </span>
+                ) : (
+                  <span className="match-none-hint">
+                    ยังไม่มีช่องบนกระดานที่ตรงกับการ์ดใบนี้
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="active-ribbon-actions">
+            {onInspectCard && (
+              <button
+                type="button"
+                className="btn-ribbon-action btn-ribbon-zoom"
+                onClick={() => onInspectCard(selectedCard)}
+                title="กดดูใบใหญ่และลักษณะเด่น"
+              >
+                🔍 ดูใบเต็ม
+              </button>
+            )}
+            {onDiscardSingle && isMyTurn && (
+              <button
+                type="button"
+                className="btn-ribbon-action btn-ribbon-discard"
+                onClick={() => onDiscardSingle(selectedCard.cardInstanceId || selectedCard.id)}
+                title="ทิ้งการ์ดใบนี้เพื่อจั่วใหม่"
+              >
+                ✕ ทิ้ง
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="cute-hand-header">
         <div className="cute-turn-guide">
           {isMyTurn ? (
@@ -278,6 +366,7 @@ export default function HandDock({
       {/* Floating Pointer Drag Ghost Card */}
       {dragInfo.isDragging && (
         <div
+          ref={ghostRef}
           className="drag-ghost-card"
           style={{
             transform: `translate3d(${dragInfo.currentX - 42}px, ${dragInfo.currentY - 60}px, 0)`,

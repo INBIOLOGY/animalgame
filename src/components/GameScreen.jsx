@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import QuestCard from './QuestCard';
 import ScoreboardChips from './ScoreboardChips';
 import HandDock from './HandDock';
+import QuestInspectModal from './QuestInspectModal';
+import CardInspectModal from './CardInspectModal';
 import { UIIcon } from '../assets/natureIcons';
 
 export default function GameScreen({
@@ -19,6 +21,9 @@ export default function GameScreen({
   onSendEmote,
   onLeaveRoom,
 }) {
+  const [inspectingCenterIdx, setInspectingCenterIdx] = useState(null);
+  const [inspectingCard, setInspectingCard] = useState(null);
+
   if (!room) return null;
 
   const me = room.players.find((p) => p.id === myId);
@@ -118,6 +123,8 @@ export default function GameScreen({
               key={centerIdx}
               centerIdx={centerIdx}
               categoryItem={categoryItem}
+              selectedAnimal={activeAnimal}
+              onInspectQuest={(idx) => setInspectingCenterIdx(idx)}
               onSlotClick={onSlotClick}
               onDropCard={onDropCardOnSlot}
             />
@@ -130,13 +137,38 @@ export default function GameScreen({
         hand={me?.hand || []}
         selectedCardId={selectedCardId}
         isMyTurn={isMyTurn}
+        centerCategories={room.centerCategories}
         onSelectCard={onSelectCard}
+        onInspectCard={(card) => setInspectingCard(card)}
         onPlaySpecialCard={onPlaySpecialCard}
         onDiscardSingle={onDiscardSingle}
         onDiscardSelectedOrFirst={onDiscardSelectedOrFirst}
         onDropCardOnSlot={onDropCardOnSlot}
         onSendEmote={onSendEmote}
       />
+
+      {/* ─── High-Res Quest Inspection Modal ─── */}
+      {inspectingCenterIdx !== null && room.centerCategories[inspectingCenterIdx] && (
+        <QuestInspectModal
+          centerIdx={inspectingCenterIdx}
+          categoryItem={room.centerCategories[inspectingCenterIdx]}
+          selectedCard={activeAnimal}
+          myHand={me?.hand || []}
+          onClose={() => setInspectingCenterIdx(null)}
+          onSlotClick={onSlotClick}
+        />
+      )}
+
+      {/* ─── High-Res Card Detail Inspection Modal ─── */}
+      {inspectingCard && (
+        <CardInspectModal
+          card={inspectingCard}
+          room={room}
+          isMyTurn={isMyTurn}
+          onClose={() => setInspectingCard(null)}
+          onDiscard={onDiscardSingle}
+        />
+      )}
     </section>
   );
 }

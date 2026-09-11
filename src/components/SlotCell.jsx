@@ -7,6 +7,7 @@ export default function SlotCell({
   slotIdx,
   slotData,
   slotConfig,
+  isCompatible = false,
   onSlotClick,
   onDropCard,
 }) {
@@ -42,7 +43,7 @@ export default function SlotCell({
     return (
       <div
         id={`slot-${centerIdx}-${slotIdx}`}
-        className={`real-slot-zone empty-slot ${slotPosClass}`}
+        className={`real-slot-zone empty-slot ${slotPosClass} ${isCompatible ? 'slot-hint-compatible' : ''}`}
         data-center-idx={centerIdx}
         data-slot-idx={slotIdx}
         onClick={() => onSlotClick(centerIdx, slotIdx)}
@@ -51,7 +52,11 @@ export default function SlotCell({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         title={slotName}
-      />
+      >
+        {isCompatible && (
+          <span className="slot-match-pill-hint">✓ วางได้</span>
+        )}
+      </div>
     );
   }
 
