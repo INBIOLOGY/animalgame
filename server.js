@@ -98,8 +98,8 @@ function shuffle(array) {
 
 function buildGameDeck(numPlayers = 4) {
   const deck = [];
-  // For larger rooms (e.g. up to 24 players), scale the card sets so cards never deplete
-  const setsCount = numPlayers > 16 ? 3 : numPlayers > 8 ? 2 : 1;
+  // ปรับจำนวนชุดการ์ดให้สัมพันธ์กับจำนวนผู้เล่น เพื่อให้มีความหลากหลายทางชีวภาพและการ์ดไม่หมด
+  const setsCount = numPlayers > 12 ? 4 : numPlayers > 5 ? 3 : numPlayers > 2 ? 2 : 1;
 
   for (let s = 0; s < setsCount; s++) {
     // เพิ่มการ์ดสัตว์ทั้งหมด (56 ชนิด) พร้อม cardInstanceId เฉพาะใบ
@@ -124,7 +124,7 @@ function buildGameDeck(numPlayers = 4) {
     });
   }
 
-  // 3-pass Fisher-Yates shuffle เพื่อการกระจายไพ่ที่สมบูรณ์แบบ
+  // 3-pass Fisher-Yates shuffle เพื่อการกระจายไพ่แบบสุ่มจริงแท้ 100%
   let shuffled = deck;
   for (let pass = 0; pass < 3; pass++) {
     shuffled = shuffle(shuffled);
@@ -132,16 +132,43 @@ function buildGameDeck(numPlayers = 4) {
   return shuffled;
 }
 
-function extractCardFromDeck(deck, predicate) {
-  const idx = deck.findIndex(predicate);
-  if (idx !== -1) {
-    return deck.splice(idx, 1)[0];
+function discardCardToPile(room, card) {
+  if (!room || !card) return;
+  if (!room.discardPile) room.discardPile = [];
+  room.discardPile.push(card);
+}
+
+function drawCardForPlayer(room) {
+  if (!room) return null;
+  if (!room.animalDeck) room.animalDeck = [];
+  if (room.animalDeck.length === 0) {
+    if (room.discardPile && room.discardPile.length > 0) {
+      // เมื่อการ์ดในกองจั่วหมด ให้นำการ์ดที่เคยทิ้งมาสับใหม่เป็นกองจั่ว (UNO & TCG Standard)
+      room.animalDeck = shuffle([...room.discardPile]);
+      room.discardPile = [];
+    } else {
+      room.animalDeck = buildGameDeck(room.players?.length || 4);
+    }
   }
-  return null;
+  return room.animalDeck.pop() || null;
 }
 
 function initializeGameSession(room) {
   room.animalDeck = buildGameDeck(room.players.length);
+  room.discardPile = [];
+
+  // คำนวณจำนวนการ์ดคำถาม (Category Quests) ให้เหมาะสมกับจำนวนผู้เล่นและโหมดเกม
+  // แก้ปัญหาการ์ดหมดไวเกินไป (เกมจบเร็วเกินความต้องการ)
+  let targetCategoryCount = 20;
+  if (room.roomMode === 'time_attack') {
+    targetCategoryCount = 28;
+  } else if (room.players.length <= 2) {
+    targetCategoryCount = 20; // 6 บนบอร์ด + 14 ในกองสำรอง (เล่นสนุกได้เต็มอิ่ม 20 เควสต์)
+  } else if (room.players.length <= 4) {
+    targetCategoryCount = 24; // 6 บนบอร์ด + 18 ในกองสำรอง
+  } else {
+    targetCategoryCount = Math.min(28, ALL_CATEGORIES.length); // 28 เควสต์ครบทุกแนวคำถาม
+  }
 
   // สุ่มและกรอง category ซ้ำออกก่อนสร้าง deck
   const shuffledCats = shuffle(ALL_CATEGORIES);
@@ -153,20 +180,26 @@ function initializeGameSession(room) {
       usedSlotSignatures.add(slotSig);
       dedupedCats.push(cat);
     }
-    if (dedupedCats.length >= 12) break;
+    if (dedupedCats.length >= targetCategoryCount) break;
   }
-  if (dedupedCats.length < 12) {
+  if (dedupedCats.length < targetCategoryCount) {
     for (const cat of shuffledCats) {
       if (!dedupedCats.includes(cat)) {
         dedupedCats.push(cat);
-        if (dedupedCats.length >= 12) break;
+        if (dedupedCats.length >= targetCategoryCount) break;
       }
     }
   }
+  while (dedupedCats.length < targetCategoryCount) {
+    const repeatCat = shuffledCats[dedupedCats.length % shuffledCats.length];
+    dedupedCats.push({
+      ...repeatCat,
+      id: `${repeatCat.id}_rep_${dedupedCats.length}`
+    });
+  }
 
-  const selectedCats = dedupedCats;
-  room.totalCategories = selectedCats.length;
-  room.categoryDeck = selectedCats;
+  room.totalCategories = dedupedCats.length;
+  room.categoryDeck = dedupedCats;
 
   room.centerCategories = [];
   for (let i = 0; i < 6; i++) {
@@ -183,56 +216,45 @@ function initializeGameSession(room) {
     room.players = shuffle(room.players);
   }
 
-  // แจกการ์ด 4 ใบเริ่มต้น:
-  // สำหรับผู้เล่นคน (Host/Tester) เตรียมการ์ดพิเศษทดสอบตามคำขอ: Play Double, Swap Hands, Drop It + สัตว์ 1 ใบ
+  // แจกการ์ด 4 ใบเริ่มต้นให้ผู้เล่นทุกคน (สุ่มจริงๆ จาก animalDeck แบบเท่าเทียมและสมดุล)
+  // รับประกันความสนุก: ต้องมีสัตว์อย่างน้อย 3 ใบ (จากต่างไฟลัม) และการ์ดพิเศษไม่เกิน 1 ใบในมือเริ่มเกม
   room.players.forEach((p) => {
     p.score = 0;
     p.wonCount = 0;
     p.hand = [];
 
-    if (!p.isBot) {
-      const doubleCard = extractCardFromDeck(room.animalDeck, (c) => c.actionType === 'double_play' || c.id === 'special_play_double') || {
-        ...ALL_SPECIALS.find((s) => s.actionType === 'double_play'),
-        cardInstanceId: `test_double_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        cardType: 'special',
-      };
-      const swapCard = extractCardFromDeck(room.animalDeck, (c) => c.actionType === 'swap_hands' || c.id === 'special_swap') || {
-        ...ALL_SPECIALS.find((s) => s.actionType === 'swap_hands'),
-        cardInstanceId: `test_swap_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        cardType: 'special',
-      };
-      const dropCard = extractCardFromDeck(room.animalDeck, (c) => c.actionType === 'drop_it' || c.id === 'special_drop_it') || {
-        ...ALL_SPECIALS.find((s) => s.actionType === 'drop_it'),
-        cardInstanceId: `test_drop_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        cardType: 'special',
-      };
-      const animalCard = extractCardFromDeck(room.animalDeck, (c) => c.cardType === 'animal') || room.animalDeck.pop();
+    const phylaInHand = new Set();
+    let specialCount = 0;
+    let attempts = 0;
 
-      p.hand = [doubleCard, swapCard, dropCard, animalCard].filter(Boolean);
-    } else {
-      const phylaInHand = new Set();
-      let specialCount = 0;
-      let attempts = 0;
-      while (p.hand.length < 4 && attempts < 100) {
-        if (room.animalDeck.length === 0) {
-          room.animalDeck = buildGameDeck(room.players.length);
+    while (p.hand.length < 4 && attempts < 150) {
+      attempts++;
+      const candidateIdx = room.animalDeck.findIndex((c) => {
+        if (c.cardType === 'special') {
+          return specialCount === 0;
         }
-        attempts++;
-        const candidateIdx = room.animalDeck.findIndex((c) => {
-          if (c.cardType === 'special') return specialCount === 0;
-          return !phylaInHand.has(c.phylum);
-        });
-        if (candidateIdx !== -1) {
-          const card = room.animalDeck.splice(candidateIdx, 1)[0];
+        return !phylaInHand.has(c.phylum) || p.hand.length >= 3;
+      });
+
+      if (candidateIdx !== -1) {
+        const card = room.animalDeck.splice(candidateIdx, 1)[0];
+        p.hand.push(card);
+        if (card.cardType === 'special') specialCount++;
+        if (card.phylum) phylaInHand.add(card.phylum);
+      } else {
+        const card = room.animalDeck.pop();
+        if (card) {
           p.hand.push(card);
           if (card.cardType === 'special') specialCount++;
           if (card.phylum) phylaInHand.add(card.phylum);
-        } else {
-          const card = room.animalDeck.pop();
-          p.hand.push(card);
-          if (card && card.cardType === 'special') specialCount++;
         }
       }
+    }
+
+    while (p.hand.length < 4) {
+      const fallbackCard = drawCardForPlayer(room);
+      if (fallbackCard) p.hand.push(fallbackCard);
+      else break;
     }
   });
 
@@ -454,11 +476,9 @@ function runBotTurn(room, botPlayer) {
   // 3. หากไม่มีท่าที่ลงได้ ให้บอททิ้งการ์ด 1 ใบ แล้วจั่วใหม่
   if (botPlayer.hand && botPlayer.hand.length > 0) {
     const discardedCard = botPlayer.hand.shift();
-    if (room.animalDeck.length === 0) {
-      room.animalDeck = buildGameDeck();
-    }
-    const newCard = room.animalDeck.pop();
-    botPlayer.hand.push(newCard);
+    discardCardToPile(room, discardedCard);
+    const newCard = drawCardForPlayer(room);
+    if (newCard) botPlayer.hand.push(newCard);
 
     io.to(room.roomId).emit('card_discarded', {
       playerId: botPlayer.id,
@@ -511,13 +531,11 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
     }
   }
 
-  // Once all validations succeed, splice card and draw new card
+  // Once all validations succeed, splice card, add to discard pile, and draw new card
   player.hand.splice(cardIdx, 1);
-  if (room.animalDeck.length === 0) {
-    room.animalDeck = buildGameDeck();
-  }
-  const drawnCard = room.animalDeck.pop();
-  player.hand.push(drawnCard);
+  discardCardToPile(room, card);
+  const drawnCard = drawCardForPlayer(room);
+  if (drawnCard) player.hand.push(drawnCard);
 
   let actionNotice = {
     actorId: player.id,
@@ -566,9 +584,10 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
         } else {
           const sIdx = targetPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
           if (sIdx !== -1) {
-            targetPlayer.hand.splice(sIdx, 1);
-            if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-            targetPlayer.hand.push(room.animalDeck.pop());
+            const shieldCard = targetPlayer.hand.splice(sIdx, 1)[0];
+            discardCardToPile(room, shieldCard);
+            const replacement = drawCardForPlayer(room);
+            if (replacement) targetPlayer.hand.push(replacement);
           }
         }
         actionNotice.message = `🛡️ ${targetPlayer.name} มีการ์ด Crab Shield จึงป้องกันผลของ Skip จาก ${player.name} ได้สำเร็จ! (ไม่ถูกข้ามตา)`;
@@ -598,7 +617,11 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
       room.animalDeck = shuffle([...room.animalDeck, ...allHandsCards]);
       room.players.forEach(p => {
         const count = handCounts.get(p.id) || 4;
-        p.hand = room.animalDeck.splice(0, count);
+        p.hand = [];
+        for (let c = 0; c < count; c++) {
+          const card = drawCardForPlayer(room);
+          if (card) p.hand.push(card);
+        }
       });
 
       actionNotice.message = `🔀 ${player.name} ใช้ Shuffle สลับการ์ดบนมือทุกคนเข้ากองแล้วแจกใหม่!`;
@@ -615,9 +638,10 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
         } else {
           const sIdx = targetPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
           if (sIdx !== -1) {
-            targetPlayer.hand.splice(sIdx, 1);
-            if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-            targetPlayer.hand.push(room.animalDeck.pop());
+            const shieldCard = targetPlayer.hand.splice(sIdx, 1)[0];
+            discardCardToPile(room, shieldCard);
+            const replacement = drawCardForPlayer(room);
+            if (replacement) targetPlayer.hand.push(replacement);
           }
         }
         actionNotice.message = `🛡️ ${targetPlayer.name} ใช้ Crab Shield ป้องกันการ์ด Drop It ของ ${player.name} ได้สำเร็จ!`;
@@ -629,8 +653,9 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
           dropIndex = Math.floor(Math.random() * targetPlayer.hand.length);
         }
         const droppedCard = targetPlayer.hand.splice(dropIndex, 1)[0];
-        if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-        targetPlayer.hand.push(room.animalDeck.pop());
+        discardCardToPile(room, droppedCard);
+        const replacement = drawCardForPlayer(room);
+        if (replacement) targetPlayer.hand.push(replacement);
         actionNotice.message = `💥 ${player.name} บังคับให้ ${targetPlayer.name} ทิ้งการ์ด "${droppedCard.name || droppedCard.title || 'การ์ด'}" ลงกองทิ้ง!`;
       }
       break;
@@ -646,9 +671,10 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
         } else {
           const sIdx = targetPlayer.hand.findIndex(c => c.actionType === 'shield' || c.id === 'special_crab_shield');
           if (sIdx !== -1) {
-            targetPlayer.hand.splice(sIdx, 1);
-            if (room.animalDeck.length === 0) room.animalDeck = buildGameDeck();
-            targetPlayer.hand.push(room.animalDeck.pop());
+            const shieldCard = targetPlayer.hand.splice(sIdx, 1)[0];
+            discardCardToPile(room, shieldCard);
+            const replacement = drawCardForPlayer(room);
+            if (replacement) targetPlayer.hand.push(replacement);
           }
         }
         actionNotice.message = `🛡️ ${targetPlayer.name} ใช้ Crab Shield ป้องกันการ์ด Swap Hands ของ ${player.name} ได้สำเร็จ! (ไม่ถูกสลับการ์ด)`;
@@ -722,10 +748,8 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
 
   // ลบการ์ดออกจากมือ และจั่วใบใหม่ขึ้นมือ
   player.hand.splice(animalIdx, 1);
-  if (room.animalDeck.length === 0) {
-    room.animalDeck = buildGameDeck();
-  }
-  player.hand.push(room.animalDeck.pop());
+  const newCard = drawCardForPlayer(room);
+  if (newCard) player.hand.push(newCard);
 
   let completedNotice = null;
   const isCompleted = centerItem.filledSlots.every((s) => s !== null);
@@ -734,6 +758,13 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
 
   // ตรวจสอบว่าเติมเต็มครบทุกช่องแล้วหรือยัง (ระบบคะแนน 5/15 สำหรับ Quest 2 ช่อง)
   if (isCompleted) {
+    // นำการ์ดสัตว์ที่วางในช่องทั้งหมดส่งเข้ากองทิ้ง เพื่อนำมารีไซเคิลได้ต่อไป
+    centerItem.filledSlots.forEach((slot) => {
+      if (slot && slot.animalCard) {
+        discardCardToPile(room, slot.animalCard);
+      }
+    });
+
     // โบนัสปิดหมวดหมู่สำเร็จ (Finisher Bonus: 15 แต้ม สำหรับ 2 ช่อง, รวมทั้ง Quest ไม่เกิน 20 แต้ม)
     gainedPoints = totalSlots === 2 ? 15 : Math.max(5, (centerItem.category.points || 20) - ((totalSlots - 1) * 5));
     player.score += gainedPoints;
@@ -754,7 +785,16 @@ function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
         filledSlots: new Array(nextCategory.slots.length).fill(null)
       };
     } else {
-      room.centerCategories[centerIdx] = null;
+      if (room.roomMode === 'time_attack') {
+        // โหมดจับเวลา: เติมเควสต์เรื่อยๆ จนกว่าเวลาจะหมด
+        const freshCat = shuffle(ALL_CATEGORIES)[0];
+        room.centerCategories[centerIdx] = {
+          category: freshCat,
+          filledSlots: new Array(freshCat.slots.length).fill(null)
+        };
+      } else {
+        room.centerCategories[centerIdx] = null;
+      }
     }
   } else {
     // แต้มวางการ์ดถูกช่องทันที (Placement Score: 5 แต้ม ไม่ต้องรอปิดหมวดหมู่)
@@ -1183,11 +1223,9 @@ io.on('connection', (socket) => {
       }
 
       const discardedCard = activePlayer.hand.shift();
-      if (room.animalDeck.length === 0) {
-        room.animalDeck = buildGameDeck();
-      }
-      const newCard = room.animalDeck.pop();
-      activePlayer.hand.push(newCard);
+      discardCardToPile(room, discardedCard);
+      const newCard = drawCardForPlayer(room);
+      if (newCard) activePlayer.hand.push(newCard);
 
       io.to(room.roomId).emit('card_discarded', {
         playerId: activePlayer.id,
@@ -1202,11 +1240,9 @@ io.on('connection', (socket) => {
       const player = room.players.find(p => p.socketId === socket.id || p.id === socket.id);
       if (player && player.hand.length > 0) {
         const discardedCard = player.hand.shift();
-        if (room.animalDeck.length === 0) {
-          room.animalDeck = buildGameDeck();
-        }
-        const newCard = room.animalDeck.pop();
-        player.hand.push(newCard);
+        discardCardToPile(room, discardedCard);
+        const newCard = drawCardForPlayer(room);
+        if (newCard) player.hand.push(newCard);
 
         io.to(room.roomId).emit('card_discarded', {
           playerId: player.id,
@@ -1240,12 +1276,9 @@ io.on('connection', (socket) => {
 
       const cardIdx = activePlayer.hand.findIndex(c => (c.cardInstanceId && c.cardInstanceId === animalCardId) || c.id === animalCardId);
       const discardedCard = cardIdx !== -1 ? activePlayer.hand.splice(cardIdx, 1)[0] : activePlayer.hand.shift();
-
-      if (room.animalDeck.length === 0) {
-        room.animalDeck = buildGameDeck();
-      }
-      const newCard = room.animalDeck.pop();
-      activePlayer.hand.push(newCard);
+      discardCardToPile(room, discardedCard);
+      const newCard = drawCardForPlayer(room);
+      if (newCard) activePlayer.hand.push(newCard);
 
       io.to(room.roomId).emit('card_discarded', {
         playerId: activePlayer.id,
@@ -1261,12 +1294,9 @@ io.on('connection', (socket) => {
       if (player && player.hand.length > 0) {
         const cardIdx = player.hand.findIndex(c => (c.cardInstanceId && c.cardInstanceId === animalCardId) || c.id === animalCardId);
         const discardedCard = cardIdx !== -1 ? player.hand.splice(cardIdx, 1)[0] : player.hand.shift();
-
-        if (room.animalDeck.length === 0) {
-          room.animalDeck = buildGameDeck();
-        }
-        const newCard = room.animalDeck.pop();
-        player.hand.push(newCard);
+        discardCardToPile(room, discardedCard);
+        const newCard = drawCardForPlayer(room);
+        if (newCard) player.hand.push(newCard);
 
         io.to(room.roomId).emit('card_discarded', {
           playerId: player.id,

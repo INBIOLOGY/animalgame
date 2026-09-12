@@ -126,23 +126,16 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
                           : undefined
                       }
                     >
-                      <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={32} />
+                      <AnimalAvatar id={p.avatarId || (p.isBot ? 'sponge_glass' : 'lion')} size={32} />
                     </div>
                     <div className="cute-slot-details">
                       <div className="cute-slot-name">
-                        {p.name}
-                        {isMe && (
-                          <span
-                            className="cute-me-sub"
-                            style={p.color ? { color: p.color, fontWeight: 800 } : undefined}
-                          >
-                            {' '}(คุณ)
-                          </span>
-                        )}
+                        <span>{p.name}</span>
+                        {isMe && <span className="cute-me-pill">คุณ</span>}
                       </div>
                       <div className="cute-slot-status">
                         {p.isHost && <span className="cute-host-tag">👑 เจ้าของห้อง</span>}
-                        {p.isBot && <span className="cute-bot-tag">🤖 Bot AI</span>}
+                        {p.isBot && <span className="cute-bot-pill">บอท</span>}
                         {!p.connected && <span className="cute-offline-tag">⚠️ หลุดการเชื่อมต่อ</span>}
                       </div>
                     </div>

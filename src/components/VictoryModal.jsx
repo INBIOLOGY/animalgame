@@ -46,14 +46,27 @@ export default function VictoryModal({ room, myId, onRematch, onLeave }) {
                   {rBadge.icon}
                 </div>
 
-                <div className="cute-rank-avatar">
-                  <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={34} />
+                <div
+                  className="cute-rank-avatar"
+                  style={{
+                    borderRadius: '50%',
+                    padding: '2px',
+                    border: `2.5px solid ${p.color || '#CBD5E1'}`,
+                    background: '#FFFFFF',
+                    boxShadow: `0 2px 6px ${p.color ? p.color + '44' : 'rgba(0,0,0,0.1)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <AnimalAvatar id={p.avatarId || (p.isBot ? 'sponge_glass' : 'lion')} size={34} />
                 </div>
 
                 <div className="cute-rank-info">
                   <div className="cute-rank-name">
-                    {p.name}
+                    <span>{p.name}</span>
                     {isMe && <span className="cute-me-pill">คุณ</span>}
+                    {p.isBot && <span className="cute-bot-pill">บอท</span>}
                   </div>
                   <div className="cute-rank-title">
                     {titles[rank] || 'ผู้ร่วมประลอง'} · พิชิต {p.wonCount || 0} หมวดหมู่

@@ -21,6 +21,8 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
             id={`scoreChip-${p.id}`}
             className={`cute-player-chip ${isCur ? 'active-turn' : ''} ${isMe ? 'is-me' : ''}`}
             style={{
+              position: 'relative',
+              zIndex: isCur ? 3 : 2,
               borderColor: colorObj.hex,
               borderWidth: isCur ? '2.5px' : '2px',
               borderStyle: 'solid',
@@ -44,7 +46,7 @@ export default function ScoreboardChips({ players = [], activeIndex, isTimeAttac
                 boxShadow: `0 2px 6px ${colorObj.shadow || 'rgba(0,0,0,0.12)'}`,
               }}
             >
-              <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={36} />
+              <AnimalAvatar id={p.avatarId || (p.isBot ? 'sponge_glass' : 'lion')} size={36} />
               {isLeader && <span className="cute-crown-badge">👑</span>}
             </div>
 

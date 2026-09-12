@@ -32,9 +32,11 @@ export default function GameStartSplash({ room, myId, onDismiss }) {
         {/* 1st Player Spotlight */}
         <div className="splash-first-player-spotlight">
           <div className="splash-crown-badge">👑 คนแรก</div>
-          <AnimalAvatar id={firstPlayer.avatarId || (firstPlayer.isBot ? 'owl' : 'lion')} size={64} />
+          <AnimalAvatar id={firstPlayer.avatarId || (firstPlayer.isBot ? 'sponge_glass' : 'lion')} size={64} />
           <div className="splash-first-player-name">
-            {firstPlayer.name} {isMeFirst && <span className="splash-me-tag">(คุณ)</span>}
+            <span>{firstPlayer.name}</span>
+            {isMeFirst && <span className="cute-me-pill">คุณ</span>}
+            {firstPlayer.isBot && <span className="cute-bot-pill">บอท</span>}
           </div>
         </div>
 
@@ -43,10 +45,20 @@ export default function GameStartSplash({ room, myId, onDismiss }) {
           <span className="splash-order-label">ลำดับการเล่น:</span>
           <div className="splash-order-players">
             {room.players.map((p, idx) => (
-              <div key={p.id} className="splash-order-chip">
+              <div
+                key={p.id}
+                className={`splash-order-chip ${p.id === myId ? 'is-me' : ''}`}
+                style={{
+                  borderColor: p.color || (p.isBot ? '#0284C7' : '#10B981'),
+                  borderWidth: '2px',
+                  borderStyle: 'solid',
+                }}
+              >
                 <span className="splash-order-num">{idx + 1}</span>
-                <AnimalAvatar id={p.avatarId || (p.isBot ? 'owl' : 'lion')} size={20} />
+                <AnimalAvatar id={p.avatarId || (p.isBot ? 'sponge_glass' : 'lion')} size={22} />
                 <span className="splash-order-name">{p.name}</span>
+                {p.id === myId && <span className="cute-me-pill" style={{ fontSize: '10px', padding: '1px 6px' }}>คุณ</span>}
+                {p.isBot && <span className="cute-bot-pill" style={{ fontSize: '9px', padding: '1px 5px' }}>บอท</span>}
               </div>
             ))}
           </div>

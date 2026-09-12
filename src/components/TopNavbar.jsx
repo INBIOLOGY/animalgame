@@ -6,7 +6,7 @@ export default function TopNavbar({
   isOnline,
   showDeckCounter,
   deckCount,
-  totalDeck = 12,
+  totalDeck = 20,
   onOpenDex,
   onOpenTutorial,
 }) {

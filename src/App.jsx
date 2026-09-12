@@ -10,7 +10,6 @@ import EncyclopediaModal from './components/EncyclopediaModal';
 import TutorialModal from './components/TutorialModal';
 import SpecialCardShowcase from './components/SpecialCardShowcase';
 import TargetPlayerModal from './components/TargetPlayerModal';
-import DropItModal from './components/DropItModal';
 import CookieBanner from './components/CookieBanner';
 import { playSfx } from './utils/audio';
 import { isTraitCompatible } from './utils/traits';
@@ -535,7 +534,7 @@ export default function App() {
         isOnline={isOnline}
         showDeckCounter={room && room.status === 'playing'}
         deckCount={deckRemaining}
-        totalDeck={room?.totalCategories || 12}
+        totalDeck={room?.totalCategories || 20}
         onOpenDex={() => setShowDex(true)}
         onOpenTutorial={() => setShowTutorial(true)}
       />

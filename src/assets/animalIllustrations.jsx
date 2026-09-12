@@ -36,6 +36,17 @@ const CUTE_PASTEL_PALETTES = {
   bat:        { bg: 'linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%)', border: '#C4B5FD', shadow: 'rgba(124, 58, 237, 0.22)' },
   wolf:       { bg: 'linear-gradient(135deg, #F1F5F9 0%, #CBD5E1 100%)', border: '#94A3B8', shadow: 'rgba(100, 116, 139, 0.2)' },
   polar_bear: { bg: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 100%)', border: '#CBD5E1', shadow: 'rgba(148, 163, 184, 0.2)' },
+  sponge_glass:       { bg: 'linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%)', border: '#38BDF8', shadow: 'rgba(2, 132, 199, 0.25)' },
+  sponge_bath:        { bg: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)', border: '#FCD34D', shadow: 'rgba(245, 158, 11, 0.25)' },
+  sponge_calcareous:  { bg: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)', border: '#94A3B8', shadow: 'rgba(100, 116, 139, 0.2)' },
+  sponge_calcarea:    { bg: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)', border: '#FCD34D', shadow: 'rgba(245, 158, 11, 0.25)' },
+  sea_anemone:        { bg: 'linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 100%)', border: '#F472B6', shadow: 'rgba(219, 39, 119, 0.25)' },
+  brain_coral:        { bg: 'linear-gradient(135deg, #FFE4E6 0%, #FECDD3 100%)', border: '#FDA4AF', shadow: 'rgba(225, 29, 72, 0.22)' },
+  sea_fan:            { bg: 'linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%)', border: '#FB923C', shadow: 'rgba(234, 88, 12, 0.22)' },
+  jellyfish_sea_nettle:{ bg: 'linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%)', border: '#C084FC', shadow: 'rgba(168, 85, 247, 0.22)' },
+  starfish:           { bg: 'linear-gradient(135deg, #FEF08A 0%, #FDE047 100%)', border: '#EAB308', shadow: 'rgba(202, 138, 4, 0.22)' },
+  dragonfly:          { bg: 'linear-gradient(135deg, #CCFBF1 0%, #99F6E4 100%)', border: '#2DD4BF', shadow: 'rgba(20, 184, 166, 0.22)' },
+  horseshoe_crab:     { bg: 'linear-gradient(135deg, #F5E6D3 0%, #E8D3BC 100%)', border: '#C4A482', shadow: 'rgba(140, 100, 70, 0.22)' },
 };
 
 /**
