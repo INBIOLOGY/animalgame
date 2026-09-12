@@ -8,9 +8,9 @@ function getMatchingSlotHints(card, centerCategories = []) {
   if (!card) return [];
   if (card.cardType === 'special') {
     if (card.actionType === 'wildcard' || card.id?.includes('fit_free')) {
-      return [{ label: 'ทุกช่อง 🌟', isWildcard: true }];
+      return [{ label: '🌟 ทุกช่อง', isWildcard: true }];
     }
-    return [{ label: 'การ์ดพิเศษ ⚡', isSpecial: true }];
+    return [{ label: '⚡ พิเศษ', isSpecial: true }];
   }
 
   const matchedCategories = new Set();
@@ -30,9 +30,9 @@ function getMatchingSlotHints(card, centerCategories = []) {
 
   if (matchedCategories.size > 0) {
     const list = Array.from(matchedCategories).sort((a, b) => a - b);
-    return [{ label: `วางได้ที่หมวด #${list.join(', #')}`, isMatch: true }];
+    return [{ label: `🎯 หมวด #${list.join(',')}`, isMatch: true }];
   }
-  return [{ label: 'ไม่มีช่องลง (รอทิ้ง)', isNoMatch: true }];
+  return [{ label: 'รอทิ้ง', isNoMatch: true }];
 }
 
 export default function TeacherHandsMonitor({
@@ -147,9 +147,6 @@ export default function TeacherHandsMonitor({
 
                         <div className="teacher-card-meta">
                           <span className="teacher-card-name">{card.title || card.name}</span>
-                          {card.phylum && (
-                            <span className="teacher-card-phylum">{card.phylum}</span>
-                          )}
                           <span
                             className={`teacher-match-tag ${
                               matchInfo.isMatch
