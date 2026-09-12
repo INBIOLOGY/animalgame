@@ -203,6 +203,15 @@ export function UIIcon({ name, size = 18, color = 'currentColor' }) {
           <circle cx="18" cy="16" r="3" fill={color} />
         </svg>
       );
+    case 'teacher':
+    case 'school':
+      // Teacher / Academic Cap
+      return (
+        <svg {...props}>
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+          <path d="M6 12v5c0 3 6 4 6 4s6-1 6-4v-5" />
+        </svg>
+      );
     case 'trophy':
       // Explorer's Medal Stamp
       return (

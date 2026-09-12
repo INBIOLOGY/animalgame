@@ -6,7 +6,9 @@ import { playSfx } from '../utils/audio';
 export default function VictoryModal({ room, myId, onRematch, onLeave }) {
   if (!room) return null;
 
-  const sorted = [...room.players].sort((a, b) => b.score - a.score);
+  const sorted = [...room.players]
+    .filter((p) => !p.isTeacher && !p.isSpectator)
+    .sort((a, b) => (b.score || 0) - (a.score || 0));
   const titles = ['👑 แชมเปียนอันดับ 1', '🥈 รองชนะเลิศอันดับ 1', '🥉 รองชนะเลิศอันดับ 2', '🎖️ ผู้ร่วมแข่งขัน'];
   
   const rankBadges = [

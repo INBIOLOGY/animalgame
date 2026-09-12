@@ -6165,5 +6165,633 @@ body {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   👨‍🏫 TEACHER CLASSROOM MODE & PROJECTOR VIEW SUITE
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Teacher Switcher Row in Header ─── */
+.teacher-header-switcher-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(99, 102, 241, 0.04));
+  border: 1.5px solid rgba(99, 102, 241, 0.22);
+  border-radius: 16px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.teacher-view-switcher {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+  border-radius: 999px;
+  border: 1.5px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+  gap: 4px;
+}
+
+.teacher-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+}
+
+.teacher-switch-btn:hover {
+  color: #4F46E5;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.teacher-switch-btn.active-switch {
+  background: linear-gradient(135deg, #4F46E5, #6366F1);
+  color: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(79, 70, 229, 0.35);
+  transform: scale(1.02);
+}
+
+.switch-active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #A5B4FC;
+  box-shadow: 0 0 6px #FFFFFF;
+  display: inline-block;
+}
+
+.teacher-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #4338CA;
+  background: #EEF2FF;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid #C7D2FE;
+  white-space: nowrap;
+}
+
+.turn-badge.teacher-badge {
+  background: linear-gradient(135deg, #4F46E5, #3730A3);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+}
+
+.cute-player-chip.is-teacher-chip {
+  border-color: #818CF8 !important;
+}
+
+/* ─── Mode 1: Teacher Hands Live Monitor (God View) ─── */
+.teacher-hands-monitor-container {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  border: 2px solid #E0E7FF;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.08);
+  margin: 12px 16px 20px;
+  padding: 16px 20px;
+}
+
+.teacher-monitor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid #F1F5F9;
+  margin-bottom: 14px;
+}
+
+.teacher-monitor-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.teacher-badge-pulse {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  background: #10B981;
+  color: #FFFFFF;
+  padding: 3px 9px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  animation: liveRadarPulse 2s infinite ease-in-out;
+}
+
+@keyframes liveRadarPulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+  }
+}
+
+.teacher-monitor-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0;
+}
+
+.teacher-monitor-hint {
+  font-size: 12px;
+  color: #64748B;
+  background: #F8FAFC;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+}
+
+.teacher-students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.teacher-student-card {
+  background: #FFFFFF;
+  border: 2px solid #E2E8F0;
+  border-radius: 18px;
+  padding: 12px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.teacher-student-card.is-active-turn {
+  transform: translateY(-2px);
+  animation: cutePulseGlow 2s infinite ease-in-out;
+}
+
+.teacher-student-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #CBD5E1;
+}
+
+.teacher-student-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teacher-student-avatar {
+  border-radius: 50%;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teacher-student-names {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.teacher-student-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.teacher-student-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.teacher-turn-pill {
+  font-size: 11px;
+  font-weight: 800;
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 999px;
+  animation: pulseTurnTag 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseTurnTag {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.06); }
+}
+
+.teacher-score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FCD34D;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.teacher-hand-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+}
+
+.teacher-card-item {
+  flex: 0 0 92px;
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+}
+
+.teacher-card-item:hover {
+  transform: translateY(-4px) scale(1.05);
+  border-color: #4F46E5;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.2);
+  z-index: 5;
+}
+
+.teacher-card-item.has-match {
+  background: #F0FDF4;
+  border-color: #86EFAC;
+}
+
+.teacher-card-item.is-special-card {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+}
+
+.teacher-card-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #E2E8F0;
+}
+
+.teacher-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.teacher-inspect-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  border-radius: 8px;
+}
+
+.teacher-card-item:hover .teacher-inspect-overlay {
+  opacity: 1;
+}
+
+.teacher-card-meta {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2px;
+}
+
+.teacher-card-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1E293B;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.teacher-card-phylum {
+  font-size: 9px;
+  color: #64748B;
+  font-style: italic;
+}
+
+.teacher-match-tag {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teacher-match-tag.match-ok {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.teacher-match-tag.match-special {
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FCD34D;
+}
+
+.teacher-match-tag.match-none {
+  background: #F1F5F9;
+  color: #94A3B8;
+  border: 1px solid #E2E8F0;
+}
+
+.teacher-no-cards {
+  font-size: 12px;
+  color: #94A3B8;
+  padding: 10px;
+  text-align: center;
+  width: 100%;
+}
+
+.teacher-hands-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748B;
+}
+
+.teacher-empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* ─── Mode 2: Teacher Classroom Projector View (Scoreboard Only) ─── */
+.teacher-projector-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  border: 2px solid #C7D2FE;
+  border-radius: 24px;
+  box-shadow: 0 12px 36px rgba(79, 70, 229, 0.12);
+  margin: 12px 16px 24px;
+  padding: 20px 24px;
+}
+
+.teacher-projector-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #1E1B4B, #312E81);
+  border-radius: 16px;
+  color: #FFFFFF;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(49, 46, 129, 0.25);
+}
+
+.teacher-projector-banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.teacher-projector-badge {
+  font-size: 14px;
+  font-weight: 800;
+  color: #A5B4FC;
+}
+
+.teacher-projector-notice {
+  font-size: 12px;
+  color: #E0E7FF;
+  opacity: 0.92;
+}
+
+.teacher-projector-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.projector-stat-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.projector-stat-pill.active-pill {
+  background: linear-gradient(135deg, #10B981, #059669);
+  border-color: #34D399;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.teacher-projector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.teacher-projector-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 2.5px solid #E2E8F0;
+  padding: 16px;
+  position: relative;
+  transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.teacher-projector-card.is-turn-active {
+  transform: translateY(-4px) scale(1.02);
+  border-width: 3px;
+}
+
+.teacher-projector-card.is-leader {
+  background: linear-gradient(135deg, #FFFFFF 70%, #FFFBEB);
+}
+
+.projector-card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.projector-card-rank-tag {
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1.5px solid transparent;
+  display: inline-flex;
+  align-items: center;
+}
+
+.projector-card-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.projector-avatar-circle {
+  position: relative;
+  border-radius: 50%;
+  padding: 3px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.projector-crown-icon {
+  position: absolute;
+  top: -12px;
+  right: -4px;
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.projector-name-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.projector-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.projector-student-name {
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projector-sub-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748B;
+}
+
+.projector-turn-alert {
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  animation: pulseTurnTag 1.2s infinite ease-in-out;
+}
+
+.projector-score-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  border: 2px solid #F59E0B;
+  padding: 8px 14px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  flex-shrink: 0;
+}
+
+.projector-star-icon {
+  font-size: 22px;
+}
+
+.projector-score-numbers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+
+.projector-score-val {
+  font-size: 22px;
+  font-weight: 900;
+  color: #92400E;
+}
+
+.projector-score-unit {
+  font-size: 11px;
+  font-weight: 700;
+  color: #B45309;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .teacher-header-switcher-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .teacher-view-switcher {
+    width: 100%;
+    justify-content: center;
+  }
+  .teacher-switch-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .teacher-projector-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 
 

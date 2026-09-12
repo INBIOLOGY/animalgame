@@ -11,14 +11,32 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
 
   const me = room.players.find((p) => p.id === myId);
   const isHost = me?.isHost;
+  const isTeacher = room.roomMode === 'teacher' || me?.isTeacher || me?.isSpectator;
+  const studentsCount = room.players.filter((p) => !p.isTeacher && !p.isSpectator).length;
   const canAddBot = isHost && room.roomMode !== 'time_attack' && room.players.length < room.maxPlayers;
-  const canStart = isHost && (room.roomMode !== 'time_attack' || room.players.length >= 1) && (room.roomMode !== 'multiplayer' || room.players.length >= 2);
+  const canStart = isHost && (
+    (room.roomMode === 'time_attack' && room.players.length >= 1) ||
+    (room.roomMode === 'vs_bot' && room.players.length >= 1) ||
+    (room.roomMode === 'teacher' && studentsCount >= 1) ||
+    (room.roomMode === 'multiplayer' && room.players.length >= 2)
+  );
 
   const modeLabels = {
     multiplayer: '👥 เล่นกับเพื่อน',
+    teacher: '👨‍🏫 ห้องเรียนคุณครู (Classroom)',
     vs_bot: '🤖 เล่นกับบอท AI',
     time_attack: '⏱️ ท้าทายเวลา (Solo)',
   };
+
+  const statusText = canStart
+    ? room.roomMode === 'teacher'
+      ? '✨ นักเรียนพร้อมแล้ว คุณครูกดเริ่มเกมได้เลย'
+      : '✨ สมาชิกพร้อมแล้ว กดเริ่มเกมได้เลย'
+    : room.roomMode === 'teacher'
+    ? '⏳ รอนักเรียนเข้าร่วมห้อง (อย่างน้อย 1 คน หรือเพิ่มบอท)...'
+    : room.roomMode === 'multiplayer'
+    ? '⏳ รอผู้เล่นเข้าร่วม (ต้องการอย่างน้อย 2 คน)...'
+    : '⏳ รอผู้เล่นเข้าร่วม...';
 
   const handleEmoteClick = (emoji) => {
     playSfx('sparkle');
@@ -69,11 +87,7 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
                   backgroundColor: canStart ? '#2D6A28' : '#F59E0B',
                   display: 'inline-block'
                 }} />
-                {canStart
-                  ? '✨ สมาชิกพร้อมแล้ว กดเริ่มเกมได้เลย'
-                  : room.roomMode === 'multiplayer'
-                  ? '⏳ รอผู้เล่นเข้าร่วม (ต้องการอย่างน้อย 2 คน)...'
-                  : '⏳ รอผู้เล่นเข้าร่วม...'}
+                {statusText}
               </div>
             </div>
 
@@ -134,7 +148,8 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
                         {isMe && <span className="cute-me-pill">คุณ</span>}
                       </div>
                       <div className="cute-slot-status">
-                        {p.isHost && <span className="cute-host-tag">👑 เจ้าของห้อง</span>}
+                        {p.isTeacher && <span className="cute-host-tag" style={{ background: '#4F46E5', color: '#FFFFFF' }}>👨‍🏫 คุณครู</span>}
+                        {p.isHost && !p.isTeacher && <span className="cute-host-tag">👑 เจ้าของห้อง</span>}
                         {p.isBot && <span className="cute-bot-pill">บอท</span>}
                         {!p.connected && <span className="cute-offline-tag">⚠️ หลุดการเชื่อมต่อ</span>}
                       </div>
@@ -168,8 +183,12 @@ export default function LobbyScreen({ room, myId, onAddBot, onStartGame, onLeave
               >
                 <UIIcon name="trophy" size={16} color="#ffffff" />
                 <span>
-                  {!canStart && room.roomMode === 'multiplayer'
+                  {!canStart && room.roomMode === 'teacher'
+                    ? 'รอนักเรียนอย่างน้อย 1 คน (หรือเพิ่มบอท)...'
+                    : !canStart && room.roomMode === 'multiplayer'
                     ? 'รอผู้เล่นอย่างน้อย 2 คน...'
+                    : room.roomMode === 'teacher'
+                    ? 'เริ่มคาบเรียน / แข่งขัน! 🎓'
                     : 'เริ่มเกมทันที! ✨'}
                 </span>
               </button>

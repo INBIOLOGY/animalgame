@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import QuestCard from './QuestCard';
 import ScoreboardChips from './ScoreboardChips';
 import HandDock from './HandDock';
+import TeacherHandsMonitor from './TeacherHandsMonitor';
+import TeacherProjectorBoard from './TeacherProjectorBoard';
 import QuestInspectModal from './QuestInspectModal';
 import CardInspectModal from './CardInspectModal';
 import { UIIcon } from '../assets/natureIcons';
 import { CUTE_ARENA_BACKDROP } from '../assets/artAssets';
+import { playSfx } from '../utils/audio';
 
 export default function GameScreen({
   room,
@@ -24,13 +27,15 @@ export default function GameScreen({
 }) {
   const [inspectingCenterIdx, setInspectingCenterIdx] = useState(null);
   const [inspectingCard, setInspectingCard] = useState(null);
+  const [teacherViewMode, setTeacherViewMode] = useState('hands'); // 'hands' | 'projector'
 
   if (!room) return null;
 
   const me = room.players.find((p) => p.id === myId);
+  const isTeacher = room.teacherId === myId || me?.isTeacher || me?.isSpectator;
   const activeIndex = room.currentTurnIndex ?? 0;
   const activePlayer = room.players[activeIndex];
-  const isMyTurn = room.roomMode === 'time_attack' || (activePlayer && activePlayer.id === myId);
+  const isMyTurn = !isTeacher && (room.roomMode === 'time_attack' || (activePlayer && activePlayer.id === myId));
   const isTimeAttack = room.roomMode === 'time_attack';
 
   const selectedAnimal = me?.hand?.find((c) => (c.cardInstanceId && c.cardInstanceId === selectedCardId) || c.id === selectedCardId);
@@ -41,7 +46,9 @@ export default function GameScreen({
   const doubleStep = room.doublePlayStep || 1;
   const playDirText = (room.playDirection || 1) === 1 ? '↻ ตามเข็ม' : '↺ ทวนเข็ม';
 
-  const turnMessageDesktop = isTimeAttack
+  const turnMessageDesktop = isTeacher
+    ? `👨‍🏫 จอคุณครู: กำลังดำเนินเกม · ถึงตาของ ${activePlayer?.name || 'นักเรียน'}`
+    : isTimeAttack
     ? '⏱️ โหมดจับเวลา: วางการ์ดลงช่อง'
     : isMyTurn
     ? isDoublePlay
@@ -51,7 +58,9 @@ export default function GameScreen({
       : '🌟 ถึงตาของคุณแล้ว: เลือกการ์ดแล้ววางลงช่อง'
     : `⏳ รอตาของ: ${activePlayer?.name || 'ผู้เล่นอื่น'}`;
 
-  const turnMessageMobile = isTimeAttack
+  const turnMessageMobile = isTeacher
+    ? `👨‍🏫 จอครู: ตาของ ${activePlayer?.name || 'นร.'}`
+    : isTimeAttack
     ? '⏱️ จับเวลา'
     : isMyTurn
     ? isDoublePlay
@@ -75,9 +84,46 @@ export default function GameScreen({
 
       {/* ─── Header Bar ─── */}
       <div className="game-header-bar">
+        {/* 👨‍🏫 Teacher Mode View Switcher Bar */}
+        {isTeacher && (
+          <div className="teacher-header-switcher-row">
+            <div className="teacher-view-switcher">
+              <button
+                type="button"
+                id="btn-teacher-view-hands"
+                className={`teacher-switch-btn ${teacherViewMode === 'hands' ? 'active-switch' : ''}`}
+                onClick={() => {
+                  playSfx('pop');
+                  setTeacherViewMode('hands');
+                }}
+              >
+                <span>👁️ ส่องการ์ดนักเรียน (God View)</span>
+                {teacherViewMode === 'hands' && <span className="switch-active-dot" />}
+              </button>
+
+              <button
+                type="button"
+                id="btn-teacher-view-projector"
+                className={`teacher-switch-btn ${teacherViewMode === 'projector' ? 'active-switch' : ''}`}
+                onClick={() => {
+                  playSfx('sparkle');
+                  setTeacherViewMode('projector');
+                }}
+              >
+                <span>📽️ ฉายโปรเจกเตอร์หน้าห้อง (ชื่อ & คะแนน)</span>
+                {teacherViewMode === 'projector' && <span className="switch-active-dot" />}
+              </button>
+            </div>
+
+            <div className="teacher-role-badge">
+              <span>👨‍🏫 ผู้ดูแลห้องเรียน</span>
+            </div>
+          </div>
+        )}
+
         <div className="game-header-main-row">
           <div className="game-header-left-group">
-            <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''} ${isDoublePlay ? 'double-active' : ''}`}>
+            <div className={`turn-badge ${isMyTurn ? 'my-turn' : ''} ${isDoublePlay ? 'double-active' : ''} ${isTeacher ? 'teacher-badge' : ''}`}>
               <span className="turn-msg-desktop">{turnMessageDesktop}</span>
               <span className="turn-msg-mobile">{turnMessageMobile}</span>
               {isDoublePlay && <span className="double-play-tag">⚔️ ลง 2 ใบ ({doubleStep}/2)</span>}
@@ -97,17 +143,19 @@ export default function GameScreen({
           </div>
 
           <div className="game-header-actions">
-            <button
-              type="button"
-              className="cute-action-btn cute-btn-pass"
-              onClick={onPassTurn}
-              disabled={!isMyTurn && !isTimeAttack}
-              title="ทิ้งการ์ดเพื่อข้ามตาและจั่วใบใหม่"
-            >
-              <UIIcon name="recycle" size={12} color="#EA580C" />
-              <span className="pass-btn-desktop">{passLabel}</span>
-              <span className="pass-btn-mobile">{selectedAnimal ? 'ทิ้ง' : 'จั่วใหม่'}</span>
-            </button>
+            {!isTeacher && (
+              <button
+                type="button"
+                className="cute-action-btn cute-btn-pass"
+                onClick={onPassTurn}
+                disabled={!isMyTurn && !isTimeAttack}
+                title="ทิ้งการ์ดเพื่อข้ามตาและจั่วใบใหม่"
+              >
+                <UIIcon name="recycle" size={12} color="#EA580C" />
+                <span className="pass-btn-desktop">{passLabel}</span>
+                <span className="pass-btn-mobile">{selectedAnimal ? 'ทิ้ง' : 'จั่วใหม่'}</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -148,20 +196,31 @@ export default function GameScreen({
         </div>
       </div>
 
-      {/* ─── Hand Dock ─── */}
-      <HandDock
-        hand={me?.hand || []}
-        selectedCardId={selectedCardId}
-        isMyTurn={isMyTurn}
-        centerCategories={room.centerCategories}
-        onSelectCard={onSelectCard}
-        onInspectCard={(card) => setInspectingCard(card)}
-        onPlaySpecialCard={onPlaySpecialCard}
-        onDiscardSingle={onDiscardSingle}
-        onDiscardSelectedOrFirst={onDiscardSelectedOrFirst}
-        onDropCardOnSlot={onDropCardOnSlot}
-        onSendEmote={onSendEmote}
-      />
+      {/* ─── Teacher Monitor or Student Hand Dock ─── */}
+      {isTeacher ? (
+        teacherViewMode === 'hands' ? (
+          <TeacherHandsMonitor
+            room={room}
+            onInspectCard={(card) => setInspectingCard(card)}
+          />
+        ) : (
+          <TeacherProjectorBoard room={room} />
+        )
+      ) : (
+        <HandDock
+          hand={me?.hand || []}
+          selectedCardId={selectedCardId}
+          isMyTurn={isMyTurn}
+          centerCategories={room.centerCategories}
+          onSelectCard={onSelectCard}
+          onInspectCard={(card) => setInspectingCard(card)}
+          onPlaySpecialCard={onPlaySpecialCard}
+          onDiscardSingle={onDiscardSingle}
+          onDiscardSelectedOrFirst={onDiscardSelectedOrFirst}
+          onDropCardOnSlot={onDropCardOnSlot}
+          onSendEmote={onSendEmote}
+        />
+      )}
 
       {/* ─── High-Res Quest Inspection Modal ─── */}
       {inspectingCenterIdx !== null && room.centerCategories[inspectingCenterIdx] && (

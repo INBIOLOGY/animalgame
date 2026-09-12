@@ -39,6 +39,15 @@ const MODES = [
     pillColor: '#2D6A28',
   },
   {
+    key: 'teacher',
+    iconName: 'teacher',
+    title: '👨‍🏫 โหมดห้องเรียนคุณครู',
+    desc: 'ครูสร้างห้องให้นักเรียนเข้า (2–24 คน) · จอฉายโปรเจกเตอร์ & จอส่องการ์ดนักเรียน',
+    tag: 'ห้องเรียน',
+    pillBg: '#EEF2FF',
+    pillColor: '#4338CA',
+  },
+  {
     key: 'vs_bot',
     iconName: 'bot',
     title: '🤖 เล่นกับบอท AI',
@@ -123,11 +132,17 @@ function ModeSelector({ mode, setMode, timeLimit, setTimeLimit, maxPlayers, setM
 
       {/* Params */}
       <div className="cute-params-panel" style={{ marginTop: 10 }}>
-        {mode === 'multiplayer' && (
+        {(mode === 'multiplayer' || mode === 'teacher') && (
           <div className="cute-param-row">
             <div className="cute-param-label-group">
-              <span className="cute-param-title">👥 จำนวนผู้เล่นในห้อง:</span>
-              <span className="cute-param-sub">รองรับ 2–10 คน (เฉพาะโหมดเล่นกับเพื่อน)</span>
+              <span className="cute-param-title">
+                {mode === 'teacher' ? '👥 จำนวนนักเรียนสูงสุด:' : '👥 จำนวนผู้เล่นในห้อง:'}
+              </span>
+              <span className="cute-param-sub">
+                {mode === 'teacher'
+                  ? 'รองรับ 2–24 คน (คุณครูเป็นผู้ดูแลและฉายจอ)'
+                  : 'รองรับ 2–10 คน (เฉพาะโหมดเล่นกับเพื่อน)'}
+              </span>
             </div>
             <div className="cute-stepper-box">
               <button
@@ -294,7 +309,9 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
   // Mode summary text for mobile button
   const curModeObj = MODES.find((m) => m.key === mode) || MODES[0];
   const modeSubtitle =
-    mode === 'multiplayer'
+    mode === 'teacher'
+      ? `นักเรียน ${maxPlayers} คน (คุณครู)`
+      : mode === 'multiplayer'
       ? `${maxPlayers} คน`
       : mode === 'vs_bot'
       ? `ระดับ ${botDifficulty === 'easy' ? 'ง่าย' : botDifficulty === 'hard' ? 'ยาก' : 'ปานกลาง'}`
@@ -448,7 +465,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
         <div className="cute-lobby-column right-column">
           <div className="cute-column-header">
             <span className="cute-column-title">🎮 เลือกโหมดการเล่น</span>
-            <span className="cute-badge-tag">3 MODES</span>
+            <span className="cute-badge-tag">4 MODES</span>
           </div>
 
           <div className="cute-modes-list">
@@ -473,11 +490,17 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
           </div>
 
           <div className="cute-params-panel">
-            {mode === 'multiplayer' && (
+            {(mode === 'multiplayer' || mode === 'teacher') && (
               <div className="cute-param-row">
                 <div className="cute-param-label-group">
-                  <span className="cute-param-title">👥 จำนวนผู้เล่นในห้อง:</span>
-                  <span className="cute-param-sub">รองรับ 2–10 คน (เฉพาะโหมดเล่นกับเพื่อน)</span>
+                  <span className="cute-param-title">
+                    {mode === 'teacher' ? '👥 จำนวนนักเรียนสูงสุด:' : '👥 จำนวนผู้เล่นในห้อง:'}
+                  </span>
+                  <span className="cute-param-sub">
+                    {mode === 'teacher'
+                      ? 'รองรับ 2–24 คน (คุณครูเป็นผู้ดำเนินเกมและฉายจอ)'
+                      : 'รองรับ 2–10 คน (เฉพาะโหมดเล่นกับเพื่อน)'}
+                  </span>
                 </div>
                 <div className="cute-stepper-box">
                   <button
@@ -539,7 +562,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
           </div>
 
           <button type="button" className="cute-btn-create-room" onClick={handleCreate}>
-            <span>✨ สร้างห้องเล่นเกม</span>
+            <span>{mode === 'teacher' ? '🎓 สร้างห้องเรียนคุณครู' : '✨ สร้างห้องเล่นเกม'}</span>
           </button>
 
           <div className="cute-join-section desktop-join-section">
@@ -683,7 +706,7 @@ export default function LandingScreen({ onCreateRoom, onJoinRoom, onOpenTutorial
         {/* ─── Fixed Bottom Create Room Action Button ─── */}
         <div className="phone-bottom-bar">
           <button type="button" className="phone-create-btn" onClick={handleCreate}>
-            <span>✨ สร้างห้องเล่นเกม</span>
+            <span>{mode === 'teacher' ? '🎓 สร้างห้องเรียนคุณครู' : '✨ สร้างห้องเล่นเกม'}</span>
           </button>
         </div>
       </div>

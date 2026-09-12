@@ -212,16 +212,21 @@ function initializeGameSession(room) {
     }
   }
 
-  if (room.roomMode !== 'time_attack' && room.roomMode !== 'vs_bot') {
+  if (room.roomMode !== 'time_attack' && room.roomMode !== 'vs_bot' && room.roomMode !== 'teacher') {
     room.players = shuffle(room.players);
   }
 
-  // แจกการ์ด 4 ใบเริ่มต้นให้ผู้เล่นทุกคน (สุ่มจริงๆ จาก animalDeck แบบเท่าเทียมและสมดุล)
+  // แจกการ์ด 4 ใบเริ่มต้นให้ผู้เล่นทุกคนที่เป็นผู้เล่นจริง (ข้ามคุณครู/ผู้ชม)
   // รับประกันความสนุก: ต้องมีสัตว์อย่างน้อย 3 ใบ (จากต่างไฟลัม) และการ์ดพิเศษไม่เกิน 1 ใบในมือเริ่มเกม
   room.players.forEach((p) => {
     p.score = 0;
     p.wonCount = 0;
     p.hand = [];
+
+    // หากเป็นคุณครูหรือผู้ชม ไม่ต้องแจกการ์ดเข้ามือ
+    if (p.isSpectator || p.isTeacher) {
+      return;
+    }
 
     const phylaInHand = new Set();
     let specialCount = 0;
@@ -259,7 +264,9 @@ function initializeGameSession(room) {
   });
 
   room.status = 'playing';
-  room.currentTurnIndex = 0;
+  // กำหนดให้ currentTurnIndex ชี้ไปที่นักเรียน/ผู้เล่นจริงคนแรกเสมอ
+  const firstPlayableIdx = room.players.findIndex(p => !p.isSpectator && !p.isTeacher);
+  room.currentTurnIndex = firstPlayableIdx !== -1 ? firstPlayableIdx : 0;
   room.playDirection = 1;
   room.shieldedPlayerIds = [];
   room.doublePlayPlayerId = null;
@@ -293,10 +300,15 @@ function checkAndRegisterAction(room, actionId) {
 
 function serializeRoomForPlayer(room, targetIdentifier) {
   if (!room) return null;
+  const targetPlayer = room.players.find(p => p.id === targetIdentifier || p.socketId === targetIdentifier);
+  const isTeacherOrSpectator = room.teacherId === targetIdentifier || !!targetPlayer?.isTeacher || !!targetPlayer?.isSpectator;
+
   return {
     ...room,
+    isSpectatingTeacher: isTeacherOrSpectator,
     players: room.players.map((p) => {
-      if (p.id === targetIdentifier || p.socketId === targetIdentifier) {
+      // คุณครูหรือผู้ชมจะได้รับข้อมูลมือของการ์ดทุกคนเพื่อใช้ในการสอนและการมอนิเตอร์
+      if (p.id === targetIdentifier || p.socketId === targetIdentifier || isTeacherOrSpectator) {
         return p;
       }
       const { hand, ...rest } = p;
@@ -377,7 +389,17 @@ function advanceTurn(room, step = 1) {
   room.doublePlayStep = null;
   const dir = room.playDirection || 1;
   const numPlayers = room.players.length;
-  room.currentTurnIndex = (room.currentTurnIndex + step * dir + numPlayers * 100) % numPlayers;
+
+  // วนหาผู้เล่นคนถัดไปที่เป็นผู้เล่นจริง (ข้ามคุณครูและผู้ชม)
+  let nextIdx = room.currentTurnIndex;
+  for (let i = 0; i < numPlayers; i++) {
+    nextIdx = (nextIdx + step * dir + numPlayers * 100) % numPlayers;
+    const candidate = room.players[nextIdx];
+    if (candidate && !candidate.isSpectator && !candidate.isTeacher) {
+      room.currentTurnIndex = nextIdx;
+      break;
+    }
+  }
   broadcastRoomState(room.roomId);
 
   // ถ้าถึงตาของ Bot ให้รัน Bot AI
@@ -493,6 +515,7 @@ function runBotTurn(room, botPlayer) {
 function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targetCardIndex = null) {
   const player = room.players.find(p => p.id === playerId || p.socketId === playerId);
   if (!player || !player.hand) return { ok: false, error: 'ไม่พบผู้เล่น' };
+  if (player.isSpectator || player.isTeacher) return { ok: false, error: 'คุณครูอยู่ในสถานะผู้ดูแล/ผู้ชมการแข่งขัน' };
 
   // การ์ดโล่ปู (Crab Shield) สามารถกดใช้ได้ตลอดเวลา (Instant Reactive Defense)
   if (room.roomMode !== 'time_attack' && cardId !== 'special_crab_shield') {
@@ -714,6 +737,7 @@ function executeSpecialCard(room, playerId, cardId, targetPlayerId = null, targe
 function executeMove(room, playerId, centerIdx, slotIdx, animalCardId) {
   const player = room.players.find((p) => p.id === playerId || p.socketId === playerId);
   if (!player || !player.hand) return { ok: false, error: 'ไม่พบผู้เล่น' };
+  if (player.isSpectator || player.isTeacher) return { ok: false, error: 'คุณครูอยู่ในสถานะผู้ดูแล/ผู้ชมการแข่งขัน' };
 
   if (room.roomMode !== 'time_attack') {
     const activePlayer = room.players[room.currentTurnIndex];
@@ -886,7 +910,7 @@ function removePlayerFromRoom(roomId, socketId) {
 
 io.on('connection', (socket) => {
   // 1. สร้างห้อง
-  socket.on('create_room', ({ playerName, avatarId, playerColor, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId } = {}, ack) => {
+  socket.on('create_room', ({ playerName, avatarId, playerColor, roomMode, timeLimitSec, maxPlayers, botDifficulty, clientPlayerId, asTeacher } = {}, ack) => {
     const cleanName = sanitizeName(playerName);
     if (!cleanName) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นที่ถูกต้อง (1-16 ตัวอักษร)';
@@ -901,13 +925,17 @@ io.on('connection', (socket) => {
     const playerId = clientPlayerId || socket.id;
     socket.data.playerId = playerId;
 
+    const isTeacherMode = roomMode === 'teacher' || !!asTeacher;
+
     const hostPlayer = {
       id: playerId,
       socketId: socket.id,
       name: cleanName,
-      avatarId: avatarId || 'sponge_bath',
-      color: playerColor || '#10B981',
+      avatarId: avatarId || (isTeacherMode ? 'owl' : 'sponge_bath'),
+      color: playerColor || (isTeacherMode ? '#0284C7' : '#10B981'),
       isHost: true,
+      isTeacher: isTeacherMode,
+      isSpectator: isTeacherMode,
       isBot: false,
       score: 0,
       wonCount: 0,
@@ -918,9 +946,10 @@ io.on('connection', (socket) => {
     const room = {
       roomId,
       hostId: playerId,
+      teacherId: isTeacherMode ? playerId : null,
       roomMode: roomMode || 'multiplayer',
       timeLimitSec: timeLimitSec || 60,
-      maxPlayers: Math.min(Math.max(maxPlayers || 6, 2), MAX_PLAYERS),
+      maxPlayers: Math.min(Math.max(maxPlayers || (isTeacherMode ? 16 : 6), 2), MAX_PLAYERS),
       botDifficulty: botDifficulty || 'medium',
       players: [hostPlayer],
       animalDeck: [],
@@ -968,7 +997,7 @@ io.on('connection', (socket) => {
   });
 
   // 2. เข้าร่วมห้อง หรือ Reconnect กลับเข้าห้องเดิม
-  socket.on('join_room', ({ playerName, avatarId, playerColor, roomId, clientPlayerId } = {}, ack) => {
+  socket.on('join_room', ({ playerName, avatarId, playerColor, roomId, clientPlayerId, asSpectator } = {}, ack) => {
     const cleanName = sanitizeName(playerName);
     if (!cleanName) {
       const msg = 'กรุณาใส่ชื่อผู้เล่นที่ถูกต้อง (1-16 ตัวอักษร)';
@@ -1034,6 +1063,8 @@ io.on('connection', (socket) => {
       avatarId: avatarId || 'sponge_bath',
       color: playerColor || '#EC4899',
       isHost: false,
+      isTeacher: !!asSpectator,
+      isSpectator: !!asSpectator,
       isBot: false,
       score: 0,
       wonCount: 0,
@@ -1134,6 +1165,14 @@ io.on('connection', (socket) => {
       const msg = 'โหมดเล่นหลายคน ต้องมีผู้เล่นอย่างน้อย 2 คนถึงจะเริ่มเกมได้';
       socket.emit('error_message', msg);
       return typeof ack === 'function' && ack({ ok: false, error: msg });
+    }
+    if (room.roomMode === 'teacher') {
+      const studentCount = room.players.filter(p => !p.isSpectator && !p.isTeacher).length;
+      if (studentCount < 1) {
+        const msg = 'โหมดห้องเรียน ต้องมีนักเรียนเข้าร่วมอย่างน้อย 1 คน (หรือเพิ่มบอท) ถึงจะเริ่มได้ครับ';
+        socket.emit('error_message', msg);
+        return typeof ack === 'function' && ack({ ok: false, error: msg });
+      }
     }
 
     initializeGameSession(room);
