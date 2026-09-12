@@ -121,8 +121,8 @@ export default function TeacherHandsMonitor({
                 </div>
               </div>
 
-              {/* Student Hand Cards */}
-              <div className="teacher-hand-row">
+              {/* Student Hand Cards (2 บน 2 ล่าง) */}
+              <div className="teacher-hand-grid">
                 {hand.length > 0 ? (
                   hand.map((card, cIdx) => {
                     const cardImg = card.image || card.origImage || '/cards/animals/animal_01.png';
